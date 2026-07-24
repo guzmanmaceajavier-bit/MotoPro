@@ -1,0 +1,57 @@
+@import "../../shared/theme/tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== BRIDGE: legacy vars -> semantic tokens ===== */
+:root {
+  --bg: var(--surface-primary);
+  --bg-card: var(--surface-secondary);
+  --bg-elevated: var(--surface-elevated);
+  --bg-muted: var(--surface-tertiary);
+  --sidebar-bg: var(--surface-secondary);
+  --sidebar-border: var(--border-default);
+  --sidebar-hover: var(--surface-tertiary);
+  --border: var(--border-default);
+  --border-light: var(--border-subtle);
+  --text: var(--text-primary);
+  --text-secondary: var(--text-secondary);
+  --text-tertiary: var(--text-tertiary);
+  --accent: var(--interactive-accent);
+  --accent-light: var(--interactive-accent-hover);
+  --accent-hover: var(--interactive-accent-hover);
+  --accent-glow: rgba(20,184,166,0.12);
+  --accent-subtle: rgba(20,184,166,0.06);
+  --shadow-lg: var(--elevation-4-shadow);
+}
+
+/* ===== COMPONENT UTILITIES ===== */
+@layer components {
+  .form-label {
+    @apply block text-caption font-medium text-text-secondary mb-1.5;
+  }
+  .input {
+    @apply h-11 w-full rounded-sm border border-border bg-surface-secondary px-3.5 text-body-sm text-text-primary placeholder:text-text-tertiary transition-all duration-base;
+  }
+  .input:focus {
+    @apply outline-none ring-2 ring-interactive-focus border-transparent;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2.5 text-body-sm font-semibold transition-all duration-base cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-interactive-accent text-white hover:bg-interactive-accent-hover;
+  }
+  .btn-secondary {
+    @apply btn border border-border bg-surface-secondary text-text-secondary hover:text-text-primary hover:bg-surface-tertiary;
+  }
+  .btn-danger {
+    @apply btn bg-status-error-bg text-status-error hover:bg-[var(--status-error-bg)];
+  }
+  .btn-sm {
+    @apply px-3 py-2 text-caption;
+  }
+  .btn-xs {
+    @apply px-2 py-1.5 text-tiny;
+  }
+}

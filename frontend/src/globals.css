@@ -1,0 +1,53 @@
+@import "../../shared/theme/tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-surface-primary text-text-primary font-body; }
+  h1, h2, h3, h4, h5, h6 { @apply font-heading; }
+  input, select, textarea {
+    @apply text-text-primary;
+    color-scheme: light dark;
+  }
+  :root.light input, :root.light select, :root.light textarea {
+    color-scheme: light;
+  }
+  :root:not(.light) input, :root:not(.light) select, :root:not(.light) textarea {
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-lg border bg-surface-secondary;
+    border-color: var(--border);
+  }
+  .card:hover {
+    border-color: var(--border-accent);
+  }
+  .btn-premium {
+    @apply rounded-lg bg-interactive-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-interactive-accent-hover transition-all;
+  }
+  .input-premium {
+    @apply rounded-lg border bg-surface-secondary px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-interactive-accent transition-colors;
+    border-color: var(--border);
+  }
+  .badge-premium {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}

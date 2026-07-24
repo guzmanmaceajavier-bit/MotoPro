@@ -1,0 +1,218 @@
+@import "../../shared/theme/tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════
+   MotoPro Admin — Premium Design System
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --mp-bg-base: #0f1219;
+  --mp-bg-surface: #161b26;
+  --mp-bg-elevated: #1c2333;
+  --mp-bg-hover: #1f2738;
+  --mp-border: #232d3f;
+  --mp-border-subtle: #1c2333;
+  --mp-text-primary: #f1f5f9;
+  --mp-text-secondary: #94a3b8;
+  --mp-text-tertiary: #64748b;
+  --mp-accent: #14b8a6;
+  --mp-accent-hover: #0d9488;
+  --mp-accent-glow: rgba(20, 184, 166, 0.15);
+  --mp-success: #10b981;
+  --mp-success-bg: rgba(16, 185, 129, 0.12);
+  --mp-warning: #f59e0b;
+  --mp-warning-bg: rgba(245, 158, 11, 0.12);
+  --mp-danger: #ef4444;
+  --mp-danger-bg: rgba(239, 68, 68, 0.12);
+  --mp-info: #3b82f6;
+  --mp-info-bg: rgba(59, 130, 246, 0.12);
+  --mp-sidebar-width: 240px;
+  --mp-header-height: 56px;
+}
+
+:root.light {
+  --mp-bg-base: #f1f5f9;
+  --mp-bg-surface: #ffffff;
+  --mp-bg-elevated: #ffffff;
+  --mp-bg-hover: #f8fafc;
+  --mp-border: #e2e8f0;
+  --mp-border-subtle: #f1f5f9;
+  --mp-text-primary: #0f172a;
+  --mp-text-secondary: #475569;
+  --mp-text-tertiary: #94a3b8;
+}
+
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  background: var(--mp-bg-base);
+  color: var(--mp-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #232d3f; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #334155; }
+::selection { background: rgba(20, 184, 166, 0.2); }
+:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--mp-accent); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+.animate-fade-in { animation: fadeIn 200ms ease-out; }
+.animate-slide-up { animation: slideUp 200ms ease-out; }
+.animate-scale-in { animation: scaleIn 200ms ease-out; }
+
+/* ═══════════════════════════════════════════
+   COMPONENT CLASSES — Premium SaaS Enterprise
+   ═══════════════════════════════════════════ */
+
+/* ── Buttons ── */
+.mp-btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer select-none;
+}
+.mp-btn:active { transform: scale(0.97); }
+.mp-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+.mp-btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer select-none text-white;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.3);
+}
+.mp-btn-primary:hover { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); box-shadow: 0 2px 8px rgba(20, 184, 166, 0.4); }
+.mp-btn-primary:active { transform: scale(0.97); }
+.mp-btn-primary:disabled { opacity: 0.4; pointer-events: none; }
+
+.mp-btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer select-none;
+  color: var(--mp-text-secondary);
+  border: 1px solid var(--mp-border);
+  background: var(--mp-bg-surface);
+}
+.mp-btn-secondary:hover { color: var(--mp-text-primary); background: var(--mp-bg-hover); }
+.mp-btn-secondary:active { transform: scale(0.97); }
+.mp-btn-secondary:disabled { opacity: 0.4; pointer-events: none; }
+
+.mp-btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer select-none;
+  color: var(--mp-text-secondary);
+  background: transparent;
+}
+.mp-btn-ghost:hover { color: var(--mp-text-primary); background: var(--mp-bg-hover); }
+.mp-btn-ghost:active { transform: scale(0.97); }
+.mp-btn-ghost:disabled { opacity: 0.4; pointer-events: none; }
+
+.mp-btn-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer select-none;
+  color: var(--mp-danger);
+  background: var(--mp-danger-bg);
+}
+.mp-btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+.mp-btn-danger:active { transform: scale(0.97); }
+.mp-btn-danger:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ── Input ── */
+.mp-input {
+  @apply w-full rounded-lg border px-3 text-sm transition-all duration-150;
+  height: 38px;
+  background: var(--mp-bg-surface);
+  border-color: var(--mp-border);
+  color: var(--mp-text-primary);
+}
+.mp-input::placeholder { color: var(--mp-text-tertiary); }
+.mp-input:focus { outline: none; border-color: var(--mp-accent); box-shadow: 0 0 0 3px var(--mp-accent-glow); }
+
+/* ── Select ── */
+.mp-select {
+  @apply w-full rounded-lg border px-3 text-sm transition-all duration-150 appearance-none;
+  height: 38px;
+  background: var(--mp-bg-surface);
+  border-color: var(--mp-border);
+  color: var(--mp-text-primary);
+  padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.mp-select:focus { outline: none; border-color: var(--mp-accent); box-shadow: 0 0 0 3px var(--mp-accent-glow); }
+
+/* ── Badge ── */
+.mp-badge {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+.mp-badge-success { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium; color: var(--mp-success); background: var(--mp-success-bg); }
+.mp-badge-warning { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium; color: var(--mp-warning); background: var(--mp-warning-bg); }
+.mp-badge-danger { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium; color: var(--mp-danger); background: var(--mp-danger-bg); }
+.mp-badge-info { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium; color: var(--mp-info); background: var(--mp-info-bg); }
+.mp-badge-accent { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium; color: var(--mp-accent); background: var(--mp-accent-glow); }
+
+/* ── Card ── */
+.mp-card {
+  @apply rounded-xl border;
+  background: var(--mp-bg-surface);
+  border-color: var(--mp-border);
+}
+.mp-card-hover {
+  @apply rounded-xl border transition-all duration-150;
+  background: var(--mp-bg-surface);
+  border-color: var(--mp-border);
+}
+.mp-card-hover:hover { border-color: rgba(20, 184, 166, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+
+/* ── KPI Card ── */
+.mp-kpi {
+  @apply rounded-xl border p-5 relative overflow-hidden;
+  background: var(--mp-bg-surface);
+  border-color: var(--mp-border);
+}
+
+/* ── Table ── */
+.mp-table { @apply w-full border-collapse text-sm; }
+.mp-table th {
+  @apply text-left text-xs font-semibold uppercase tracking-wider px-4 py-3;
+  color: var(--mp-text-tertiary);
+  background: var(--mp-bg-elevated);
+  border-bottom: 1px solid var(--mp-border);
+}
+.mp-table td {
+  @apply px-4 py-3;
+  border-bottom: 1px solid var(--mp-border-subtle);
+  color: var(--mp-text-primary);
+}
+.mp-table tr:hover td { background: var(--mp-bg-hover); }
+.mp-table tr:last-child td { border-bottom: none; }
+
+/* ── Skeleton ── */
+.mp-skeleton {
+  @apply animate-pulse rounded-lg;
+  background: var(--mp-bg-elevated);
+}
+
+/* ── Pagination ── */
+.mp-page-btn {
+  @apply flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150;
+  width: 36px; height: 36px;
+  color: var(--mp-text-secondary);
+}
+.mp-page-btn:hover { background: var(--mp-bg-hover); color: var(--mp-text-primary); }
+.mp-page-btn.active { background: var(--mp-accent); color: white; }
+.mp-page-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+/* ── Header Glow ── */
+.header-glow {
+  position: relative;
+}
+.header-glow::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.3), transparent);
+  pointer-events: none;
+}

@@ -19,7 +19,6 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-500/15 text-red-400",
   pending: "bg-amber-500/15 text-amber-400",
   sent: "bg-blue-500/15 text-blue-400",
-  approved: "bg-green-500/15 text-green-400",
   rejected: "bg-red-500/15 text-red-400",
 };
 
@@ -136,7 +135,7 @@ export default function AdminDashboard() {
         ].map((kpi, i) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className="mp-kpi group hover:border-[rgba(20,184,166,0.2)] transition-all duration-150"
+            <div key={kpi.label} className="mp-kpi group hover:border-[rgba(255,107,0,0.2)] transition-all duration-150"
               style={{ animation: `slideUp 200ms ${i * 50}ms var(--ease-out) both` }}>
               <div className="flex items-start justify-between mb-3">
                 <span className="text-xs font-medium text-[var(--mp-text-tertiary)] uppercase tracking-wider">{kpi.label}</span>
@@ -181,6 +180,67 @@ export default function AdminDashboard() {
           })}
         </div>
       )}
+
+      {/* ── 3. Taller en Vivo — Bahías ── */}
+      <div className="rounded-xl border border-border bg-surface-secondary overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-status-success animate-pulse" />
+            <h2 className="text-caption font-semibold text-text-primary tracking-wide">Taller en Vivo</h2>
+          </div>
+          <span className="text-[10px] text-text-tertiary font-mono">{mechanics.length} técnicos activos</span>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3 p-4">
+          {mechanics.length > 0 ? mechanics.map((m: any) => {
+            const busy = (m.activeOrders || 0) > 0;
+            return (
+              <div key={m.id || m.name}
+                className={`relative rounded-lg border p-3 transition-all ${
+                  busy
+                    ? 'border-orange-500/30 bg-orange-500/5'
+                    : 'border-border bg-surface-primary'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 mb-2.5">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    busy ? 'bg-orange-500/15 text-orange-400' : 'bg-status-success/10 text-status-success'
+                  }`}>
+                    {(m.name || m.mechanic_name || "?").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-text-primary truncate">{m.name || m.mechanic_name || "Sin asignar"}</p>
+                    <p className="text-[10px] text-text-tertiary">BAHÍA {m.bay || m.id || "—"}</p>
+                  </div>
+                </div>
+                {busy ? (
+                  <>
+                    <div className="h-1.5 rounded-full bg-surface-tertiary mb-1.5 overflow-hidden">
+                      <div className="h-full rounded-full bg-orange-500 transition-all duration-500" style={{ width: `${Math.min((m.progress || 50), 100)}%` }} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-mono font-semibold text-orange-400">
+                        {Math.min((m.progress || 50), 100)}%
+                      </span>
+                      <span className="text-[9px] font-mono text-text-tertiary">
+                        {m.vehicle || "—"}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-status-success" />
+                    <span className="text-[9px] font-mono text-status-success font-semibold">DISPONIBLE</span>
+                  </div>
+                )}
+              </div>
+            );
+          }) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-xs text-text-tertiary">No hay mecánicos registrados</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ── Main Grid: Órdenes + Sidebar ── */}
       <div className="grid gap-5 lg:grid-cols-3">
@@ -397,7 +457,7 @@ export default function AdminDashboard() {
                     <span className="text-xs text-text-tertiary">{m.completed} completada{m.completed !== 1 ? "s" : ""}</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-surface-tertiary overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 transition-all duration-500"
+                    <div className="h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-500"
                       style={{ width: `${pct}%` }} />
                   </div>
                   <div className="flex justify-between mt-1">

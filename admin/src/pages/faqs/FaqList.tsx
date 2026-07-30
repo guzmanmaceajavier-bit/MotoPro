@@ -127,7 +127,7 @@ export default function FaqList() {
   const categoryCount = new Set(items.map(i => i.category)).size;
 
   const categoryColors: Record<string, string> = {
-    general: "#6366F1", servicios: "#14b8a6", compras: "#F59E0B", envios: "#3B82F6", garantia: "#10B981", taller: "#EF4444"
+    general: "#6366F1", servicios: "#ff6b00", compras: "#F59E0B", envios: "#3B82F6", garantia: "#10B981", taller: "#EF4444"
   };
 
   if (loading) return (
@@ -143,7 +143,7 @@ export default function FaqList() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
             <HelpCircle size={20} />
           </div>
           <div>
@@ -304,7 +304,7 @@ export default function FaqList() {
           <div className="relative w-full max-w-[640px] rounded-2xl bg-white shadow-2xl animate-scale-in max-h-[90vh] flex flex-col">
 
             <div className="flex items-center gap-3 px-6 pt-6 pb-2">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
                 <HelpCircle size={22} />
               </div>
               <div className="flex-1">

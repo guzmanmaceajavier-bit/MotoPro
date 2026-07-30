@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { useConfig } from "@/providers/CMSProvider";
 
 interface CMSSEO {
   meta_title?: string;
@@ -23,14 +24,15 @@ interface SEOProps {
 }
 
 export function SEO({ title, description, image, url, type = "website", pageSEO, structuredData }: SEOProps) {
-  const site = "MotoPro Taller";
-  const siteUrl = "https://tallermotos.com";
+  const config = useConfig();
+  const site = config.site_name || "MotoPro Taller";
+  const siteUrl = config.site_url || "https://tallermotos.com";
   const pageTitle = pageSEO?.meta_title || title;
   const fullTitle = pageTitle ? `${pageTitle} | ${site}` : site;
-  const desc = pageSEO?.meta_description || description || "Taller especializado en mantenimiento, reparación y personalización de motocicletas.";
+  const desc = pageSEO?.meta_description || description || config.site_description || "Taller especializado en mantenimiento, reparación y personalización de motocicletas.";
   const ogTitleFinal = pageSEO?.og_title || fullTitle;
   const ogDescFinal = pageSEO?.og_description || desc;
-  const ogImageFinal = pageSEO?.og_image || image || `${siteUrl}/og-default.jpg`;
+  const ogImageFinal = pageSEO?.og_image || image || config.site_og_image || `${siteUrl}/og-default.jpg`;
   const canonical = pageSEO?.canonical_url || url ? `${siteUrl}${pageSEO?.canonical_url || url}` : undefined;
 
   const defaultSchema = {
@@ -39,14 +41,14 @@ export function SEO({ title, description, image, url, type = "website", pageSEO,
     name: site,
     description: desc,
     url: siteUrl,
-    telephone: "+57 300 123 4567",
-    address: { "@type": "PostalAddress", addressLocality: "Bogotá", addressCountry: "CO" },
-    openingHoursSpecification: [
+    telephone: config.site_phone || "+57 300 123 4567",
+    address: { "@type": "PostalAddress", addressLocality: config.site_city || "Bogotá", addressCountry: "CO" },
+    openingHoursSpecification: (config.site_schema_hours ? JSON.parse(config.site_schema_hours) : null) || [
       { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"], opens: "08:00", closes: "18:00" },
       { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "08:00", closes: "13:00" },
     ],
-    priceRange: "$$",
-    sameAs: [],
+    priceRange: config.site_price_range || "$$",
+    sameAs: (config.site_social_links ? JSON.parse(config.site_social_links) : null) || [],
   };
 
   const schema = structuredData || pageSEO?.schema_json || defaultSchema;
@@ -131,5 +133,45 @@ export function faqSchema(faqs: Array<{ question: string; answer: string }>) {
       name: f.question,
       acceptedAnswer: { "@type": "Answer", text: f.answer },
     })),
+  };
+}
+
+export function blogPostSchema(post: { title: string; description: string; author?: string; datePublished?: string; image?: string; url?: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    ...(post.author ? { author: { "@type": "Person", name: post.author } } : {}),
+    ...(post.datePublished ? { datePublished: post.datePublished } : {}),
+    ...(post.image ? { image: post.image } : {}),
+    ...(post.url ? { url: post.url } : {}),
+    publisher: { "@type": "Organization", name: "MotoPro Taller" },
+  };
+}
+
+export function articleSchema(article: { title: string; description: string; author?: string; datePublished?: string; image?: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.description,
+    ...(article.author ? { author: { "@type": "Person", name: article.author } } : {}),
+    ...(article.datePublished ? { datePublished: article.datePublished } : {}),
+    ...(article.image ? { image: article.image } : {}),
+    publisher: { "@type": "Organization", name: "MotoPro Taller" },
+  };
+}
+
+export function localBusinessSchema(data: { name?: string; description?: string; telephone?: string; image?: string; url?: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AutoRepair",
+    name: data.name || "MotoPro Taller",
+    description: data.description || "Taller especializado en mantenimiento, reparación y personalización de motocicletas.",
+    ...(data.telephone ? { telephone: data.telephone } : {}),
+    ...(data.image ? { image: data.image } : {}),
+    ...(data.url ? { url: data.url } : {}),
+    address: { "@type": "PostalAddress", addressLocality: "Bogotá", addressCountry: "CO" },
   };
 }

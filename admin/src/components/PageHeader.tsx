@@ -38,7 +38,7 @@ export default function PageHeader({ title, description, breadcrumbs, action, ta
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           {icon && (
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)] shrink-0">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)] shrink-0">
               {icon}
             </div>
           )}

@@ -1,9 +1,11 @@
+import { sanitizeHtml } from "@/lib/sanitize";
+
 export default function SectionTitle({ title, subtitle, light }: { title: string; subtitle?: string; light?: boolean }) {
   return (
     <div className="mb-12 text-center">
       <h2
         className="text-3xl md:text-4xl font-heading font-bold tracking-tight"
-        dangerouslySetInnerHTML={{ __html: title }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(title) }}
         style={{ color: light ? "#FFFFFF" : "var(--color-text, #0F172A)" }}
       />
       {subtitle && (

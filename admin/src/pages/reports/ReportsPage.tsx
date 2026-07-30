@@ -29,7 +29,7 @@ function MiniBar({ data }: { data: Report[] }) {
 function MiniPie({ data }: { data: Report[] }) {
   if (!data || !data.length) return null;
   const total = data.reduce((s, d) => s + d.value, 0) || 1;
-  const colors = ["#25D366", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6"];
+  const colors = ["#25D366", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#FF6B00"];
   let cum = 0;
   return (
     <div className="space-y-2">
@@ -74,7 +74,7 @@ export default function ReportsPage() {
   const exportCSV = async (format: string) => {
     setExporting(true);
     try {
-      const resp = await api.get(`/reports/${activeReport}/export?format=${period}&type=${format}`);
+      const resp = await api.get(`/reports/export/${activeReport}?format=${period}&type=${format}`);
       const blob = new Blob([typeof resp === "string" ? resp : JSON.stringify(resp)], { type: format === "excel" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "text/csv" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = `reporte_${activeReport}_${period}.${format === "excel" ? "xlsx" : "csv"}`; a.click();

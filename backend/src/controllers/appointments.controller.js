@@ -10,7 +10,7 @@ function getDurationMinutes(serviceType) {
   try {
     const durations = JSON.parse(durationsRaw);
     if (serviceType && durations[serviceType]) return parseInt(durations[serviceType]) || 60;
-  } catch {}
+  } catch (e) { console.error("[backend]", e.message); }
   return parseInt(getConfig("appointment_interval_minutes", "60")) || 60;
 }
 
@@ -106,8 +106,8 @@ exports.create = (req, res) => {
     run(`INSERT INTO work_orders (id, order_number, customer_name, customer_phone, customer_email, service_type, description, status, appointment_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'received', ?)`,
       [generateId(), orderNumber, customer_name, customer_phone, customer_email || "", service_type || "", `Cita agendada para ${appointment_date} ${start_time}`, id]);
-  } catch {}
-
+  } catch (e) { console.error("[backend]", e.message); }
+ 
   success(res, { id, end_time }, "Cita creada", 201);
 };
 

@@ -108,13 +108,13 @@ export default function GalleryPage() {
         </div>
       </div>
 
-      <div className={`rounded-2xl p-6 mb-5 border-2 border-dashed transition-all cursor-pointer ${dragOver ? "border-[var(--mp-accent)] bg-[rgba(20,184,166,0.04)]" : "border-[var(--mp-border)] bg-[var(--mp-bg-card)]"}`}
+      <div className={`rounded-2xl p-6 mb-5 border-2 border-dashed transition-all cursor-pointer ${dragOver ? "border-[var(--mp-accent)] bg-[rgba(255,107,0,0.04)]" : "border-[var(--mp-border)] bg-[var(--mp-bg-card)]"}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={handleDrop}
         onClick={() => !preview && !uploading && fileRef.current?.click()}>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleInputChange} disabled={uploading} />
         {!preview && !uploading ? (
           <div className="flex flex-col items-center gap-4 py-8">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]"><Upload size={24} /></div>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]"><Upload size={24} /></div>
             <div className="text-center">
               <p className="text-sm font-semibold text-[var(--mp-text-primary)]">Arrastra una imagen aquí o haz clic para seleccionar</p>
               <p className="text-xs mt-1.5 text-[var(--mp-text-tertiary)]">JPG, PNG, WebP — Max 5MB</p>

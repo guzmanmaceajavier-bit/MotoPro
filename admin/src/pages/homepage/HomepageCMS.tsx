@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { GripVertical, Eye, EyeOff, ChevronDown, Plus, Link2, Upload, Save, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/Toast";
-import { api } from "@/api/client";
+import { api, uploadFile } from "@/api/client";
 import { HomepageSection } from "../../../../shared/types";
 import PageHeader from "@/components/PageHeader";
 
@@ -37,7 +37,7 @@ const SECTION_SVG_ICONS: Record<string, JSX.Element> = {
 };
 
 const SECTION_COLORS: Record<string, string> = {
-  hero: "#6366F1", brands: "#8B5CF6", categories: "#3B82F6", why_us: "#14B8A6",
+  hero: "#6366F1", brands: "#8B5CF6", categories: "#3B82F6", why_us: "#FF6B00",
   services: "#10B981", promotions: "#F59E0B", featured_products: "#EF4444", values: "#EC4899",
 };
 
@@ -172,17 +172,18 @@ export default function HomepageCMS() {
                   </div>
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1.5 block">Imagen de fondo</label>
-                    <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-gray-300 cursor-pointer hover:border-[var(--mp-accent)] transition-colors">
-                      <Upload size={16} className="text-gray-400" />
-                      <span className="text-sm text-gray-500">Subir archivo</span>
-                      <span className="text-xs text-gray-400">o arrastra y suelta</span>
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-[var(--mp-border)] cursor-pointer hover:border-[var(--mp-accent)] transition-colors">
+                      <Upload size={16} className="text-[var(--mp-text-tertiary)]" />
+                      <span className="text-sm text-[var(--mp-text-secondary)]">Subir archivo</span>
+                      <span className="text-xs text-[var(--mp-text-tertiary)]">o arrastra y suelta</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (ev) => updateSection(expanded.section_key, "image", ev.target?.result as string);
-                          reader.readAsDataURL(file);
-                        }
+                        if (!file) return;
+                        try {
+                          const res = await uploadFile("/upload", file, "taller-motos/homepage");
+                          const url = res.data?.url || res.url || res.image || "";
+                          if (url) updateSection(expanded.section_key, "image", url);
+                        } catch { showToast("error", "Error al subir imagen"); }
                       }} />
                     </label>
                   </div>

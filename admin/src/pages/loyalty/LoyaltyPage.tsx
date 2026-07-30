@@ -49,7 +49,7 @@ export default function LoyaltyPage() {
     const pts = parseInt(adjustPoints);
     if (isNaN(pts) || pts === 0) { showToast("error", "Puntos invalidos"); return; }
     try {
-      await api.post(`/loyalty/customers/${adjustModal.customerId}/adjust`, { points: pts, description: adjustDesc || "Ajuste manual" });
+      await api.post(`/loyalty/points/${adjustModal.customerId}`, { points: pts, description: adjustDesc || "Ajuste manual" });
       showToast("success", `${pts > 0 ? "Agregados" : "Restados"} ${Math.abs(pts)} puntos`);
       setAdjustModal(null); setAdjustPoints(""); setAdjustDesc(""); load();
     } catch (err: unknown) { showToast("error", err instanceof Error ? err.message : "Error"); }

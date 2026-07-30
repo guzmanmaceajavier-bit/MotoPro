@@ -7,7 +7,7 @@ export function WhatsAppFloat() {
   useEffect(() => {
     api.get("/config").then((cfg) => {
       if (cfg?.social_whatsapp) setWhatsapp(cfg.social_whatsapp);
-    }).catch(() => {});
+    }).catch((err) => console.warn("[fetch]", err));
   }, []);
 
   return (

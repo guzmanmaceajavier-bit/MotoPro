@@ -10,10 +10,10 @@ interface Log {
 }
 
 const actionColors: Record<string, string> = {
-  POST: "text-green-600 bg-green-50",
-  PUT: "text-blue-600 bg-blue-50",
-  DELETE: "text-red-600 bg-red-50",
-  PATCH: "text-orange-600 bg-orange-50",
+  POST: "text-[var(--mp-success)] bg-[rgba(16,185,129,0.1)]",
+  PUT: "text-[var(--mp-info)] bg-[rgba(37,99,235,0.1)]",
+  DELETE: "text-[var(--mp-danger)] bg-[rgba(239,68,68,0.1)]",
+  PATCH: "text-[var(--mp-accent)] bg-[rgba(255,107,0,0.1)]",
 };
 
 export default function LogsPage() {
@@ -80,28 +80,28 @@ export default function LogsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--text)" }}>Monitoreo y Auditoría</h1>
-          <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Registro de actividades del sistema</p>
+          <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--mp-text-primary)" }}>Monitoreo y Auditoría</h1>
+          <p className="text-sm mt-0.5" style={{ color: "var(--mp-text-secondary)" }}>Registro de actividades del sistema</p>
         </div>
-        <button onClick={clearLogs} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-red-600 hover:bg-red-50 transition-colors" type="button">
+        <button onClick={clearLogs} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-[var(--mp-danger)] hover:bg-[var(--mp-bg-hover)] transition-colors" type="button">
           <Trash2 size={13} /> Limpiar logs
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-lg border p-4" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
-          <div className="flex items-center gap-2 mb-2"><Activity size={16} style={{ color: "var(--accent)" }} /><span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Total logs</span></div>
-          <p className="text-2xl font-bold" style={{ color: "var(--text)" }}>{stats.total}</p>
+        <div className="rounded-lg border p-4" style={{ borderColor: "var(--mp-border)", background: "var(--mp-bg-elevated)" }}>
+          <div className="flex items-center gap-2 mb-2"><Activity size={16} style={{ color: "var(--mp-accent)" }} /><span className="text-xs font-medium" style={{ color: "var(--mp-text-secondary)" }}>Total logs</span></div>
+          <p className="text-2xl font-bold" style={{ color: "var(--mp-text-primary)" }}>{stats.total}</p>
         </div>
-        <div className="rounded-lg border p-4" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
-          <div className="flex items-center gap-2 mb-2"><FileText size={16} style={{ color: "#3B82F6" }} /><span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Hoy</span></div>
-          <p className="text-2xl font-bold" style={{ color: "var(--text)" }}>{stats.today}</p>
+        <div className="rounded-lg border p-4" style={{ borderColor: "var(--mp-border)", background: "var(--mp-bg-elevated)" }}>
+          <div className="flex items-center gap-2 mb-2"><FileText size={16} style={{ color: "#3B82F6" }} /><span className="text-xs font-medium" style={{ color: "var(--mp-text-secondary)" }}>Hoy</span></div>
+          <p className="text-2xl font-bold" style={{ color: "var(--mp-text-primary)" }}>{stats.today}</p>
         </div>
         {stats.byAction.slice(0, 2).map((a) => (
-          <div key={a.action} className="rounded-lg border p-4" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
-            <div className="flex items-center gap-2 mb-2"><span className={`text-xs font-bold px-1.5 py-0.5 rounded ${actionColors[a.action] || ""}`}>{a.action}</span><span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>acciones</span></div>
-            <p className="text-2xl font-bold" style={{ color: "var(--text)" }}>{a.count}</p>
+          <div key={a.action} className="rounded-lg border p-4" style={{ borderColor: "var(--mp-border)", background: "var(--mp-bg-elevated)" }}>
+            <div className="flex items-center gap-2 mb-2"><span className={`text-xs font-bold px-1.5 py-0.5 rounded ${actionColors[a.action] || "text-[var(--mp-text-secondary)] bg-[var(--mp-bg-hover)]"}`}>{a.action}</span><span className="text-xs font-medium" style={{ color: "var(--mp-text-secondary)" }}>acciones</span></div>
+            <p className="text-2xl font-bold" style={{ color: "var(--mp-text-primary)" }}>{a.count}</p>
           </div>
         ))}
       </div>
@@ -109,9 +109,9 @@ export default function LogsPage() {
       {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <Filter size={14} style={{ color: "var(--text-tertiary)" }} />
+          <Filter size={14} style={{ color: "var(--mp-text-tertiary)" }} />
           <select value={filters.entity_type} onChange={(e) => setFilters({ ...filters, entity_type: e.target.value })}
-            className="h-8 rounded-md border px-2 text-xs" style={{ borderColor: "var(--border)", background: "var(--bg-card)", color: "var(--text)" }}>
+            className="h-8 rounded-md border px-2 text-xs" style={{ borderColor: "var(--mp-border)", background: "var(--mp-bg-elevated)", color: "var(--mp-text-primary)" }}>
             <option value="">Todas las entidades</option>
             {["work_orders", "customers", "products", "invoices", "appointments", "quotes", "users", "store_orders", "config"].map((e) => (
               <option key={e} value={e}>{e}</option>

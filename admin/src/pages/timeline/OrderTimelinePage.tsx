@@ -108,7 +108,7 @@ export default function OrderTimelinePage() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
           <Activity size={20} />
         </div>
         <div>
@@ -137,7 +137,7 @@ export default function OrderTimelinePage() {
                   <button key={o.id} onClick={() => setSelectedOrderId(o.id)}
                     className={`w-full text-left p-3 rounded-xl text-sm transition-colors ${
                       selectedOrderId === o.id
-                        ? "bg-[rgba(20,184,166,0.1)] border border-[rgba(20,184,166,0.3)]"
+                        ? "bg-[rgba(255,107,0,0.1)] border border-[rgba(255,107,0,0.3)]"
                         : "bg-[var(--mp-bg-elevated)] hover:bg-[var(--mp-bg-hover)] border border-transparent"
                     }`}
                   >

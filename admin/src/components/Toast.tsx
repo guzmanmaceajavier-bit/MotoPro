@@ -37,11 +37,11 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
   return (
     <div className="flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-sm pointer-events-auto animate-fade-in"
-      style={{ background: "var(--bg-card)", border: `1px solid var(--border)`, borderLeft: `3px solid ${color}` }}
+      style={{ background: "var(--mp-bg-elevated)", border: `1px solid var(--mp-border)`, borderLeft: `3px solid ${color}` }}
     >
       <div style={{ color }}><Icon size={16} /></div>
-      <p className="text-sm flex-1" style={{ color: "var(--text)" }}>{toast.message}</p>
-      <button onClick={onClose} className="p-0.5 rounded hover:bg-[var(--bg-muted)] transition-all" style={{ color: "var(--text-tertiary)" }} type="button">
+      <p className="text-sm flex-1" style={{ color: "var(--mp-text-primary)" }}>{toast.message}</p>
+      <button onClick={onClose} className="p-0.5 rounded hover:bg-[var(--mp-bg-hover)] transition-all" style={{ color: "var(--mp-text-tertiary)" }} type="button">
         <X size={13} />
       </button>
     </div>

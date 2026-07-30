@@ -1,9 +1,10 @@
 const router = require("express").Router();
-const customersCtrl = require("../controllers/customers.controller");
-const vehiclesCtrl = require("../controllers/vehicles.controller");
-const warrantiesCtrl = require("../controllers/warranties.controller");
-const returnsCtrl = require("../controllers/returns.controller");
-const notificationsCtrl = require("../controllers/notifications.controller");
+const { wrapController } = require("../utils/helpers");
+const customersCtrl = wrapController(require("../controllers/customers.controller"));
+const vehiclesCtrl = wrapController(require("../controllers/vehicles.controller"));
+const warrantiesCtrl = wrapController(require("../controllers/warranties.controller"));
+const returnsCtrl = wrapController(require("../controllers/returns.controller"));
+const notificationsCtrl = wrapController(require("../controllers/notifications.controller"));
 const { verifyToken, requirePermission } = require("../middleware/auth");
 
 router.get("/customers", verifyToken, requirePermission("customers.read"), customersCtrl.list);

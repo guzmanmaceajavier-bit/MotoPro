@@ -67,7 +67,7 @@ export function DataTable<T extends Record<string, any>>({
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-status-error"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
         <div><p className="text-body-sm font-medium text-text-primary">Error al cargar</p><p className="text-tiny text-text-tertiary mt-0.5">{error}</p></div>
-        {onRetry && <button onClick={onRetry} className="btn btn-secondary btn-sm">Reintentar</button>}
+        {onRetry && <button onClick={onRetry} className="px-4 py-2 rounded-lg border border-border bg-surface-secondary text-sm font-semibold text-text-primary hover:border-border-accent transition-colors">Reintentar</button>}
       </div>
     );
   }
@@ -120,7 +120,7 @@ export function DataTable<T extends Record<string, any>>({
               const isSelected = selectedIds.includes(id);
               return (
                 <tr key={id}
-                  className={`h-[var(--density-row-height)] border-b border-border-subtle transition-colors duration-fast hover:bg-surface-tertiary ${isSelected ? 'bg-[rgba(20,184,166,0.06)]' : ''}`}
+                  className={`h-[var(--density-row-height)] border-b border-border-subtle transition-colors duration-fast hover:bg-surface-tertiary ${isSelected ? 'bg-[rgba(255,107,0,0.06)]' : ''}`}
                 >
                   {selectable && (
                     <td className="px-4">

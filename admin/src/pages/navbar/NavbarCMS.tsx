@@ -50,12 +50,12 @@ export default function NavbarCMS() {
 
   const saveConfigField = async (key: string, value: string) => {
     setConfig(prev => ({ ...prev, [key]: value }));
-    await api.post("/config", { key, value }).catch(() => {});
+    await api.put(`/system-config/${key}`, { value }).catch(() => {});
   };
 
   const saveAllConfig = async () => {
     try {
-      const promises = Object.entries(config).map(([key, value]) => api.post("/config", { key, value }));
+      api.put("/config", config);
       await Promise.all(promises);
       showToast("success", "Cambios guardados");
       setHasChanges(false);
@@ -145,8 +145,8 @@ export default function NavbarCMS() {
             <h3 className="text-sm font-bold text-[var(--mp-text-primary)]">Logo</h3>
           </div>
           <div className="space-y-4">
-            <ImageUpload label="Logo principal" value={config["navbar_logo"] || ""} onChange={(url) => updateConfig("navbar_logo", url)} />
-            <ImageUpload label="Logo movil" value={config["navbar_logo_mobile"] || ""} onChange={(url) => updateConfig("navbar_logo_mobile", url)} />
+<ImageUpload folder="taller-motos/config" label="Logo principal" value={config["navbar_logo"] || ""} onChange={(url) => updateConfig("navbar_logo", url)} />
+<ImageUpload folder="taller-motos/config" label="Logo movil" value={config["navbar_logo_mobile"] || ""} onChange={(url) => updateConfig("navbar_logo_mobile", url)} />
           </div>
         </div>
 

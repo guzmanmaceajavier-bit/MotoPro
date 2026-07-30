@@ -17,7 +17,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   warning: 'bg-[var(--status-warning-bg)] text-status-warning',
   danger: 'bg-[var(--status-error-bg)] text-status-error',
   info: 'bg-[var(--status-info-bg)] text-status-info',
-  accent: 'bg-[rgba(20,184,166,0.12)] text-interactive-accent',
+  accent: 'bg-[rgba(255,107,0,0.12)] text-interactive-accent',
 };
 
 export function Badge({ variant = 'default', dot = false, removable = false, onRemove, children, className = '' }: BadgeProps) {

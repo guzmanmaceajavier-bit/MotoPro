@@ -16,7 +16,7 @@ export default function Pagination({ page, totalPages, onChange }: PaginationPro
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-center gap-2 mt-10">
-      <button onClick={() => onChange(page - 1)} disabled={page <= 1}
+      <button onClick={() => onChange(page - 1)} disabled={page <= 1} aria-label="Página anterior"
         className="rounded-lg border border-border-subtle bg-surface-tertiary/50 p-2.5 text-text-secondary hover:text-text-primary hover:border-interactive-accent/50 transition-all disabled:opacity-30 disabled:pointer-events-none"
       >
         <ChevronLeftIcon />
@@ -32,7 +32,7 @@ export default function Pagination({ page, totalPages, onChange }: PaginationPro
           {n}
         </button>
       ))}
-      <button onClick={() => onChange(page + 1)} disabled={page >= totalPages}
+      <button onClick={() => onChange(page + 1)} disabled={page >= totalPages} aria-label="Página siguiente"
         className="rounded-lg border border-border-subtle bg-surface-tertiary/50 p-2.5 text-text-secondary hover:text-text-primary hover:border-interactive-accent/50 transition-all disabled:opacity-30 disabled:pointer-events-none"
       >
         <ChevronRightIcon />

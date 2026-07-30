@@ -1,9 +1,10 @@
 const router = require("express").Router();
-const dashboardCtrl = require("../controllers/dashboard.controller");
-const logsCtrl = require("../controllers/logs.controller");
-const emailConfigCtrl = require("../controllers/email-config.controller");
-const notificationsCtrl = require("../controllers/notifications.controller");
-const contactCtrl = require("../controllers/contact.controller");
+const { wrapController } = require("../utils/helpers");
+const dashboardCtrl = wrapController(require("../controllers/dashboard.controller"));
+const logsCtrl = wrapController(require("../controllers/logs.controller"));
+const emailConfigCtrl = wrapController(require("../controllers/email-config.controller"));
+const notificationsCtrl = wrapController(require("../controllers/notifications.controller"));
+const contactCtrl = wrapController(require("../controllers/contact.controller"));
 const { query, get, run } = require("../config/database");
 const { generateId, success, error } = require("../utils/helpers");
 const { getAllConfig, getConfigGroup, setConfig, setConfigBatch } = require("../utils/settings");
@@ -11,12 +12,13 @@ const { verifyToken, requirePermission } = require("../middleware/auth");
 const path = require("path");
 const fs = require("fs");
 
+const BACKUP_DIR = path.resolve(__dirname, "../../data/backups");
+
 router.get("/dashboard", verifyToken, requirePermission("orders.read"), dashboardCtrl.dashboard);
 
-router.post("/backups", (req, res) => {
+router.post("/backups", verifyToken, requirePermission("settings.write"), (req, res) => {
   try {
     const DATA_DIR = path.resolve(__dirname, "../../data");
-    const BACKUP_DIR = path.resolve(__dirname, "../../data/backups");
     if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
     const dbPath = path.join(DATA_DIR, "database.sqlite");
     if (!fs.existsSync(dbPath)) return error(res, "Base de datos no encontrada", 404);
@@ -27,9 +29,8 @@ router.post("/backups", (req, res) => {
     success(res, { filename, size: stats.size, created_at: new Date().toISOString() }, "Backup creado");
   } catch (err) { console.error(err); error(res, "Error al crear backup", 500); }
 });
-router.get("/backups", (req, res) => {
+router.get("/backups", verifyToken, requirePermission("settings.read"), (req, res) => {
   try {
-    const BACKUP_DIR = path.resolve(__dirname, "../../data/backups");
     if (!fs.existsSync(BACKUP_DIR)) return success(res, []);
     const files = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith(".sqlite")).map(f => {
       const stats = fs.statSync(path.join(BACKUP_DIR, f));
@@ -38,32 +39,34 @@ router.get("/backups", (req, res) => {
     success(res, files);
   } catch (err) { console.error(err); error(res, "Error al listar backups", 500); }
 });
-router.get("/backups/:filename/download", (req, res) => {
+router.get("/backups/:filename/download", verifyToken, requirePermission("settings.read"), (req, res) => {
   try {
-    const filePath = path.resolve(__dirname, "../../data/backups", req.params.filename);
+    const safeName = path.basename(req.params.filename);
+    const filePath = path.join(BACKUP_DIR, safeName);
     if (!fs.existsSync(filePath)) return error(res, "Backup no encontrado", 404);
-    res.download(filePath, req.params.filename);
+    res.download(filePath, safeName);
   } catch (err) { console.error(err); error(res, "Error al descargar", 500); }
 });
-router.delete("/backups/:filename", (req, res) => {
+router.delete("/backups/:filename", verifyToken, requirePermission("settings.write"), (req, res) => {
   try {
-    const filePath = path.resolve(__dirname, "../../data/backups", req.params.filename);
+    const safeName = path.basename(req.params.filename);
+    const filePath = path.join(BACKUP_DIR, safeName);
     if (!fs.existsSync(filePath)) return error(res, "Backup no encontrado", 404);
     fs.unlinkSync(filePath);
     success(res, null, "Backup eliminado");
   } catch (err) { console.error(err); error(res, "Error al eliminar", 500); }
 });
-router.post("/backups/:filename/restore", (req, res) => {
+router.post("/backups/:filename/restore", verifyToken, requirePermission("settings.write"), (req, res) => {
   try {
     const DATA_DIR = path.resolve(__dirname, "../../data");
-    const BACKUP_DIR = path.resolve(__dirname, "../../data/backups");
-    const filePath = path.join(BACKUP_DIR, req.params.filename);
+    const safeName = path.basename(req.params.filename);
+    const filePath = path.join(BACKUP_DIR, safeName);
     if (!fs.existsSync(filePath)) return error(res, "Backup no encontrado", 404);
     const dbPath = path.join(DATA_DIR, "database.sqlite");
     const safetyName = `pre-restore-${Date.now()}.sqlite`;
     fs.copyFileSync(dbPath, path.join(BACKUP_DIR, safetyName));
     fs.copyFileSync(filePath, dbPath);
-    success(res, { restored: req.params.filename, safety_backup: safetyName }, "Backup restaurado. Reinicia el servidor.");
+    success(res, { restored: safeName, safety_backup: safetyName }, "Backup restaurado. Reinicia el servidor.");
   } catch (err) { console.error(err); error(res, "Error al restaurar", 500); }
 });
 
@@ -71,23 +74,23 @@ router.get("/logs", verifyToken, requirePermission("logs.read"), logsCtrl.list);
 router.post("/logs", verifyToken, requirePermission("logs.export"), logsCtrl.create);
 router.delete("/logs", verifyToken, requirePermission("logs.export"), logsCtrl.clear);
 
-router.get("/system-config", (req, res) => {
+router.get("/system-config", verifyToken, requirePermission("settings.read"), (req, res) => {
   try { success(res, getAllConfig()); } catch (err) { console.error(err); error(res, "Error", 500); }
 });
-router.get("/system-config/:group", (req, res) => {
+router.get("/system-config/:group", verifyToken, requirePermission("settings.read"), (req, res) => {
   try { success(res, getConfigGroup(req.params.group)); } catch (err) { console.error(err); error(res, "Error", 500); }
 });
-router.put("/system-config", (req, res) => {
+router.put("/system-config", verifyToken, requirePermission("settings.write"), (req, res) => {
   try { setConfigBatch(req.body); success(res, null, "Configuración actualizada"); } catch (err) { console.error(err); error(res, "Error al actualizar", 500); }
 });
-router.put("/system-config/:key", (req, res) => {
+router.put("/system-config/:key", verifyToken, requirePermission("settings.write"), (req, res) => {
   try { setConfig(req.params.key, req.body.value); success(res, null, "Configuración actualizada"); } catch (err) { console.error(err); error(res, "Error al actualizar", 500); }
 });
 
-router.get("/system-config/branches/list", (req, res) => {
+router.get("/system-config/branches/list", verifyToken, requirePermission("settings.read"), (req, res) => {
   try { success(res, query("SELECT * FROM branches ORDER BY name")); } catch (err) { console.error(err); error(res, "Error", 500); }
 });
-router.post("/system-config/branches", (req, res) => {
+router.post("/system-config/branches", verifyToken, requirePermission("settings.write"), (req, res) => {
   try {
     const { name, address, phone, email, schedule, is_main } = req.body;
     if (!name) return error(res, "Nombre requerido", 400);
@@ -96,7 +99,7 @@ router.post("/system-config/branches", (req, res) => {
     success(res, null, "Sucursal creada", 201);
   } catch (err) { console.error(err); error(res, "Error", 500); }
 });
-router.put("/system-config/branches/:id", (req, res) => {
+router.put("/system-config/branches/:id", verifyToken, requirePermission("settings.write"), (req, res) => {
   try {
     const { name, address, phone, email, schedule, is_main } = req.body;
     run("UPDATE branches SET name = COALESCE(?,name), address = COALESCE(?,address), phone = COALESCE(?,phone), email = COALESCE(?,email), schedule = COALESCE(?,schedule), is_main = COALESCE(?,is_main) WHERE id = ?",
@@ -104,11 +107,11 @@ router.put("/system-config/branches/:id", (req, res) => {
     success(res, null, "Sucursal actualizada");
   } catch (err) { console.error(err); error(res, "Error", 500); }
 });
-router.delete("/system-config/branches/:id", (req, res) => {
+router.delete("/system-config/branches/:id", verifyToken, requirePermission("settings.write"), (req, res) => {
   try { run("DELETE FROM branches WHERE id = ?", [req.params.id]); success(res, null, "Sucursal eliminada"); } catch (err) { console.error(err); error(res, "Error", 500); }
 });
 
-router.get("/system-config/hours", (req, res) => {
+router.get("/system-config/hours", verifyToken, requirePermission("settings.read"), (req, res) => {
   try {
     const config = getAllConfig();
     const hours = {
@@ -121,15 +124,15 @@ router.get("/system-config/hours", (req, res) => {
       sunday: { start: "0", end: "0", enabled: false },
     };
     const customHours = get("SELECT value FROM site_config WHERE key = 'custom_hours'");
-    if (customHours?.value) { try { Object.assign(hours, JSON.parse(customHours.value)); } catch {} }
+    if (customHours?.value) { try { Object.assign(hours, JSON.parse(customHours.value)); } catch (e) { console.error("[backend]", e.message); } }
     success(res, hours);
   } catch (err) { console.error(err); error(res, "Error", 500); }
 });
-router.put("/system-config/hours", (req, res) => {
+router.put("/system-config/hours", verifyToken, requirePermission("settings.write"), (req, res) => {
   try { setConfig("custom_hours", JSON.stringify(req.body)); success(res, null, "Horarios actualizados"); } catch (err) { console.error(err); error(res, "Error", 500); }
 });
 
-router.get("/system-config/email-templates", (req, res) => {
+router.get("/system-config/email-templates", verifyToken, requirePermission("settings.read"), (req, res) => {
   try {
     const { templates } = require("../utils/email-templates");
     const names = Object.keys(templates);
@@ -137,7 +140,7 @@ router.get("/system-config/email-templates", (req, res) => {
   } catch (err) { console.error(err); error(res, "Error", 500); }
 });
 
-router.get("/system-config/logs", (req, res) => {
+router.get("/system-config/logs", verifyToken, requirePermission("logs.read"), (req, res) => {
   try {
     const { page = 1, limit = 50, entity_type, user_id, search } = req.query;
     const offset = (page - 1) * limit;
@@ -152,7 +155,7 @@ router.get("/system-config/logs", (req, res) => {
     success(res, { logs, total: total?.c || 0, page: parseInt(page), pages: Math.ceil((total?.c || 0) / limit) });
   } catch (err) { console.error(err); error(res, "Error", 500); }
 });
-router.delete("/system-config/logs", (req, res) => {
+router.delete("/system-config/logs", verifyToken, requirePermission("logs.export"), (req, res) => {
   try { run("DELETE FROM activity_logs"); success(res, null, "Logs eliminados"); } catch (err) { console.error(err); error(res, "Error", 500); }
 });
 

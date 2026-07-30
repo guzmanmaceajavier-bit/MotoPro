@@ -29,7 +29,7 @@ const TAB_LABELS: Record<string, string> = { info: "Datos", service: "Historial"
 const DOC_TYPES = ["soat", "tecnomecanica", "seguro", "tarjeta_propiedad", "factura", "otro"];
 const PHOTO_CATS = ["general", "frontal", "lateral", "trasera", "motor", "danos", "detalle"];
 
-const emptyForm = { customer_id: "", brand: "", model: "", year: "", plate: "", vin: "", color: "", mileage: "", observations: "" };
+const emptyForm = { customer_id: "", brand: "", model: "", year: "", plate: "", vin: "", engine_number: "", chassis_number: "", color: "", mileage: "", observations: "" };
 
 export default function VehiclesPage() {
   const { showToast } = useToast();
@@ -75,7 +75,7 @@ export default function VehiclesPage() {
 
   const openEdit = (v: Vehicle) => {
     setEditing(v);
-    setForm({ customer_id: v.customer_id, brand: v.brand, model: v.model, year: v.year || "", plate: v.plate, vin: v.vin || "", color: v.color || "", mileage: String(v.mileage || ""), observations: v.observations || "" });
+    setForm({ customer_id: v.customer_id, brand: v.brand, model: v.model, year: v.year || "", plate: v.plate, vin: v.vin || "", engine_number: (v as any).engine_number || "", chassis_number: (v as any).chassis_number || "", color: v.color || "", mileage: String(v.mileage || ""), observations: v.observations || "" });
     setShowModal(true);
   };
 
@@ -242,7 +242,13 @@ export default function VehiclesPage() {
               <input className="mp-input w-full font-mono uppercase" value={form.plate} onChange={e => setForm({ ...form, plate: e.target.value.toUpperCase() })} placeholder="ABC 123" />
             </div>
             <div><label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">VIN</label>
-              <input className="mp-input w-full" value={form.vin} onChange={e => setForm({ ...form, vin: e.target.value })} placeholder="Numero de serie" />
+              <input className="mp-input w-full" value={form.vin} onChange={e => setForm({ ...form, vin: e.target.value })} placeholder="Número de serie (VIN)" />
+            </div>
+            <div><label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">Motor</label>
+              <input className="mp-input w-full" value={form.engine_number} onChange={e => setForm({ ...form, engine_number: e.target.value })} placeholder="Número de motor" />
+            </div>
+            <div><label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">Chasis</label>
+              <input className="mp-input w-full" value={form.chassis_number} onChange={e => setForm({ ...form, chassis_number: e.target.value })} placeholder="Número de chasis" />
             </div>
             <div><label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">Color</label>
               <input className="mp-input w-full" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} placeholder="Ej: Negro" />
@@ -293,6 +299,16 @@ export default function VehiclesPage() {
                   <div className="p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
                     <p className="text-[10px] text-[var(--mp-text-tertiary)] uppercase">Servicios Totales</p>
                     <p className="text-lg font-bold text-teal-400">{detail.service_history?.length || 0}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
+                    <p className="text-[10px] text-[var(--mp-text-tertiary)] uppercase">Motor</p>
+                    <p className="text-sm font-semibold text-[var(--mp-text-primary)]">{(detail as any).engine_number || "N/A"}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
+                    <p className="text-[10px] text-[var(--mp-text-tertiary)] uppercase">Chasis</p>
+                    <p className="text-sm font-semibold text-[var(--mp-text-primary)]">{(detail as any).chassis_number || "N/A"}</p>
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-[var(--mp-bg-elevated)]">

@@ -4,7 +4,7 @@ import { api } from "@/api/client";
 import { useToast } from "@/components/Toast";
 import { X, FolderTree, Check, Upload, Eye, EyeOff, Star, ChevronDown } from "lucide-react";
 
-const colorPresets = ["#14b8a6", "#8b5cf6", "#3b82f6", "#f59e0b", "#f97316", "#ef4444", "#ec4899", "#6366f1", "#64748b", "#374151"];
+const colorPresets = ["#ff6b00", "#8b5cf6", "#3b82f6", "#f59e0b", "#f97316", "#ef4444", "#ec4899", "#6366f1", "#64748b", "#374151"];
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "sin-nombre";
@@ -18,7 +18,7 @@ export default function CategoryForm() {
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    name: "", slug: "", description: "", image: "", color: "#14b8a6",
+    name: "", slug: "", description: "", image: "", color: "#ff6b00",
     parent_id: "", is_visible: true, is_featured: false,
     seo_title: "", seo_description: "", seo_keywords: ""
   });
@@ -30,7 +30,7 @@ export default function CategoryForm() {
     if (isEdit) api.get(`/categories/id/${id}`).then((c) => {
       setForm({
         name: c.name || "", slug: c.slug || "", description: c.description || "",
-        image: c.image || "", color: c.color || "#14b8a6", parent_id: c.parent_id || "",
+        image: c.image || "", color: c.color || "#ff6b00", parent_id: c.parent_id || "",
         is_visible: c.is_visible !== false, is_featured: c.is_featured || false,
         seo_title: c.seo_title || "", seo_description: c.seo_description || "", seo_keywords: c.seo_keywords || ""
       });
@@ -56,7 +56,7 @@ export default function CategoryForm() {
       } else {
         const res = await api.post("/categories", data) as any;
         if (createAnother) {
-          setForm({ name: "", slug: "", description: "", image: "", color: "#14b8a6", parent_id: "", is_visible: true, is_featured: false, seo_title: "", seo_description: "", seo_keywords: "" });
+          setForm({ name: "", slug: "", description: "", image: "", color: "#ff6b00", parent_id: "", is_visible: true, is_featured: false, seo_title: "", seo_description: "", seo_keywords: "" });
           setStep(0);
           showToast("success", "Categoría creada. Crea otra.");
         } else {
@@ -80,7 +80,7 @@ export default function CategoryForm() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
             <FolderTree size={20} />
           </div>
           <div>
@@ -99,7 +99,7 @@ export default function CategoryForm() {
           <div key={s.num} className="flex items-center flex-1">
             <button onClick={() => setStep(i)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all flex-1 ${
-                step === i ? "bg-[rgba(20,184,166,0.08)] border border-[rgba(20,184,166,0.2)]" : "border border-transparent hover:bg-[var(--mp-bg-hover)]"
+                step === i ? "bg-[rgba(255,107,0,0.08)] border border-[rgba(255,107,0,0.2)]" : "border border-transparent hover:bg-[var(--mp-bg-hover)]"
               }`}>
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
                 step === i ? "bg-[var(--mp-accent)] text-white" : step > i ? "bg-[var(--mp-success)] text-white" : "bg-[var(--mp-bg-elevated)] text-[var(--mp-text-tertiary)]"
@@ -187,7 +187,7 @@ export default function CategoryForm() {
 
               <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--mp-bg-elevated)]">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
                     <Eye size={16} />
                   </div>
                   <div>

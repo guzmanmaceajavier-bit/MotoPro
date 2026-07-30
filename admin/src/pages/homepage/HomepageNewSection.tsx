@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, Link2, HelpCircle } from "lucide-react";
 import { useToast } from "@/components/Toast";
-import { api } from "@/api/client";
+import { api, uploadFile } from "@/api/client";
 
 const SECTION_OPTIONS = [
   { key: "hero", label: "Hero" },
@@ -122,20 +122,21 @@ export default function HomepageNewSection() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">Imagen de la seccion</label>
-            <p className="text-xs text-gray-400 mb-3">Esta imagen se mostrara como fondo o encabezado de la seccion.</p>
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-8 cursor-pointer hover:border-[var(--mp-accent)] transition-colors">
-              <Upload size={28} className="text-gray-300 mb-2" />
-              <span className="text-sm font-medium text-gray-600">Subir imagen</span>
-              <span className="text-xs text-gray-400 mt-0.5">o arrastra y suelta</span>
-              <span className="text-[11px] text-gray-400 mt-3">Formatos: JPG, PNG, WebP (max. 2MB)</span>
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+            <label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1 block">Imagen de la seccion</label>
+            <p className="text-xs text-[var(--mp-text-tertiary)] mb-3">Esta imagen se mostrara como fondo o encabezado de la seccion.</p>
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-[var(--mp-border)] rounded-xl p-8 cursor-pointer hover:border-[var(--mp-accent)] transition-colors">
+              <Upload size={28} className="text-[var(--mp-text-tertiary)] mb-2" />
+              <span className="text-sm font-medium text-[var(--mp-text-primary)]">Subir imagen</span>
+              <span className="text-xs text-[var(--mp-text-tertiary)] mt-0.5">o arrastra y suelta</span>
+              <span className="text-[11px] text-[var(--mp-text-tertiary)] mt-3">Formatos: JPG, PNG, WebP (max. 2MB)</span>
+              <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                 const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (ev) => setForm({ ...form, image: ev.target?.result as string });
-                  reader.readAsDataURL(file);
-                }
+                if (!file) return;
+                try {
+                  const res = await uploadFile("/upload", file, "taller-motos/homepage");
+                  const url = res.data?.url || res.url || res.image || "";
+                  if (url) setForm({ ...form, image: url });
+                } catch { showToast("error", "Error al subir imagen"); }
               }} />
             </label>
             {form.image && (

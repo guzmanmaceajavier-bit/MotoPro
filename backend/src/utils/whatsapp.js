@@ -61,7 +61,7 @@ async function sendWhatsAppAPI(phoneNumber, templateName, language, components) 
             console.error("WhatsApp API error:", result.error?.message || body);
             resolve(false);
           }
-        } catch { resolve(false); }
+        } catch (e) { console.error("[whatsapp]", e.message); resolve(false); }
       });
     });
 
@@ -106,7 +106,7 @@ async function sendWhatsAppMessage(phoneNumber, message) {
         try {
           const result = JSON.parse(body);
           resolve(!!result.messages);
-        } catch { resolve(false); }
+        } catch (e) { console.error("[whatsapp]", e.message); resolve(false); }
       });
     });
 

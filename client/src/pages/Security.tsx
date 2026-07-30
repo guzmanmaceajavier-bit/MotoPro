@@ -9,7 +9,7 @@ export default function Security() {
       <div className="rounded-lg border border-border bg-surface-secondary p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[rgba(20,184,166,0.1)] text-interactive-accent">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[rgba(255,107,0,0.1)] text-interactive-accent">
               <Shield size={24} />
             </div>
             <div>

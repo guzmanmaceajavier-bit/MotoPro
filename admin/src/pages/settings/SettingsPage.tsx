@@ -196,13 +196,13 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-xs font-semibold text-[var(--mp-text-primary)] mb-2">Logo del sitio</p>
                   <div className="border-2 border-dashed border-[var(--mp-border)] rounded-xl p-4 text-center hover:border-[var(--mp-accent)]/40 transition-colors">
-                    <ImageUpload key="site_logo" value={c.site_logo || ""} onChange={(url) => handleChange("site_logo", url)} label="" />
+                    <ImageUpload key="site_logo" folder="taller-motos/config" value={c.site_logo || ""} onChange={(url) => handleChange("site_logo", url)} label="" />
                   </div>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-[var(--mp-text-primary)] mb-2">Favicon</p>
                   <div className="border-2 border-dashed border-[var(--mp-border)] rounded-xl p-4 text-center hover:border-[var(--mp-accent)]/40 transition-colors">
-                    <ImageUpload key="site_favicon" value={c.site_favicon || ""} onChange={(url) => handleChange("site_favicon", url)} label="" />
+                    <ImageUpload key="site_favicon" folder="taller-motos/config" value={c.site_favicon || ""} onChange={(url) => handleChange("site_favicon", url)} label="" />
                   </div>
                 </div>
               </div>

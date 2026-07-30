@@ -23,3 +23,4 @@ export { Tooltip, type TooltipProps } from './Tooltip';
 export { Accordion, type AccordionProps, type AccordionItem } from './Accordion';
 export { DataTable, type DataTableProps, type Column } from './DataTable';
 export { Textarea, type TextareaProps, type TextareaVariant } from './Textarea';
+export { default as KpiCard, type KpiCardProps } from './KpiCard';

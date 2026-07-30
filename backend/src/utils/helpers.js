@@ -37,4 +37,22 @@ function paginate(items, page = 1, limit = 12) {
   };
 }
 
-module.exports = { generateId, slugify, now, success, error, paginate };
+function wrapHandler(fn) {
+  return (req, res, next) => {
+    try { fn(req, res, next); } catch (err) { next(err); }
+  };
+}
+
+function wrapController(ctrl) {
+  const wrapped = {};
+  for (const key of Object.keys(ctrl)) {
+    if (typeof ctrl[key] === "function") {
+      wrapped[key] = wrapHandler(ctrl[key]);
+    } else {
+      wrapped[key] = ctrl[key];
+    }
+  }
+  return wrapped;
+}
+
+module.exports = { generateId, slugify, now, success, error, paginate, wrapHandler, wrapController };

@@ -26,7 +26,7 @@ function auditLogger(req, res, next) {
         "INSERT INTO activity_logs (id, user_id, action, entity_type, entity_id, description, ip, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))",
         [`log-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, userId, action, entityType, entityId, description, req.ip || req.connection?.remoteAddress || ""]
       );
-    } catch {}
+    } catch (e) { console.error("[backend]", e.message); }
     return originalJson(body);
   };
 
@@ -91,7 +91,7 @@ const defaultConfigs = {
 
   // Appearance
   primary_color: "#0D9488",
-  accent_color: "#14B8A6",
+  accent_color: "#FF6B00",
   dark_mode_default: "false",
   hero_title: "Tu taller de confianza",
   hero_subtitle: "Especialistas en motocicletas",

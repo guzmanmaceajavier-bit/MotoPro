@@ -55,7 +55,7 @@ export default function ClientLayout() {
       >
         <div className="flex items-center gap-2.5 h-13 px-4 border-b shrink-0" style={{ borderColor: "var(--sidebar-border)" }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-extrabold shrink-0"
-            style={{ background: "linear-gradient(135deg, #0D9488, #14B8A6)" }}>
+            style={{ background: "linear-gradient(135deg, #E05E00, #FF6B00)" }}>
             <Bike size={16} />
           </div>
           <div className="min-w-0 flex-1">
@@ -116,7 +116,7 @@ export default function ClientLayout() {
               type="button"
             >
               <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-bold text-white shrink-0"
-                style={{ background: "linear-gradient(135deg, #0D9488, #14B8A6)" }}>
+                style={{ background: "linear-gradient(135deg, #E05E00, #FF6B00)" }}>
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <div className="flex-1 min-w-0 text-left">
@@ -153,7 +153,7 @@ export default function ClientLayout() {
           </button>
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[9px] font-extrabold shrink-0"
-              style={{ background: "linear-gradient(135deg, #0D9488, #14B8A6)" }}>
+              style={{ background: "linear-gradient(135deg, #E05E00, #FF6B00)" }}>
               <Bike size={14} />
             </div>
             <div className="text-sm font-bold truncate" style={{ color: "var(--text)" }}>MotoPro</div>

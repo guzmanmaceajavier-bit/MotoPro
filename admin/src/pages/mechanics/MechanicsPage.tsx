@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "@/api/client";
 import { useToast } from "@/components/Toast";
-import { Users, Plus, Pencil, Trash2, Loader2, Clock } from "lucide-react";
+import { Users, Plus, Pencil, Trash2, Loader2, Clock, Wrench, CheckCircle2, Star } from "lucide-react";
 import Modal from "@/components/Modal";
 
 interface Mechanic {
@@ -13,6 +13,10 @@ interface Mechanic {
   description: string;
   image?: string;
   availability: Record<string, { active: boolean; start: string; end: string }>;
+  active_orders?: number;
+  completed_services?: number;
+  performance_score?: number;
+  max_load?: number;
   created_at: string;
 }
 
@@ -40,6 +44,8 @@ export default function MechanicsPage() {
 
   const [form, setForm] = useState({
     name: "", role: "", specialty: "", experience: "", description: "", image: "",
+    max_load: 5,
+    performance_score: 5,
     availability: defaultAvailability(),
   });
 
@@ -58,7 +64,7 @@ export default function MechanicsPage() {
   useEffect(() => { fetchData(); }, []);
 
   const resetForm = () => {
-    setForm({ name: "", role: "", specialty: "", experience: "", description: "", image: "", availability: defaultAvailability() });
+    setForm({ name: "", role: "", specialty: "", experience: "", description: "", image: "", max_load: 5, performance_score: 5, availability: defaultAvailability() });
     setEditId(null);
   };
 
@@ -67,6 +73,8 @@ export default function MechanicsPage() {
     setForm({
       name: m.name, role: m.role, specialty: m.specialty, experience: m.experience,
       description: m.description, image: m.image || "",
+      max_load: (m as any).max_load || 5,
+      performance_score: (m as any).performance_score || 5,
       availability: m.availability || defaultAvailability(),
     });
     setShowModal(true);
@@ -76,7 +84,7 @@ export default function MechanicsPage() {
 
   const handleSave = async () => {
     try {
-      const payload = { ...form, availability: form.availability };
+      const payload = { name: form.name, role: form.role, specialty: form.specialty, experience: form.experience, description: form.description, image: form.image, max_load: form.max_load, performance_score: form.performance_score, availability: form.availability };
       if (editId) {
         await api.put(`/mechanics/${editId}`, payload);
         showToast("success", "Mecánico actualizado");
@@ -135,7 +143,7 @@ export default function MechanicsPage() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
             <Users size={20} />
           </div>
           <div>
@@ -150,7 +158,7 @@ export default function MechanicsPage() {
 
       {mechanics.length === 0 ? (
         <div className="mp-card p-12 flex flex-col items-center text-center">
-          <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
             <Users size={28} />
           </div>
           <h3 className="text-lg font-semibold text-[var(--mp-text-primary)] mb-1">Sin mecánicos registrados</h3>
@@ -177,7 +185,7 @@ export default function MechanicsPage() {
                   <h3 className="text-sm font-bold text-[var(--mp-text-primary)] truncate">{m.name}</h3>
                   {m.role && <p className="text-xs text-[var(--mp-text-tertiary)]">{m.role}</p>}
                   {m.specialty && (
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
                       {m.specialty}
                     </span>
                   )}
@@ -195,6 +203,47 @@ export default function MechanicsPage() {
               {m.experience && (
                 <p className="text-xs text-[var(--mp-text-secondary)] mb-2">{m.experience}</p>
               )}
+
+              {/* Carga laboral y rendimiento */}
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="p-2.5 rounded-xl bg-[var(--mp-bg-elevated)]">
+                  <p className="text-[10px] text-[var(--mp-text-tertiary)] uppercase flex items-center gap-1">
+                    <Wrench size={10} /> Carga
+                  </p>
+                  <p className="text-sm font-bold text-[var(--mp-text-primary)] mt-0.5">
+                    {(m as any).active_orders ?? 0} / {(m as any).max_load ?? 5}
+                  </p>
+                  <div className="w-full h-1.5 rounded-full bg-[var(--mp-bg-surface)] mt-1 overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(((m as any).active_orders ?? 0) / ((m as any).max_load ?? 5) * 100, 100)}%`,
+                        backgroundColor: ((m as any).active_orders ?? 0) >= ((m as any).max_load ?? 5) ? "#EF4444" :
+                          ((m as any).active_orders ?? 0) >= ((m as any).max_load ?? 5) * 0.7 ? "#F59E0B" : "#FF6B00"
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-[var(--mp-bg-elevated)]">
+                  <p className="text-[10px] text-[var(--mp-text-tertiary)] uppercase flex items-center gap-1">
+                    <Star size={10} /> Rendimiento
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-sm font-bold text-[var(--mp-text-primary)]">
+                      {((m as any).performance_score ?? 0).toFixed(1)}
+                    </span>
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <svg key={s} width="10" height="10" viewBox="0 0 24 24" fill={s <= Math.round((m as any).performance_score ?? 0) ? "#F59E0B" : "rgba(255,255,255,0.1)"}>
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-[var(--mp-text-tertiary)] mt-0.5">
+                    {(m as any).completed_services ?? 0} servicios
+                  </p>
+                </div>
+              </div>
 
               <div className="p-3 rounded-xl bg-[var(--mp-bg-elevated)]">
                 <div className="flex items-center gap-1.5 mb-2 text-[11px] font-medium text-[var(--mp-text-tertiary)]">
@@ -254,6 +303,27 @@ export default function MechanicsPage() {
             <label className="text-xs font-medium text-[var(--mp-text-primary)] mb-1 block">URL de imagen</label>
             <input value={form.image} onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
               className="mp-input text-sm w-full" placeholder="https://..." />
+          </div>
+
+          {/* Carga laboral y rendimiento */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-medium text-[var(--mp-text-primary)] mb-1 block">Carga máxima (órdenes)</label>
+              <input type="number" min={1} max={20} value={form.max_load}
+                onChange={(e) => setForm((f) => ({ ...f, max_load: Math.max(1, Number(e.target.value)) }))}
+                className="mp-input text-sm w-full" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-[var(--mp-text-primary)] mb-1 block">Puntaje de rendimiento</label>
+              <div className="flex gap-2">
+                <input type="range" min={0} max={5} step={0.5} value={form.performance_score}
+                  onChange={(e) => setForm((f) => ({ ...f, performance_score: Number(e.target.value) }))}
+                  className="flex-1" />
+                <span className="text-sm font-bold text-[var(--mp-text-primary)] min-w-[2ch] text-right">
+                  {form.performance_score.toFixed(1)}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div>

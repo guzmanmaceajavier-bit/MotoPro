@@ -28,10 +28,11 @@ async function request(url: string, options: RequestInit = {}) {
   return json.data ?? json;
 }
 
-export async function uploadFile(url: string, file: File) {
+export async function uploadFile(url: string, file: File, folder?: string) {
   const token = getToken();
   const fd = new FormData();
   fd.append("image", file);
+  if (folder) fd.append("folder", folder);
   const headers: Record<string, string> = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${API}${url}`, { method: "POST", headers, body: fd });

@@ -1,0 +1,46 @@
+const swaggerDocs = {
+  openapi: "3.0.0",
+  info: {
+    title: "MotoPro API",
+    description: "API REST para taller de motocicletas MotoPro",
+    version: "1.0.0",
+    contact: { name: "MotoPro Taller", email: "info@motopro.com" },
+  },
+  servers: [{ url: "/api", description: "API principal" }],
+  components: {
+    securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
+    schemas: {
+      Error: { type: "object", properties: { success: { type: "boolean" }, message: { type: "string" } } },
+      Product: { type: "object", properties: { id: { type: "string" }, name: { type: "string" }, slug: { type: "string" }, price: { type: "number" }, stock: { type: "integer" }, description: { type: "string" }, images: { type: "array", items: { type: "string" } }, category: { type: "string" }, brand: { type: "string" }, is_active: { type: "integer" } } },
+      Service: { type: "object", properties: { id: { type: "string" }, title: { type: "string" }, slug: { type: "string" }, description: { type: "string" }, price: { type: "number" }, duration: { type: "string" }, features: { type: "array", items: { type: "string" } }, is_active: { type: "integer" } } },
+      BlogPost: { type: "object", properties: { id: { type: "string" }, title: { type: "string" }, excerpt: { type: "string" }, content: { type: "string" }, category: { type: "string" }, image: { type: "string" }, author_name: { type: "string" }, is_published: { type: "integer" }, created_at: { type: "string" } } },
+      Appointment: { type: "object", properties: { id: { type: "string" }, service_type: { type: "string" }, mechanic_id: { type: "string" }, appointment_date: { type: "string" }, start_time: { type: "string" }, end_time: { type: "string" }, customer_name: { type: "string" }, customer_phone: { type: "string" }, status: { type: "string" } } },
+      WorkOrder: { type: "object", properties: { id: { type: "string" }, order_number: { type: "string" }, status: { type: "string" }, customer_name: { type: "string" }, customer_phone: { type: "string" }, vehicle_description: { type: "string" }, service_type: { type: "string" }, diagnosis: { type: "string" }, total: { type: "number" }, created_at: { type: "string" } } },
+    },
+  },
+  paths: {
+    "/products": { get: { tags: ["Productos"], summary: "Listar productos", parameters: [{ name: "category", in: "query", schema: { type: "string" } }, { name: "brand", in: "query", schema: { type: "string" } }, { name: "search", in: "query", schema: { type: "string" } }, { name: "min_price", in: "query", schema: { type: "number" } }, { name: "max_price", in: "query", schema: { type: "number" } }, { name: "in_stock", in: "query", schema: { type: "integer" } }, { name: "sort", in: "query", schema: { type: "string" } }, { name: "page", in: "query", schema: { type: "integer" } }, { name: "limit", in: "query", schema: { type: "integer" } }], responses: { "200": { description: "Lista de productos" } } } },
+    "/products/{slug}": { get: { tags: ["Productos"], summary: "Obtener producto por slug", parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }], responses: { "200": { description: "Producto" } } } },
+    "/categories": { get: { tags: ["Categorías"], summary: "Listar categorías", responses: { "200": { description: "Lista de categorías" } } } },
+    "/brands": { get: { tags: ["Marcas"], summary: "Listar marcas", responses: { "200": { description: "Lista de marcas" } } } },
+    "/services": { get: { tags: ["Servicios"], summary: "Listar servicios", parameters: [{ name: "category", in: "query", schema: { type: "string" } }], responses: { "200": { description: "Lista de servicios" } } } },
+    "/services/slug/{slug}": { get: { tags: ["Servicios"], summary: "Obtener servicio por slug", parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }], responses: { "200": { description: "Servicio" } } } },
+    "/appointments": { post: { tags: ["Citas"], summary: "Crear cita", requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/Appointment" } } } }, responses: { "201": { description: "Cita creada" } } } },
+    "/appointments/slots": { get: { tags: ["Citas"], summary: "Obtener slots disponibles", parameters: [{ name: "date", in: "query", schema: { type: "string" } }, { name: "mechanic_id", in: "query", schema: { type: "string" } }], responses: { "200": { description: "Slots disponibles" } } } },
+    "/work-orders": { get: { tags: ["Órdenes"], summary: "Listar órdenes de trabajo" }, post: { tags: ["Órdenes"], summary: "Crear orden de trabajo" } },
+    "/orders/search": { get: { tags: ["Órdenes"], summary: "Buscar órdenes", parameters: [{ name: "q", in: "query", schema: { type: "string" } }, { name: "type", in: "query", schema: { type: "string" } }], responses: { "200": { description: "Resultados" } } } },
+    "/checkout": { post: { tags: ["Ventas"], summary: "Crear checkout", responses: { "201": { description: "Checkout creado" } } } },
+    "/blog": { get: { tags: ["Blog"], summary: "Listar artículos", parameters: [{ name: "category", in: "query", schema: { type: "string" } }, { name: "page", in: "query", schema: { type: "integer" } }, { name: "limit", in: "query", schema: { type: "integer" } }], responses: { "200": { description: "Lista de artículos" } } } },
+    "/blog-comments": { get: { tags: ["Blog"], summary: "Listar comentarios", parameters: [{ name: "post_id", in: "query", schema: { type: "string" } }, { name: "is_approved", in: "query", schema: { type: "integer" } }], responses: { "200": { description: "Lista de comentarios" } } }, post: { tags: ["Blog"], summary: "Crear comentario", responses: { "201": { description: "Comentario creado" } } } },
+    "/customer-auth/wishlist": { get: { tags: ["Cliente"], summary: "Listar favoritos" }, post: { tags: ["Cliente"], summary: "Agregar favorito" } },
+    "/customer-auth/addresses": { get: { tags: ["Cliente"], summary: "Listar direcciones" }, post: { tags: ["Cliente"], summary: "Crear dirección" } },
+    "/notifications": { get: { tags: ["Notificaciones"], summary: "Listar notificaciones" } },
+    "/mercadopago/create-preference": { post: { tags: ["Pagos"], summary: "Crear preferencia MercadoPago" } },
+    "/search": { get: { tags: ["Búsqueda"], summary: "Búsqueda global", parameters: [{ name: "q", in: "query", required: true, schema: { type: "string" } }], responses: { "200": { description: "Resultados de búsqueda" } } } },
+    "/upload": { post: { tags: ["Archivos"], summary: "Subir archivo" } },
+    "/invoices/{id}/pdf": { get: { tags: ["Exportación"], summary: "Exportar factura PDF", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { "200": { description: "HTML de factura" } } } },
+    "/quotes/{id}/pdf": { get: { tags: ["Exportación"], summary: "Exportar cotización PDF", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { "200": { description: "HTML de cotización" } } } },
+  },
+};
+
+module.exports = swaggerDocs;

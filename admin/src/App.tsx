@@ -37,6 +37,7 @@ const VehiclesPage = lazy(() => import("./pages/vehicles/VehiclesPage"));
 const InventoryPage = lazy(() => import("./pages/inventory/InventoryPage"));
 const ProfilePage = lazy(() => import("./pages/profile/ProfilePage"));
 const StoreOrdersPage = lazy(() => import("./pages/store-orders/StoreOrdersPage"));
+const NewsletterPage = lazy(() => import("./pages/newsletter/NewsletterPage"));
 const MediaLibrary = lazy(() => import("./pages/media/MediaLibrary"));
 const HomepageCMS = lazy(() => import("./pages/homepage/HomepageCMS"));
 const NavbarCMS = lazy(() => import("./pages/navbar/NavbarCMS"));
@@ -49,6 +50,31 @@ const ReportsPage = lazy(() => import("./pages/reports/ReportsPage"));
 const LoyaltyPage = lazy(() => import("./pages/loyalty/LoyaltyPage"));
 const BranchesPage = lazy(() => import("./pages/branches/BranchesPage"));
 const LogsPage = lazy(() => import("./pages/logs/LogsPage"));
+const DiagnosticsPage = lazy(() => import("./pages/diagnostics/DiagnosticsPage"));
+const QuotesPage = lazy(() => import("./pages/quotes/QuotesPage"));
+const ReturnsPage = lazy(() => import("./pages/returns/ReturnsPage"));
+const TestimonialList = lazy(() => import("./pages/testimonials/TestimonialList"));
+const TestimonialForm = lazy(() => import("./pages/testimonials/TestimonialForm"));
+const ValueList = lazy(() => import("./pages/values/ValueList"));
+const ValueForm = lazy(() => import("./pages/values/ValueForm"));
+const LegalList = lazy(() => import("./pages/legal/LegalList"));
+const LegalForm = lazy(() => import("./pages/legal/LegalForm"));
+const CommentList = lazy(() => import("./pages/blog-comments/CommentList"));
+const SeoPage = lazy(() => import("./pages/seo/SeoPage"));
+const TeamList = lazy(() => import("./pages/team/TeamList"));
+const TeamForm = lazy(() => import("./pages/team/TeamForm"));
+const BeforeAfterList = lazy(() => import("./pages/before-after/BeforeAfterList"));
+const BeforeAfterForm = lazy(() => import("./pages/before-after/BeforeAfterForm"));
+const GarageBayList = lazy(() => import("./pages/garage-bays/GarageBayList"));
+const GarageBayForm = lazy(() => import("./pages/garage-bays/GarageBayForm"));
+const ProcessStepList = lazy(() => import("./pages/process-steps/ProcessStepList"));
+const ProcessStepForm = lazy(() => import("./pages/process-steps/ProcessStepForm"));
+const FacilityList = lazy(() => import("./pages/facilities/FacilityList"));
+const FacilityForm = lazy(() => import("./pages/facilities/FacilityForm"));
+const CertificationList = lazy(() => import("./pages/certifications/CertificationList"));
+const CertificationForm = lazy(() => import("./pages/certifications/CertificationForm"));
+const TrustItemList = lazy(() => import("./pages/trust-items/TrustItemList"));
+const TrustItemForm = lazy(() => import("./pages/trust-items/TrustItemForm"));
 
 const pageMeta: Record<string, { title: string; description?: string }> = {
   "/login": { title: "Iniciar Sesión" },
@@ -57,6 +83,18 @@ const pageMeta: Record<string, { title: string; description?: string }> = {
   "/products/new": { title: "Nuevo Producto" },
   "/categories": { title: "Categorías" },
   "/brands": { title: "Marcas" },
+  "/testimonials": { title: "Testimonios", description: "Gestión de testimonios de clientes" },
+  "/team": { title: "Equipo", description: "Gestión del equipo técnico" },
+  "/before-after": { title: "Antes/Después", description: "Comparaciones de trabajos realizados" },
+  "/values": { title: "Valores", description: "Misión, visión y valores de la empresa" },
+  "/legal": { title: "Páginas Legales", description: "Términos, políticas y avisos" },
+  "/comments": { title: "Comentarios", description: "Moderación de comentarios del blog" },
+  "/seo": { title: "SEO", description: "Configuración SEO por página" },
+  "/garage-bays": { title: "Bahías", description: "Gestión de bahías del taller" },
+  "/process-steps": { title: "Pasos del Proceso", description: "Pasos del proceso de atención" },
+  "/facilities": { title: "Instalaciones", description: "Instalaciones del taller" },
+  "/certifications": { title: "Certificaciones", description: "Certificaciones y acreditaciones" },
+  "/trust-items": { title: "Confianza", description: "Elementos de confianza del sitio" },
   "/proveedores": { title: "Proveedores", description: "Gestión de proveedores" },
   "/compras": { title: "Compras", description: "Gestión de compras y compras" },
   "/services": { title: "Servicios" },
@@ -79,6 +117,7 @@ const pageMeta: Record<string, { title: string; description?: string }> = {
   "/inventario": { title: "Inventario" },
   "/profile": { title: "Perfil" },
   "/multimedia": { title: "Multimedia" },
+  "/newsletter": { title: "Newsletter" },
   "/homepage": { title: "Homepage CMS" },
   "/navbar": { title: "Navbar CMS" },
   "/navbar/new": { title: "Nuevo item de menu" },
@@ -90,6 +129,9 @@ const pageMeta: Record<string, { title: string; description?: string }> = {
   "/fidelidad": { title: "Fidelidad", description: "Programa de puntos y recompensas" },
   "/sucursales": { title: "Sucursales", description: "Gestion de sedes" },
   "/logs": { title: "Logs", description: "Monitoreo y auditoria del sistema" },
+  "/diagnostics": { title: "Diagnósticos", description: "Gestión de diagnósticos del taller" },
+  "/quotes": { title: "Cotizaciones", description: "Gestión de cotizaciones para clientes" },
+  "/returns": { title: "Devoluciones", description: "Gestión de devoluciones y reembolsos" },
 };
 
 function RouteMeta() {
@@ -148,6 +190,38 @@ export default function App() {
           <Route path="blog" element={<Suspense fallback={<SuspenseFallback />}><BlogList /></Suspense>} />
           <Route path="blog/new" element={<Suspense fallback={<SuspenseFallback />}><BlogForm /></Suspense>} />
           <Route path="blog/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><BlogForm /></Suspense>} />
+          <Route path="testimonials" element={<Suspense fallback={<SuspenseFallback />}><TestimonialList /></Suspense>} />
+          <Route path="testimonials/new" element={<Suspense fallback={<SuspenseFallback />}><TestimonialForm /></Suspense>} />
+          <Route path="testimonials/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><TestimonialForm /></Suspense>} />
+          <Route path="team" element={<Suspense fallback={<SuspenseFallback />}><TeamList /></Suspense>} />
+          <Route path="team/new" element={<Suspense fallback={<SuspenseFallback />}><TeamForm /></Suspense>} />
+          <Route path="team/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><TeamForm /></Suspense>} />
+          <Route path="before-after" element={<Suspense fallback={<SuspenseFallback />}><BeforeAfterList /></Suspense>} />
+          <Route path="before-after/new" element={<Suspense fallback={<SuspenseFallback />}><BeforeAfterForm /></Suspense>} />
+          <Route path="before-after/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><BeforeAfterForm /></Suspense>} />
+          <Route path="values" element={<Suspense fallback={<SuspenseFallback />}><ValueList /></Suspense>} />
+          <Route path="values/new" element={<Suspense fallback={<SuspenseFallback />}><ValueForm /></Suspense>} />
+          <Route path="values/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><ValueForm /></Suspense>} />
+          <Route path="legal" element={<Suspense fallback={<SuspenseFallback />}><LegalList /></Suspense>} />
+          <Route path="legal/new" element={<Suspense fallback={<SuspenseFallback />}><LegalForm /></Suspense>} />
+          <Route path="legal/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><LegalForm /></Suspense>} />
+          <Route path="comments" element={<Suspense fallback={<SuspenseFallback />}><CommentList /></Suspense>} />
+          <Route path="seo" element={<Suspense fallback={<SuspenseFallback />}><SeoPage /></Suspense>} />
+          <Route path="garage-bays" element={<Suspense fallback={<SuspenseFallback />}><GarageBayList /></Suspense>} />
+          <Route path="garage-bays/new" element={<Suspense fallback={<SuspenseFallback />}><GarageBayForm /></Suspense>} />
+          <Route path="garage-bays/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><GarageBayForm /></Suspense>} />
+          <Route path="process-steps" element={<Suspense fallback={<SuspenseFallback />}><ProcessStepList /></Suspense>} />
+          <Route path="process-steps/new" element={<Suspense fallback={<SuspenseFallback />}><ProcessStepForm /></Suspense>} />
+          <Route path="process-steps/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><ProcessStepForm /></Suspense>} />
+          <Route path="facilities" element={<Suspense fallback={<SuspenseFallback />}><FacilityList /></Suspense>} />
+          <Route path="facilities/new" element={<Suspense fallback={<SuspenseFallback />}><FacilityForm /></Suspense>} />
+          <Route path="facilities/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><FacilityForm /></Suspense>} />
+          <Route path="certifications" element={<Suspense fallback={<SuspenseFallback />}><CertificationList /></Suspense>} />
+          <Route path="certifications/new" element={<Suspense fallback={<SuspenseFallback />}><CertificationForm /></Suspense>} />
+          <Route path="certifications/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><CertificationForm /></Suspense>} />
+          <Route path="trust-items" element={<Suspense fallback={<SuspenseFallback />}><TrustItemList /></Suspense>} />
+          <Route path="trust-items/new" element={<Suspense fallback={<SuspenseFallback />}><TrustItemForm /></Suspense>} />
+          <Route path="trust-items/:id/edit" element={<Suspense fallback={<SuspenseFallback />}><TrustItemForm /></Suspense>} />
           <Route path="orders" element={<Suspense fallback={<SuspenseFallback />}><WorkshopOrders /></Suspense>} />
           <Route path="orders/new" element={<Suspense fallback={<SuspenseFallback />}><OrderForm /></Suspense>} />
           <Route path="orders/:id" element={<Suspense fallback={<SuspenseFallback />}><WorkOrderDetailPage /></Suspense>} />
@@ -169,7 +243,8 @@ export default function App() {
           <Route path="profile" element={<Suspense fallback={<SuspenseFallback />}><ProfilePage /></Suspense>} />
           <Route path="pedidos-tienda" element={<Suspense fallback={<SuspenseFallback />}><StoreOrdersPage /></Suspense>} />
           <Route path="sliders" element={<Suspense fallback={<SuspenseFallback />}><SlidersPage /></Suspense>} />
-          <Route path="multimedia" element={<Suspense fallback={<SuspenseFallback />}><MediaLibrary /></Suspense>} />
+            <Route path="multimedia" element={<Suspense fallback={<SuspenseFallback />}><MediaLibrary /></Suspense>} />
+            <Route path="newsletter" element={<Suspense fallback={<SuspenseFallback />}><NewsletterPage /></Suspense>} />
           <Route path="homepage" element={<Suspense fallback={<SuspenseFallback />}><HomepageCMS /></Suspense>} />
           <Route path="homepage/new" element={<Suspense fallback={<SuspenseFallback />}><HomepageNewSection /></Suspense>} />
           <Route path="navbar" element={<Suspense fallback={<SuspenseFallback />}><NavbarCMS /></Suspense>} />
@@ -182,6 +257,9 @@ export default function App() {
           <Route path="fidelidad" element={<Suspense fallback={<SuspenseFallback />}><LoyaltyPage /></Suspense>} />
           <Route path="sucursales" element={<Suspense fallback={<SuspenseFallback />}><BranchesPage /></Suspense>} />
           <Route path="logs" element={<Suspense fallback={<SuspenseFallback />}><LogsPage /></Suspense>} />
+          <Route path="diagnostics" element={<Suspense fallback={<SuspenseFallback />}><DiagnosticsPage /></Suspense>} />
+          <Route path="quotes" element={<Suspense fallback={<SuspenseFallback />}><QuotesPage /></Suspense>} />
+          <Route path="returns" element={<Suspense fallback={<SuspenseFallback />}><ReturnsPage /></Suspense>} />
         </Route>
       </Routes>
     </>

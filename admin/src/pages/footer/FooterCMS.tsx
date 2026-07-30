@@ -55,7 +55,7 @@ export default function FooterCMS() {
 
   const saveAllConfig = async () => {
     try {
-      const promises = Object.entries(config).map(([key, value]) => api.post("/config", { key, value }));
+      api.put("/config", config);
       await Promise.all(promises);
       showToast("success", "Cambios guardados");
       setHasChanges(false);
@@ -134,7 +134,7 @@ export default function FooterCMS() {
           </div>
           <p className="text-xs text-[var(--mp-text-tertiary)] mb-3">Logo del footer</p>
           <div className="border-2 border-dashed border-[var(--mp-border)] rounded-xl p-6 text-center hover:border-[var(--mp-accent)]/40 transition-colors">
-            <ImageUpload label="" value={config["footer_logo"] || ""} onChange={(url) => updateConfig("footer_logo", url)} />
+            <ImageUpload folder="taller-motos/config" label="" value={config["footer_logo"] || ""} onChange={(url) => updateConfig("footer_logo", url)} />
           </div>
         </div>
 

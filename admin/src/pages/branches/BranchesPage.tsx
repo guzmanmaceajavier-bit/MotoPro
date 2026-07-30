@@ -16,7 +16,7 @@ export default function BranchesPage() {
 
   const load = () => {
     setLoading(true);
-    api.get("/system-config/branches").then((r) => setBranches(Array.isArray(r) ? r : [])).catch(() => {}).finally(() => setLoading(false));
+    api.get("/system-config/branches/list").then((r) => setBranches(Array.isArray(r) ? r : [])).catch(() => {}).finally(() => setLoading(false));
   };
   useEffect(() => { load(); }, []);
 

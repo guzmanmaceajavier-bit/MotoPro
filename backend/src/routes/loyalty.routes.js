@@ -10,6 +10,20 @@ router.get("/points/:customerId", (req, res) => {
   } catch (err) { console.error(err); error(res, "Error", 500); }
 });
 
+router.post("/points/:customerId", (req, res) => {
+  try {
+    const { points, description } = req.body;
+    if (!points || typeof points !== "number") return error(res, "Puntos inválidos", 400);
+    if (points > 0) {
+      awardPoints(req.params.customerId, points, "adjust", description || "Ajuste manual");
+    } else {
+      redeemPoints(req.params.customerId, Math.abs(points), description || "Ajuste manual");
+    }
+    const updated = get("SELECT * FROM loyalty_points WHERE customer_id = ?", [req.params.customerId]);
+    success(res, { balance: updated?.balance || 0 }, `${points > 0 ? "Puntos agregados" : "Puntos restados"}`);
+  } catch (err) { console.error(err); error(res, "Error", 500); }
+});
+
 router.get("/", (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;

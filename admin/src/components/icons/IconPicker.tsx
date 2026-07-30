@@ -24,14 +24,14 @@ import {
   Bug, Leaf, Flower2, Trophy, Medal, Crown, Gem, Diamond,
   Glasses, Dog, Cat, Dumbbell, Briefcase, Building, Factory, Car,
   FlaskConical, Frown, Angry, Brain, BookOpen, Gift, Ear, Footprints,
-  HeartHandshake, FishSymbol, Birdhouse, PawPrint, Smile, Skull,
+  HeartHandshake, FishSymbol, PawPrint, Smile, Skull,
   Stethoscope, Pill, ThumbsUp, Scale, Shirt, Sparkles, Paintbrush,
   Workflow, ScanLine, TreePine, Warehouse, SortAsc, MoreHorizontal,
-  Ring, Store
+  Store
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-const ICON_LIBRARY: Record<string, LucideIcon> = {
+export const ICON_LIBRARY: Record<string, LucideIcon> = {
   wrench: Wrench, cpu: Cpu, hammer: Hammer, droplets: Droplets,
   palette: Palette, zap: Zap, shield: Shield, check: Check,
   search: Search, gauge: Gauge, wind: Wind, volume2: Volume2,
@@ -79,11 +79,11 @@ const ICON_LIBRARY: Record<string, LucideIcon> = {
   car: Car, flaskConical: FlaskConical, frown: Frown, angry: Angry,
   brain: Brain, bookOpen: BookOpen, gift: Gift, ear: Ear,
   footprints: Footprints, heartHandshake: HeartHandshake,
-  fish: FishSymbol, birdhouse: Birdhouse, pawPrint: PawPrint,
+  fishSymbol: FishSymbol, pawPrint: PawPrint,
   smile: Smile, skull: Skull, stethoscope: Stethoscope, pill: Pill,
   thumbsUp: ThumbsUp, scale: Scale, shirt: Shirt, sparkles: Sparkles,
   paintbrush: Paintbrush, workflow: Workflow, scanLine: ScanLine,
-  treePine: TreePine, warehouse: Warehouse, store: Store, ring: Ring,
+  treePine: TreePine, warehouse: Warehouse,   store: Store,
 };
 
 const ICON_CATEGORIES = [

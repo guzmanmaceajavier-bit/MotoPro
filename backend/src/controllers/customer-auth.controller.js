@@ -250,3 +250,17 @@ exports.orderDetail = (req, res) => {
     error(res, "Error al obtener pedido", 500);
   }
 };
+
+exports.refresh = (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) return error(res, "Token requerido", 401);
+    const oldToken = authHeader.split(" ")[1];
+    const decoded = jwt.verify(oldToken, process.env.JWT_SECRET);
+    const newToken = jwt.sign({ id: decoded.id, email: decoded.email, role: decoded.role }, process.env.JWT_SECRET, { expiresIn: "30d" });
+    success(res, { token: newToken }, "Token renovado");
+  } catch (err) {
+    console.error("Refresh token error:", err);
+    error(res, "Token inválido o expirado", 401);
+  }
+};

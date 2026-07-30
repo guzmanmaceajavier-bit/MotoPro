@@ -4,7 +4,7 @@ import { api, uploadFile } from "@/api/client";
 import { useToast } from "@/components/Toast";
 import { Save, Tags, X, Plus, Upload, BookOpen, Eye, EyeOff, Store } from "lucide-react";
 
-const colorPresets = ["#14b8a6", "#8B5CF6", "#3B82F6", "#F59E0B", "#F97316", "#EF4444", "#EC4899", "#6366F1", "#64748b", "#374151"];
+const colorPresets = ["#ff6b00", "#8B5CF6", "#3B82F6", "#F59E0B", "#F97316", "#EF4444", "#EC4899", "#6366F1", "#64748b", "#374151"];
 
 export default function BrandForm() {
   const { id } = useParams();
@@ -12,7 +12,7 @@ export default function BrandForm() {
   const isEdit = !!id;
   const { showToast } = useToast();
 
-  const [form, setForm] = useState({ name: "", image: "", alt_image: "", accent: "#14b8a6", is_active: true, is_visible_store: true });
+  const [form, setForm] = useState({ name: "", image: "", alt_image: "", accent: "#ff6b00", is_active: true, is_visible_store: true });
   const [models, setModels] = useState<string[]>([]);
   const [modelInput, setModelInput] = useState("");
   const [saving, setSaving] = useState(false);
@@ -27,7 +27,7 @@ export default function BrandForm() {
       try { m = JSON.parse(b.models || "[]"); } catch { m = []; }
       setForm({
         name: b.name || "", image: b.image || "", alt_image: b.alt_image || "",
-        accent: b.accent || "#14b8a6", is_active: b.is_active !== false, is_visible_store: b.is_visible_store !== false,
+        accent: b.accent || "#ff6b00", is_active: b.is_active !== false, is_visible_store: b.is_visible_store !== false,
       });
       setModels(m);
     });
@@ -44,7 +44,7 @@ export default function BrandForm() {
     if (!file || !file.type.startsWith("image/")) { showToast("error", "Solo se permiten imágenes"); return; }
     setUploading(true);
     try {
-      const res = await uploadFile("/upload", file);
+      const res = await uploadFile("/upload", file, "taller-motos/brands");
       const url = res.data?.url || res.url || res.image || "";
       if (url) { setForm(prev => ({ ...prev, image: url })); setLogoPreview(null); showToast("success", "Logo subido"); }
     } catch { showToast("error", "Error al subir"); }
@@ -78,7 +78,7 @@ export default function BrandForm() {
       const data = { ...form, models: JSON.stringify(models) };
       await api.post("/brands", data);
       showToast("success", "Marca creada. Crea otra.");
-      setForm({ name: "", image: "", alt_image: "", accent: "#14b8a6", is_active: true, is_visible_store: true });
+      setForm({ name: "", image: "", alt_image: "", accent: "#ff6b00", is_active: true, is_visible_store: true });
       setModels([]);
     } catch (err: unknown) { showToast("error", err instanceof Error ? err.message : "Error"); }
     finally { setSaving(false); }
@@ -89,7 +89,7 @@ export default function BrandForm() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
             <Tags size={20} />
           </div>
           <div>
@@ -164,7 +164,7 @@ export default function BrandForm() {
               </button>
               <input ref={altRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
                 const f = e.target.files?.[0]; if (!f) return;
-                const res = await uploadFile("/upload", f);
+                const res = await uploadFile("/upload", f, "taller-motos/brands");
                 const url = res.data?.url || res.url || res.image || "";
                 if (url) setForm(prev => ({ ...prev, alt_image: url }));
               }} />
@@ -236,7 +236,7 @@ export default function BrandForm() {
                 {models.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {models.map((m) => (
-                      <span key={m} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[rgba(20,184,166,0.08)] text-[var(--mp-accent)]">
+                      <span key={m} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[rgba(255,107,0,0.08)] text-[var(--mp-accent)]">
                         {m}
                         <button type="button" onClick={() => removeModel(m)} className="hover:text-[var(--mp-danger)] transition-colors"><X size={12} /></button>
                       </span>
@@ -261,7 +261,7 @@ export default function BrandForm() {
               <div className="space-y-0">
                 <div className="flex items-center justify-between py-4 border-b border-[var(--mp-border)]">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
                       <Eye size={16} />
                     </div>
                     <div>

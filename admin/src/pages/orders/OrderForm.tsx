@@ -91,8 +91,8 @@ export default function OrderForm() {
           <div className="lg:col-span-2 space-y-6">
             <div className="mp-card p-5">
               <div className="flex items-center gap-3 mb-5 pb-4 border-b border-[var(--mp-border-subtle)]">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)]">
-                  <User size={18} className="text-[#14B8A6]" />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)]">
+                  <User size={18} className="text-[#FF6B00]" />
                 </div>
                 <h3 className="text-sm font-semibold text-[var(--mp-text-primary)]">Información del cliente</h3>
               </div>
@@ -121,8 +121,8 @@ export default function OrderForm() {
 
             <div className="mp-card p-5">
               <div className="flex items-center gap-3 mb-5 pb-4 border-b border-[var(--mp-border-subtle)]">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)]">
-                  <Bike size={18} className="text-[#14B8A6]" />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)]">
+                  <Bike size={18} className="text-[#FF6B00]" />
                 </div>
                 <h3 className="text-sm font-semibold text-[var(--mp-text-primary)]">Vehículo y servicio</h3>
               </div>
@@ -176,8 +176,8 @@ export default function OrderForm() {
               </div>
             </div>
 
-            <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-[rgba(20,184,166,0.06)] border border-[rgba(20,184,166,0.15)]">
-              <Info size={16} className="text-[#14B8A6] mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-[rgba(255,107,0,0.06)] border border-[rgba(255,107,0,0.15)]">
+              <Info size={16} className="text-[#FF6B00] mt-0.5 shrink-0" />
               <p className="text-xs text-[var(--mp-text-secondary)]">Una vez creada, podrás gestionar el diagnóstico, cotización, repuestos y entrega desde el detalle de la orden.</p>
             </div>
           </div>

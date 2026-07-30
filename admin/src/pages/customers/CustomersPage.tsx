@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { api } from "@/api/client";
+import { api, uploadFile } from "@/api/client";
 import { Modal } from "@shared/components/ui/Modal";
 import { Badge } from "@shared/components/ui/Badge";
 import { useToast } from "@/components/Toast";
@@ -113,7 +113,7 @@ export default function CustomersPage() {
     setDetailCustomer(c);
     setCustomerOrders([]);
     setOrdersLoading(true);
-    api.get("/store-orders").then((orders) => {
+    api.get("/direct-sales").then((orders) => {
       const arr = Array.isArray(orders) ? orders : [];
       setCustomerOrders(arr.filter((o: any) => o.customer_email?.toLowerCase() === c.email?.toLowerCase()));
     }).catch(() => {}).finally(() => setOrdersLoading(false));
@@ -189,7 +189,7 @@ export default function CustomersPage() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard title="Total Clientes" value={items.length} icon={<Users size={18} />} iconColor="teal" subtitle="Registrados" sparkline={<SparkLine data={SparkData.orders} color="#14B8A6" />} />
+        <KpiCard title="Total Clientes" value={items.length} icon={<Users size={18} />} iconColor="teal" subtitle="Registrados" sparkline={<SparkLine data={SparkData.orders} color="#FF6B00" />} />
         <KpiCard title="Total Pedidos" value={totalOrders} icon={<ShoppingBag size={18} />} iconColor="purple" sparkline={<SparkLine data={SparkData.orders} color="#8B5CF6" />} />
         <KpiCard title="Ingresos Totales" value={`$${totalSpent.toLocaleString()}`} icon={<DollarSign size={18} />} iconColor="orange" sparkline={<SparkLine data={SparkData.spent} color="#F59E0B" />} />
         <KpiCard title="Promedio por Cliente" value={`$${avgSpent.toFixed(0)}`} icon={<TrendingUp size={18} />} iconColor="pink" sparkline={<SparkLine data={SparkData.spent} color="#EC4899" />} />
@@ -231,8 +231,8 @@ export default function CustomersPage() {
         </div>
       ) : paginated.length === 0 ? (
         <div className="mp-card py-12 px-6 text-center">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[rgba(20,184,166,0.1)]">
-            <Users size={28} className="text-[#14B8A6]" />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[rgba(255,107,0,0.1)]">
+            <Users size={28} className="text-[#FF6B00]" />
           </div>
           <h3 className="text-base font-semibold mb-1 text-[var(--mp-text-primary)]">{search ? "Sin resultados" : "Comienza aquí"}</h3>
           <p className="text-sm mb-5 text-[var(--mp-text-secondary)]">{search ? "No hay clientes que coincidan con la búsqueda" : "Registra tu primer cliente para empezar."}</p>
@@ -249,7 +249,7 @@ export default function CustomersPage() {
                   <th style={{ width: 40 }}>
                     <button onClick={() => setSelectedIds(allSelected ? new Set() : new Set(paginated.map(c => c.id)))}
                       className="w-4 h-4 rounded border flex items-center justify-center transition-colors"
-                      style={{ borderColor: allSelected ? "#14B8A6" : "var(--mp-border)", background: allSelected ? "#14B8A6" : "transparent" }}>
+                      style={{ borderColor: allSelected ? "#FF6B00" : "var(--mp-border)", background: allSelected ? "#FF6B00" : "transparent" }}>
                       {allSelected && <Check size={10} className="text-white" />}
                     </button>
                   </th>
@@ -270,11 +270,11 @@ export default function CustomersPage() {
                 {paginated.map((c, idx) => {
                   const isSelected = selectedIds.has(c.id);
                   return (
-                    <tr key={c.id} className={isSelected ? "bg-[rgba(20,184,166,0.04)]" : ""}>
+                    <tr key={c.id} className={isSelected ? "bg-[rgba(255,107,0,0.04)]" : ""}>
                       <td>
                         <button onClick={() => toggleSelect(c.id)}
                           className="w-4 h-4 rounded border flex items-center justify-center transition-colors"
-                          style={{ borderColor: isSelected ? "#14B8A6" : "var(--mp-border)", background: isSelected ? "#14B8A6" : "transparent" }}>
+                          style={{ borderColor: isSelected ? "#FF6B00" : "var(--mp-border)", background: isSelected ? "#FF6B00" : "transparent" }}>
                           {isSelected && <Check size={10} className="text-white" />}
                         </button>
                       </td>
@@ -287,7 +287,7 @@ export default function CustomersPage() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
                               <p className="text-sm font-semibold truncate cursor-pointer hover:opacity-70 text-[var(--mp-text-primary)]" onClick={() => openDetail(c)}>{c.name}</p>
-                              {c.is_registered === 1 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[rgba(20,184,166,0.1)] text-[#14B8A6]">Web</span>}
+                              {c.is_registered === 1 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[rgba(255,107,0,0.1)] text-[#FF6B00]">Web</span>}
                             </div>
                             <p className="text-[11px] text-[var(--mp-text-tertiary)] flex items-center gap-1"><Calendar size={9} /> {c.created_at ? new Date(c.created_at).toLocaleDateString("es-CO") : ""}</p>
                           </div>
@@ -343,7 +343,7 @@ export default function CustomersPage() {
               Cancelar
             </button>
             <button onClick={handleSave} disabled={!form.name.trim() || !form.email.trim()}
-              className="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-[#14B8A6] hover:bg-[#0D9488] transition-all flex items-center gap-2 shadow-lg shadow-[rgba(20,184,166,0.3)] disabled:opacity-50">
+              className="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-[#FF6B00] hover:bg-[#E05E00] transition-all flex items-center gap-2 shadow-lg shadow-[rgba(255,107,0,0.3)] disabled:opacity-50">
               <Check size={16} /> Guardar Cliente
             </button>
           </>
@@ -434,9 +434,14 @@ export default function CustomersPage() {
                   <p className="text-[10px] text-[var(--mp-text-tertiary)]">JPG, PNG o GIF. Máx. 2MB</p>
                 </div>
               )}
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+              <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                 const file = e.target.files?.[0];
-                if (file) { const r = new FileReader(); r.onload = () => setForm(f => ({ ...f, avatar: r.result as string })); r.readAsDataURL(file); }
+                if (!file) return;
+                try {
+                  const res = await uploadFile("/upload", file, "taller-motos/customers");
+                  const url = res.data?.url || res.url || res.image || "";
+                  if (url) setForm(f => ({ ...f, avatar: url }));
+                } catch { showToast("error", "Error al subir avatar"); }
               }} />
             </label>
           </div>
@@ -448,7 +453,7 @@ export default function CustomersPage() {
         title={detailCustomer?.name || "Detalle del Cliente"}>
         {detailCustomer && (
           <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-[rgba(20,184,166,0.04)] border border-[rgba(20,184,166,0.15)]">
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-[rgba(255,107,0,0.04)] border border-[rgba(255,107,0,0.15)]">
               <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
                 style={{ background: `${avatarColors[7]}18`, color: avatarColors[7] }}>
                 {detailCustomer.avatar ? <img src={detailCustomer.avatar} alt="" className="w-full h-full rounded-full object-cover" /> : getInitials(detailCustomer.name)}
@@ -470,7 +475,7 @@ export default function CustomersPage() {
                 <p className="text-[10px] text-[var(--mp-text-tertiary)]">Gastado</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
-                <p className="text-lg font-bold text-[#14B8A6]">{detailCustomer.created_at ? new Date(detailCustomer.created_at).toLocaleDateString("es-CO") : "—"}</p>
+                <p className="text-lg font-bold text-[#FF6B00]">{detailCustomer.created_at ? new Date(detailCustomer.created_at).toLocaleDateString("es-CO") : "—"}</p>
                 <p className="text-[10px] text-[var(--mp-text-tertiary)]">Registro</p>
               </div>
             </div>

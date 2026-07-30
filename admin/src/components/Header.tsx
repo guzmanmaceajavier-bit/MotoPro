@@ -39,7 +39,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
             <p className="text-xs font-semibold text-[var(--mp-text-primary)]">Admin</p>
             <p className="text-[10px] text-[var(--mp-text-tertiary)] font-medium">admin@motopro.com</p>
           </div>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br from-[#14b8a6] to-[#0d9488] shadow-md shadow-[rgba(20,184,166,0.2)]">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white bg-[var(--mp-accent)] shadow-md shadow-[var(--mp-accent)]/20">
             AD
           </div>
         </div>

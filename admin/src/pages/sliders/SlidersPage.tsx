@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { api } from "@/api/client";
+import { api, uploadFile } from "@/api/client";
 import { useToast } from "@/components/Toast";
 import { downloadCSV, downloadExcel } from "@/utils/export";
 import {
@@ -507,19 +507,21 @@ export default function SlidersPage() {
                         <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                         </div>
-                        <p className="text-xs text-gray-500 mb-1">Arrastra y suelta una imagen aquí</p>
-                        <p className="text-xs text-gray-500 mb-1">o haz clic para seleccionar</p>
-                        <p className="text-[11px] text-gray-400 mt-2">Formatos: JPG, PNG, WebP</p>
-                        <p className="text-[11px] text-gray-400">Tamaño recomendado: 1920x1080px</p>
-                        <label className="mt-3 inline-block px-4 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors">
+                        <p className="text-xs text-[var(--mp-text-secondary)] mb-1">Arrastra y suelta una imagen aquí</p>
+                        <p className="text-xs text-[var(--mp-text-secondary)] mb-1">o haz clic para seleccionar</p>
+                        <p className="text-[11px] text-[var(--mp-text-tertiary)] mt-2">Formatos: JPG, PNG, WebP</p>
+                        <p className="text-[11px] text-[var(--mp-text-tertiary)]">Tamaño recomendado: 1920x1080px</p>
+                        <label className="mt-3 inline-block px-4 py-2 rounded-lg border border-[var(--mp-border)] text-xs font-medium text-[var(--mp-text-primary)] hover:bg-[var(--mp-bg-hover)] cursor-pointer transition-colors">
                           Seleccionar imagen
-                          <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                             const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (ev) => setForm({ ...form, image: ev.target?.result as string });
-                              reader.readAsDataURL(file);
-                            }
+                            if (!file) return;
+                            const folder = activeTab === "hero" ? "taller-motos/hero" : "taller-motos/offers";
+                            try {
+                              const res = await uploadFile("/upload", file, folder);
+                              const url = res.data?.url || res.url || res.image || "";
+                              if (url) setForm({ ...form, image: url });
+                            } catch { showToast("error", "Error al subir imagen"); }
                           }} />
                         </label>
                       </div>

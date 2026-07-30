@@ -23,7 +23,8 @@ exports.getUsages = (req, res) => {
 exports.create = async (req, res) => {
   try {
     if (!req.file) return error(res, 'No se envió ningún archivo', 400);
-    const result = await cloudinary.uploadToCloudinary(req.file.buffer);
+    const cloudinaryFolder = req.body.folder && req.body.folder !== '/' ? `taller-motos${req.body.folder}` : 'taller-motos/media';
+    const result = await cloudinary.uploadToCloudinary(req.file.buffer, cloudinaryFolder);
     const item = await mediaService.create({
       name: req.file.originalname || 'unnamed',
       url: result.secure_url,

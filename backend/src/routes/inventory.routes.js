@@ -1,7 +1,8 @@
 const router = require("express").Router();
-const inventoryCtrl = require("../controllers/inventory.controller");
-const purchasesCtrl = require("../controllers/purchases.controller");
-const suppliersCtrl = require("../controllers/suppliers.controller");
+const { wrapController } = require("../utils/helpers");
+const inventoryCtrl = wrapController(require("../controllers/inventory.controller"));
+const purchasesCtrl = wrapController(require("../controllers/purchases.controller"));
+const suppliersCtrl = wrapController(require("../controllers/suppliers.controller"));
 const { verifyToken, requirePermission } = require("../middleware/auth");
 
 router.get("/inventory/summary", verifyToken, requirePermission("inventory.read"), inventoryCtrl.getSummary);

@@ -43,7 +43,7 @@ export default function BrandList() {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const fetchBrands = () => { setLoading(true); api.get("/brands").then((r) => setBrands(r || [])).finally(() => setLoading(false)); };
+  const fetchBrands = () => { setLoading(true); api.get("/brands?all=1").then((r) => setBrands(r || [])).finally(() => setLoading(false)); };
   useEffect(() => { fetchBrands(); }, []);
 
   const enriched = useMemo(() => brands.map((b) => ({ ...b, _models: parseModels(b.models), _vehicleCount: (b as any).vehicle_count || 0 })), [brands]);
@@ -111,7 +111,7 @@ export default function BrandList() {
         <div className="mp-kpi group">
           <div className="flex items-start justify-between mb-3">
             <span className="text-[10px] font-bold text-[var(--mp-text-tertiary)] uppercase tracking-wider">Total Modelos</span>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]"><Car size={18} /></div>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]"><Car size={18} /></div>
           </div>
           <p className="text-2xl font-bold tracking-tight text-[var(--mp-text-primary)]">{stats.totalModels}</p>
           <p className="text-[11px] text-[var(--mp-text-tertiary)] mt-1">En todas las marcas</p>

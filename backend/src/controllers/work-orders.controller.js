@@ -18,7 +18,7 @@ function sendStatusEmail(order, newStatus, label) {
   if (!order.customer_email) return;
   const statusLabels = { received: "Recibido", diagnosed: "Diagnosticado", quoted: "Cotizado", approved: "Aprobado", in_progress: "En reparación", quality_check: "Control de calidad", ready: "Listo para entregar", delivered: "Entregado", cancelled: "Cancelado" };
   sendMail({ to: order.customer_email, subject: `Orden ${order.order_number} - ${label || statusLabels[newStatus] || newStatus}`,
-    html: `<h2>Hola ${order.customer_name}</h2><p>El estado de tu orden <b>${order.order_number}</b> ha cambiado:</p><p style="font-size:18px;font-weight:bold;color:#14B8A6">${statusLabels[newStatus] || newStatus}</p>` });
+    html: `<h2>Hola ${order.customer_name}</h2><p>El estado de tu orden <b>${order.order_number}</b> ha cambiado:</p><p style="font-size:18px;font-weight:bold;color:#FF6B00">${statusLabels[newStatus] || newStatus}</p>` });
 }
 
 // List all work orders with filtering, pagination, search

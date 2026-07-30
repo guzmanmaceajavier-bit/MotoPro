@@ -81,7 +81,7 @@ export default function StoreOrderForm({ open, onClose, id }: Props) {
         origin: form.origin,
         internal_notes: form.internalNotes,
       };
-      if (id) await api.put(`/checkout/${id}`, data);
+      if (id) await api.put(`/direct-sales/${id}`, data);
       else await api.post("/checkout", data);
       showToast("success", id ? "Pedido actualizado correctamente" : "Pedido creado correctamente");
       onClose();
@@ -100,8 +100,8 @@ export default function StoreOrderForm({ open, onClose, id }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--mp-border)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)]">
-              <ShoppingCart size={20} className="text-[#14B8A6]" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)]">
+              <ShoppingCart size={20} className="text-[#FF6B00]" />
             </div>
             <div>
               <h2 className="text-base font-bold text-[var(--mp-text-primary)]">Nuevo Pedido</h2>
@@ -124,17 +124,17 @@ export default function StoreOrderForm({ open, onClose, id }: Props) {
                 <div key={s.key} className="flex items-center">
                   <div className="flex flex-col items-center gap-1.5">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                      done ? "bg-[#14B8A6] text-white" : active ? "bg-[rgba(20,184,166,0.15)] text-[#14B8A6] border-2 border-[#14B8A6]" : "bg-[var(--mp-bg-elevated)] text-[var(--mp-text-tertiary)]"
+                      done ? "bg-[#FF6B00] text-white" : active ? "bg-[rgba(255,107,0,0.15)] text-[#FF6B00] border-2 border-[#FF6B00]" : "bg-[var(--mp-bg-elevated)] text-[var(--mp-text-tertiary)]"
                     }`}>
                       {done ? <CheckCircle2 size={16} /> : i + 1}
                     </div>
                     <div className="text-center">
-                      <p className={`text-[11px] font-semibold ${active ? "text-[#14B8A6]" : done ? "text-[var(--mp-text-primary)]" : "text-[var(--mp-text-tertiary)]"}`}>{s.label}</p>
+                      <p className={`text-[11px] font-semibold ${active ? "text-[#FF6B00]" : done ? "text-[var(--mp-text-primary)]" : "text-[var(--mp-text-tertiary)]"}`}>{s.label}</p>
                       <p className="text-[10px] text-[var(--mp-text-tertiary)] hidden sm:block">{s.desc}</p>
                     </div>
                   </div>
                   {i < steps.length - 1 && (
-                    <div className={`w-12 sm:w-20 h-0.5 mx-2 mb-5 rounded-full ${done ? "bg-[#14B8A6]" : "bg-[var(--mp-border)]"}`} />
+                    <div className={`w-12 sm:w-20 h-0.5 mx-2 mb-5 rounded-full ${done ? "bg-[#FF6B00]" : "bg-[var(--mp-border)]"}`} />
                   )}
                 </div>
               );
@@ -150,8 +150,8 @@ export default function StoreOrderForm({ open, onClose, id }: Props) {
                 {/* Cliente */}
                 <div className="mp-card p-5">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[rgba(20,184,166,0.1)]">
-                      <User size={16} className="text-[#14B8A6]" />
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[rgba(255,107,0,0.1)]">
+                      <User size={16} className="text-[#FF6B00]" />
                     </div>
                     <h3 className="text-sm font-semibold text-[var(--mp-text-primary)]">Información del cliente</h3>
                   </div>
@@ -234,8 +234,8 @@ export default function StoreOrderForm({ open, onClose, id }: Props) {
                 {/* Origen */}
                 <div className="mp-card p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[rgba(20,184,166,0.1)]">
-                      <Info size={16} className="text-[#14B8A6]" />
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[rgba(255,107,0,0.1)]">
+                      <Info size={16} className="text-[#FF6B00]" />
                     </div>
                     <h3 className="text-sm font-semibold text-[var(--mp-text-primary)]">Origen</h3>
                   </div>
@@ -253,7 +253,7 @@ export default function StoreOrderForm({ open, onClose, id }: Props) {
               <div className="space-y-5">
                 <div className="mp-card p-5">
                   <h3 className="text-sm font-semibold text-[var(--mp-text-primary)] mb-4 flex items-center gap-2">
-                    <ShoppingCart size={16} className="text-[#14B8A6]" /> Resumen del pedido
+                    <ShoppingCart size={16} className="text-[#FF6B00]" /> Resumen del pedido
                   </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between"><span className="text-sm text-[var(--mp-text-secondary)]">Subtotal productos</span><span className="text-sm font-semibold">$0</span></div>
@@ -263,8 +263,8 @@ export default function StoreOrderForm({ open, onClose, id }: Props) {
                       <div className="flex justify-between"><span className="text-sm font-bold">Total estimado</span><span className="text-lg font-bold">$0</span></div>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2 mt-3 px-3 py-2 rounded-lg bg-[rgba(20,184,166,0.06)] border border-[rgba(20,184,166,0.15)]">
-                    <Info size={14} className="text-[#14B8A6] mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-2 mt-3 px-3 py-2 rounded-lg bg-[rgba(255,107,0,0.06)] border border-[rgba(255,107,0,0.15)]">
+                    <Info size={14} className="text-[#FF6B00] mt-0.5 shrink-0" />
                     <p className="text-[11px] text-[var(--mp-text-secondary)]">El total se calculará automáticamente al agregar productos y configurar el envío.</p>
                   </div>
                 </div>

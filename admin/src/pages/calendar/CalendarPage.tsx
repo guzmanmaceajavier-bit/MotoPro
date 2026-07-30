@@ -189,7 +189,7 @@ export default function CalendarPage() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
             <Calendar size={20} />
           </div>
           <div>
@@ -281,7 +281,7 @@ export default function CalendarPage() {
                   <div key={day}
                     onClick={() => setSelectedDate(dateStr)}
                     className={`min-h-[80px] p-1.5 border-r border-b border-white/5 cursor-pointer transition-colors hover:bg-[var(--mp-bg-hover)] ${
-                      isSelected ? "bg-[rgba(20,184,166,0.08)]" : ""
+                      isSelected ? "bg-[rgba(255,107,0,0.08)]" : ""
                     }`}
                   >
                     <span className={`inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full mb-1 ${

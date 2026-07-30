@@ -32,8 +32,10 @@ async function initDatabase() {
       created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS brands (
-      id TEXT PRIMARY KEY, name TEXT NOT NULL, image TEXT, models TEXT DEFAULT '[]',
-      sort_order INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+      id TEXT PRIMARY KEY, name TEXT NOT NULL, image TEXT, alt_image TEXT, accent TEXT,
+      is_active INTEGER DEFAULT 1, is_visible_store INTEGER DEFAULT 1,
+      models TEXT DEFAULT '[]', sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY, name TEXT NOT NULL, slug TEXT UNIQUE NOT NULL, image TEXT,
@@ -53,12 +55,16 @@ async function initDatabase() {
       FOREIGN KEY (subcategory_id) REFERENCES subcategories(id),
       FOREIGN KEY (brand_id) REFERENCES brands(id)
     );
+    CREATE TABLE IF NOT EXISTS service_categories (
+      id TEXT PRIMARY KEY, name TEXT NOT NULL, slug TEXT UNIQUE NOT NULL, sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
     CREATE TABLE IF NOT EXISTS services (
       id TEXT PRIMARY KEY, title TEXT NOT NULL, slug TEXT UNIQUE NOT NULL,
       description TEXT DEFAULT '', features TEXT DEFAULT '[]', icon TEXT DEFAULT 'wrench',
       icon_type TEXT DEFAULT 'lucide', price REAL, duration TEXT DEFAULT '',
       accent TEXT DEFAULT '#F59E0B', is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+      category TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS blog_posts (
       id TEXT PRIMARY KEY, title TEXT NOT NULL, slug TEXT UNIQUE NOT NULL,
@@ -68,7 +74,7 @@ async function initDatabase() {
     );
     CREATE TABLE IF NOT EXISTS gallery_images (
       id TEXT PRIMARY KEY, label TEXT DEFAULT '', image TEXT, size TEXT DEFAULT 'medium',
-      sort_order INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now'))
+      category TEXT DEFAULT 'fotos', sort_order INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS testimonials (
       id TEXT PRIMARY KEY, name TEXT NOT NULL, role TEXT DEFAULT '', content TEXT DEFAULT '',
@@ -188,6 +194,18 @@ async function initDatabase() {
       entity_type TEXT, entity_id TEXT, description TEXT DEFAULT '',
       ip TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS invoice_items (
+      id TEXT PRIMARY KEY, invoice_id TEXT NOT NULL, name TEXT NOT NULL,
+      description TEXT DEFAULT '', quantity INTEGER DEFAULT 1,
+      price REAL DEFAULT 0, created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS quote_items (
+      id TEXT PRIMARY KEY, quote_id TEXT NOT NULL, name TEXT NOT NULL,
+      description TEXT DEFAULT '', quantity INTEGER DEFAULT 1,
+      price REAL DEFAULT 0, created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE
+    );
     CREATE TABLE IF NOT EXISTS returns (
       id TEXT PRIMARY KEY, order_id TEXT NOT NULL, customer_name TEXT NOT NULL,
       customer_email TEXT NOT NULL, reason TEXT NOT NULL, status TEXT DEFAULT 'pending',
@@ -216,6 +234,31 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS legal_pages (
       id TEXT PRIMARY KEY, title TEXT NOT NULL, slug TEXT UNIQUE NOT NULL,
       content TEXT DEFAULT '', is_published INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS garage_bays (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, subtitle TEXT DEFAULT '', description TEXT DEFAULT '',
+      image TEXT, services TEXT DEFAULT '[]', color TEXT DEFAULT '#FF6B00', is_active INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS process_steps (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT DEFAULT '', icon TEXT DEFAULT 'settings',
+      color TEXT DEFAULT '#FF6B00', is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS facilities (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT DEFAULT '', image TEXT,
+      icon TEXT DEFAULT 'building', is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS certifications (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, issuer TEXT DEFAULT '', image TEXT,
+      description TEXT DEFAULT '', is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS trust_items (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT DEFAULT '', icon TEXT DEFAULT 'shield',
+      page TEXT DEFAULT '', is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS roles (
@@ -672,6 +715,18 @@ async function initDatabase() {
     status TEXT DEFAULT 'sent'
   )`);
 
+  // Blog comments table
+  db.run(`CREATE TABLE IF NOT EXISTS blog_comments (
+    id TEXT PRIMARY KEY,
+    post_id TEXT NOT NULL,
+    author_name TEXT NOT NULL,
+    author_email TEXT,
+    content TEXT NOT NULL,
+    is_approved INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE
+  )`);
+
   // Surveys additional columns on work_orders
   try { db.run("ALTER TABLE work_orders ADD COLUMN survey_sent TEXT"); } catch (e) {}
 
@@ -706,6 +761,30 @@ async function initDatabase() {
   try { db.run("ALTER TABLE site_config ADD COLUMN google_calendar_enabled TEXT DEFAULT 'false'"); } catch (e) {}
   try { db.run("ALTER TABLE site_config ADD COLUMN google_calendar_id TEXT DEFAULT 'primary'"); } catch (e) {}
   try { db.run("ALTER TABLE site_config ADD COLUMN google_calendar_service_account TEXT DEFAULT ''"); } catch (e) {}
+
+  // Brands: add missing columns
+  try { db.run("ALTER TABLE brands ADD COLUMN alt_image TEXT DEFAULT ''"); } catch (e) {}
+  try { db.run("ALTER TABLE brands ADD COLUMN accent TEXT DEFAULT ''"); } catch (e) {}
+  try { db.run("ALTER TABLE brands ADD COLUMN is_active INTEGER DEFAULT 1"); } catch (e) {}
+  try { db.run("ALTER TABLE brands ADD COLUMN is_visible_store INTEGER DEFAULT 1"); } catch (e) {}
+
+  // Services: add category column
+  try { db.run("ALTER TABLE services ADD COLUMN category TEXT DEFAULT ''"); } catch (e) {}
+
+  // Gallery: add category column
+  try { db.run("ALTER TABLE gallery_images ADD COLUMN category TEXT DEFAULT 'fotos'"); } catch (e) {}
+
+  // Seed default service categories
+  const existingCats = db.exec("SELECT COUNT(*) as c FROM service_categories");
+  if (!existingCats.length || !existingCats[0].values.length || existingCats[0].values[0][0] === 0) {
+    const defaultCats = ["Mecánica", "Eléctrica", "Suspensión", "Frenos", "Motor", "Llantas", "Diagnóstico", "Mantenimiento"];
+    const { generateId, slugify } = require("../utils/helpers");
+    defaultCats.forEach((name, i) => {
+      const id = generateId();
+      const slug = slugify(name);
+      try { run("INSERT INTO service_categories (id, name, slug, sort_order) VALUES (?, ?, ?, ?)", [id, name, slug, i + 1]); } catch (e) {}
+    });
+  }
 
   // Warehouses table
   db.run(`CREATE TABLE IF NOT EXISTS warehouses (

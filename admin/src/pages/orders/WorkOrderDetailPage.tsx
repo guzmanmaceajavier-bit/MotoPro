@@ -236,8 +236,8 @@ export default function WorkOrderDetailPage() {
                 disabled={key === order.status}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                   key === order.status
-                    ? "border-[var(--mp-accent)] bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]"
-                    : "border-[var(--mp-border)] hover:border-[var(--mp-accent)] hover:bg-[rgba(20,184,166,0.05)] text-[var(--mp-text-secondary)]"
+                    ? "border-[var(--mp-accent)] bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]"
+                    : "border-[var(--mp-border)] hover:border-[var(--mp-accent)] hover:bg-[rgba(255,107,0,0.05)] text-[var(--mp-text-secondary)]"
                 }`}>
                 {cfg.label}
               </button>
@@ -253,7 +253,7 @@ export default function WorkOrderDetailPage() {
             <button key={t.key} onClick={() => setActiveTab(t.key)}
               className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all ${
                 activeTab === t.key
-                  ? "border-[var(--mp-accent)] text-[var(--mp-accent)] bg-[rgba(20,184,166,0.04)]"
+                  ? "border-[var(--mp-accent)] text-[var(--mp-accent)] bg-[rgba(255,107,0,0.04)]"
                   : "border-transparent text-[var(--mp-text-tertiary)] hover:text-[var(--mp-text-secondary)]"
               }`}>
               <t.icon size={13} />
@@ -609,7 +609,7 @@ export default function WorkOrderDetailPage() {
                     item.checked ? "border-emerald-300 bg-emerald-50/50" : "border-[var(--mp-border)] hover:border-[var(--mp-accent)]"
                   }`}>
                     <input type="checkbox" checked={!!item.checked} onChange={() => toggleChecklistItem(item.id)}
-                      className="w-4 h-4 rounded border-[var(--mp-border)] text-[#14B8A6] focus:ring-[#14B8A6]" />
+                      className="w-4 h-4 rounded border-[var(--mp-border)] text-[#FF6B00] focus:ring-[#FF6B00]" />
                     <span className={`text-sm ${item.checked ? "text-emerald-700 line-through" : "text-[var(--mp-text-primary)]"}`}>{item.item}</span>
                   </label>
                 ))}

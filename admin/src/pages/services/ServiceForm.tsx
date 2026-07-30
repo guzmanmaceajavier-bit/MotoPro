@@ -8,20 +8,28 @@ import { Button } from "@shared/components/ui/Button";
 import { Badge } from "@shared/components/ui/Badge";
 import PageHeader from "@/components/PageHeader";
 import SectionCard from "@/components/SectionCard";
-import IconPicker from "@/components/icons/IconPicker";
+import IconPicker, { ICON_LIBRARY } from "@/components/icons/IconPicker";
 import { Save, Wrench, Plus, X, Check, BookOpen } from "lucide-react";
 
-const accentOptions = ["#F59E0B","#F97316","#0EA5E9","#8B5CF6","#10B981","#EC4899","#6366F1","#14B8A6"];
+const accentOptions = ["#F59E0B","#F97316","#0EA5E9","#8B5CF6","#10B981","#EC4899","#6366F1","#FF6B00"];
+
+const iconEntries = Object.entries(ICON_LIBRARY).map(([value, icon]) => ({ value, icon }));
+const icons = iconEntries;
 
 export default function ServiceForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
   const { showToast } = useToast();
-  const [form, setForm] = useState({ title: "", slug: "", description: "", icon: "wrench", icon_type: "lucide" as "lucide" | "svg", price: "", duration: "", is_active: "1", accent: "#F59E0B" });
+  const [form, setForm] = useState({ title: "", slug: "", description: "", icon: "wrench", icon_type: "lucide" as "lucide" | "svg", price: "", duration: "", is_active: "1", accent: "#F59E0B", category: "" });
   const [features, setFeatures] = useState<string[]>([]);
   const [featureInput, setFeatureInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState<{id: string; name: string}[]>([]);
+
+  useEffect(() => {
+    api.get("/service-categories").then(r => setCategories(r || []));
+  }, []);
 
   useEffect(() => {
     if (isEdit) api.get(`/services/${id}`).then((s) => {
@@ -35,7 +43,8 @@ export default function ServiceForm() {
         price: s.price ? String(s.price) : "",
         duration: s.duration || "",
         is_active: String(s.is_active),
-        accent: s.accent || "#F59E0B"
+        accent: s.accent || "#F59E0B",
+        category: s.category || ""
       });
       setFeatures(f);
     });
@@ -135,10 +144,12 @@ export default function ServiceForm() {
                       className="mp-input" />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">Duración</label>
-                    <input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                      placeholder="2 horas"
-                      className="mp-input" />
+                    <label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">Categoría</label>
+                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="mp-input">
+                      <option value="">Sin categoría</option>
+                      {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                    </select>
                   </div>
                 </div>
                 <div>
@@ -149,6 +160,12 @@ export default function ServiceForm() {
                       placeholder="0.00"
                       className="mp-input pl-7" />
                   </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">Duración</label>
+                  <input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                    placeholder="2 horas"
+                    className="mp-input" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-[var(--mp-text-secondary)] mb-1.5 block">Descripción</label>

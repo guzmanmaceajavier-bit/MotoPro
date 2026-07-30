@@ -7,9 +7,10 @@ interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  folder?: string;
 }
 
-export default function ImageUpload({ value, onChange, label = "Imagen" }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, label = "Imagen", folder }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
@@ -19,7 +20,7 @@ export default function ImageUpload({ value, onChange, label = "Imagen" }: Image
     if (!file) return;
     setUploading(true);
     try {
-      const res = await uploadFile("/upload", file);
+      const res = await uploadFile("/upload", file, folder);
       const url = res.data?.url || res.url || res.image || "";
       if (url) {
         onChange(url);

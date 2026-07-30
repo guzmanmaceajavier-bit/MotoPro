@@ -1,9 +1,9 @@
 :root {
   /* ── Foundation Colors ── */
-  --color-night-900: #0F172A;
-  --color-night-800: #1E293B;
-  --color-night-700: #334155;
-  --color-night-600: #475569;
+  --color-carbon-black: #0B0F14;
+  --color-steel-dark:   #151B23;
+  --color-steel-mid:    #1E2630;
+  --color-steel-light:  #2A3440;
   --color-slate-100: #F1F5F9;
   --color-slate-200: #E2E8F0;
   --color-slate-300: #CBD5E1;
@@ -14,11 +14,14 @@
   --color-slate-700:  #334155;
   --color-slate-800:  #1E293B;
   --color-slate-900:  #0F172A;
-  --color-primary:        #0F766E;
-  --color-accent:         #14B8A6;
-  --color-accent-subtle:  #0D9488;
-  --color-highlight:      #5EEAD4;
-  --color-accent-hover:   #0D9488;
+  /* Industrial Orange — primary action */
+  --color-orange:        #FF6B00;
+  --color-orange-dark:   #E05E00;
+  --color-orange-light:  #FF8533;
+  /* Teal — technical secondary */
+  --color-teal:          #14B8A6;
+  --color-teal-dark:     #0D9488;
+  --color-teal-light:    #5EEAD4;
   --color-success:        #10B981;
   --color-warning:        #F59E0B;
   --color-error:          #EF4444;
@@ -68,23 +71,26 @@
   --elevation-1: 0 1px 3px rgba(0,0,0,0.3);
   --elevation-2: 0 4px 12px rgba(0,0,0,0.35);
   --elevation-3: 0 4px 16px rgba(0,0,0,0.4);
+  --elevation-3-shadow: 0 4px 16px rgba(0,0,0,0.4);
   --elevation-4: 0 8px 32px rgba(0,0,0,0.45);
   --elevation-5: 0 12px 48px rgba(0,0,0,0.5);
 
   /* ── Glow ── */
+  --glow-orange: 0 0 20px rgba(255,107,0,0.2);
+  --glow-orange-strong: 0 0 30px rgba(255,107,0,0.35);
   --glow-teal: 0 0 20px rgba(20,184,166,0.15);
   --glow-teal-strong: 0 0 30px rgba(20,184,166,0.25);
 
   /* ── Semantic: Surfaces (Dark - default) ── */
-  --surface-primary:   var(--color-night-900);
-  --surface-secondary: var(--color-night-800);
-  --surface-tertiary:  var(--color-night-700);
-  --surface-elevated:  var(--color-night-600);
+  --surface-primary:   var(--color-carbon-black);
+  --surface-secondary: var(--color-steel-dark);
+  --surface-tertiary:  var(--color-steel-mid);
+  --surface-elevated:  var(--color-steel-light);
 
   /* ── Navbar ── */
-  --navbar-bg: #0F172A;
+  --navbar-bg: var(--color-carbon-black);
   --navbar-border: rgba(255,255,255,0.06);
-  --navbar-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --navbar-shadow: 0 1px 3px rgba(0,0,0,0.4);
 
   /* ── Text ── */
   --text-primary:   #F1F5F9;
@@ -92,14 +98,24 @@
   --text-tertiary:  #64748B;
 
   /* ── Borders ── */
-  --border:        #1E293B;
-  --border-subtle: rgba(255,255,255,0.06);
-  --border-accent: rgba(20,184,166,0.2);
+  --border:        var(--color-steel-mid);
+  --border-subtle: rgba(255,255,255,0.05);
+  --border-accent: rgba(255,107,0,0.2);
 
   /* ── Interactive ── */
-  --interactive-accent:        #14B8A6;
-  --interactive-accent-hover:  #0D9488;
-  --interactive-focus:         #5EEAD4;
+  --interactive-accent:        #FF6B00;
+  --interactive-accent-hover:  #E05E00;
+  --interactive-focus:         #FF8533;
+  --interactive-primary:       #FF6B00;
+  --interactive-primary-hover: #E05E00;
+  --interactive-disabled:      0.4;
+  --text-inverse:              #0B0F14;
+
+  /* ── Technical (Teal — for diagnostics, sensors, status) ── */
+  --technical:       #14B8A6;
+  --technical-dark:  #0D9488;
+  --technical-light: #5EEAD4;
+  --technical-glow:  0 0 20px rgba(20,184,166,0.15);
 
   /* ── Status ── */
   --status-success:    #10B981;
@@ -108,8 +124,8 @@
   --status-warning-bg: rgba(245,158,11,0.1);
   --status-error:      #EF4444;
   --status-error-bg:   rgba(239,68,68,0.1);
-  --status-info:       #3B82F6;
-  --status-info-bg:    rgba(59,130,246,0.1);
+  --status-info:       #14B8A6;
+  --status-info-bg:    rgba(20,184,166,0.1);
 
   /* ── Density ── */
   --density-padding-card: var(--space-5);
@@ -120,29 +136,33 @@
 
 /* ── Light Mode ── */
 :root.light {
-  --surface-primary:   #F4F7FA;
+  --surface-primary:   #F0F2F5;
   --surface-secondary: #FFFFFF;
-  --surface-tertiary:  #EDF2F7;
+  --surface-tertiary:  #E4E8EE;
   --surface-elevated:  #FFFFFF;
 
   --navbar-bg: #FFFFFF;
   --navbar-border: rgba(0,0,0,0.06);
   --navbar-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
 
-  --text-primary:      #0F172A;
+  --text-primary:      #0B0F14;
   --text-secondary:    #475569;
   --text-tertiary:     #94A3B8;
+  --text-inverse:      #F8FAFC;
 
-  --border:            #E2E8F0;
+  --border:            #D0D5DD;
   --border-subtle:     rgba(0,0,0,0.05);
-  --border-accent:     rgba(20,184,166,0.2);
+  --border-accent:     rgba(255,107,0,0.2);
 
   --elevation-1: 0 1px 3px rgba(0,0,0,0.04);
   --elevation-2: 0 4px 12px rgba(0,0,0,0.06);
   --elevation-3: 0 4px 16px rgba(0,0,0,0.08);
+  --elevation-3-shadow: 0 4px 16px rgba(0,0,0,0.08);
   --elevation-4: 0 8px 32px rgba(0,0,0,0.1);
   --elevation-5: 0 12px 48px rgba(0,0,0,0.12);
 
+  --glow-orange: 0 0 20px rgba(255,107,0,0.1);
+  --glow-orange-strong: 0 0 30px rgba(255,107,0,0.15);
   --glow-teal: 0 0 20px rgba(20,184,166,0.08);
 }
 
@@ -173,15 +193,16 @@
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-night-600); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--color-steel-light); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-slate-500); }
 :root.light ::-webkit-scrollbar-thumb { background: #CBD5E1; }
 
-::selection { background: rgba(20,184,166,0.25); color: var(--text-primary); }
+::selection { background: rgba(255,107,0,0.25); color: var(--text-primary); }
 
 /* ── Gradients ── */
 :root {
-  --gradient-accent: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
-  --gradient-surface: linear-gradient(180deg, rgba(20,184,166,0.03) 0%, transparent 100%);
-  --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(20,184,166,0.08) 0%, transparent 60%);
+  --gradient-accent: linear-gradient(135deg, #FF6B00 0%, #E05E00 100%);
+  --gradient-technical: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(255,107,0,0.03) 0%, transparent 100%);
+  --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(255,107,0,0.06) 0%, transparent 60%);
 }

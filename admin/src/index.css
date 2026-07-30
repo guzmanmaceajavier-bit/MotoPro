@@ -8,40 +8,28 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  --mp-bg-base: #0f1219;
-  --mp-bg-surface: #161b26;
-  --mp-bg-elevated: #1c2333;
-  --mp-bg-hover: #1f2738;
-  --mp-border: #232d3f;
-  --mp-border-subtle: #1c2333;
-  --mp-text-primary: #f1f5f9;
-  --mp-text-secondary: #94a3b8;
-  --mp-text-tertiary: #64748b;
-  --mp-accent: #14b8a6;
-  --mp-accent-hover: #0d9488;
-  --mp-accent-glow: rgba(20, 184, 166, 0.15);
-  --mp-success: #10b981;
-  --mp-success-bg: rgba(16, 185, 129, 0.12);
-  --mp-warning: #f59e0b;
-  --mp-warning-bg: rgba(245, 158, 11, 0.12);
-  --mp-danger: #ef4444;
-  --mp-danger-bg: rgba(239, 68, 68, 0.12);
-  --mp-info: #3b82f6;
-  --mp-info-bg: rgba(59, 130, 246, 0.12);
+  --mp-bg-base: var(--surface-primary);
+  --mp-bg-surface: var(--surface-secondary);
+  --mp-bg-elevated: var(--surface-secondary);
+  --mp-bg-hover: var(--surface-tertiary);
+  --mp-border: var(--border);
+  --mp-border-subtle: var(--border-subtle);
+  --mp-text-primary: var(--text-primary);
+  --mp-text-secondary: var(--text-secondary);
+  --mp-text-tertiary: var(--text-tertiary);
+  --mp-accent: var(--interactive-accent);
+  --mp-accent-hover: var(--interactive-accent-hover);
+  --mp-accent-glow: var(--glow-teal);
+  --mp-success: var(--status-success);
+  --mp-success-bg: var(--status-success-bg);
+  --mp-warning: var(--status-warning);
+  --mp-warning-bg: var(--status-warning-bg);
+  --mp-danger: var(--status-error);
+  --mp-danger-bg: var(--status-error-bg);
+  --mp-info: var(--status-info);
+  --mp-info-bg: var(--status-info-bg);
   --mp-sidebar-width: 240px;
   --mp-header-height: 56px;
-}
-
-:root.light {
-  --mp-bg-base: #f1f5f9;
-  --mp-bg-surface: #ffffff;
-  --mp-bg-elevated: #ffffff;
-  --mp-bg-hover: #f8fafc;
-  --mp-border: #e2e8f0;
-  --mp-border-subtle: #f1f5f9;
-  --mp-text-primary: #0f172a;
-  --mp-text-secondary: #475569;
-  --mp-text-tertiary: #94a3b8;
 }
 
 html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -57,7 +45,7 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #232d3f; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #334155; }
-::selection { background: rgba(20, 184, 166, 0.2); }
+::selection { background: rgba(255, 107, 0, 0.2); }
 :focus-visible { outline: none; box-shadow: 0 0 0 2px var(--mp-accent); }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -80,10 +68,10 @@ body {
 
 .mp-btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 cursor-pointer select-none text-white;
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.3);
+  background: var(--mp-accent);
+  box-shadow: var(--glow-teal);
 }
-.mp-btn-primary:hover { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); box-shadow: 0 2px 8px rgba(20, 184, 166, 0.4); }
+.mp-btn-primary:hover { background: var(--mp-accent-hover); box-shadow: var(--glow-orange-strong); }
 .mp-btn-primary:active { transform: scale(0.97); }
 .mp-btn-primary:disabled { opacity: 0.4; pointer-events: none; }
 
@@ -152,20 +140,20 @@ body {
 
 /* ── Card ── */
 .mp-card {
-  @apply rounded-xl border;
+  @apply rounded-lg border;
   background: var(--mp-bg-surface);
   border-color: var(--mp-border);
 }
 .mp-card-hover {
-  @apply rounded-xl border transition-all duration-150;
+  @apply rounded-lg border transition-all duration-150;
   background: var(--mp-bg-surface);
   border-color: var(--mp-border);
 }
-.mp-card-hover:hover { border-color: rgba(20, 184, 166, 0.3); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+.mp-card-hover:hover { border-color: var(--border-accent); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
 
 /* ── KPI Card ── */
 .mp-kpi {
-  @apply rounded-xl border p-5 relative overflow-hidden;
+  @apply rounded-lg border p-5 relative overflow-hidden;
   background: var(--mp-bg-surface);
   border-color: var(--mp-border);
 }
@@ -213,6 +201,6 @@ body {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.3), transparent);
   pointer-events: none;
 }

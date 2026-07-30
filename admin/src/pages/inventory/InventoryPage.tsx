@@ -155,7 +155,7 @@ export default function InventoryPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
             <Grid3X3 size={20} />
           </div>
           <div>
@@ -173,7 +173,7 @@ export default function InventoryPage() {
         <div className="mp-kpi group">
           <div className="flex items-start justify-between mb-3">
             <span className="text-[10px] font-bold text-[var(--mp-text-tertiary)] uppercase tracking-wider">Entradas (Hoy)</span>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
             </div>
           </div>
@@ -502,7 +502,7 @@ export default function InventoryPage() {
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-[var(--mp-border)] flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
                 </div>
                 <div>
@@ -536,7 +536,7 @@ export default function InventoryPage() {
                 <h4 className="text-sm font-bold text-[var(--mp-text-primary)] mb-3">2. Tipo de movimiento</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <button type="button" onClick={() => setForm({ ...form, type: "in" })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${form.type === "in" ? "border-[var(--mp-accent)] bg-[rgba(20,184,166,0.04)]" : "border-[var(--mp-border)] hover:border-[var(--mp-border-hover)]"}`}>
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${form.type === "in" ? "border-[var(--mp-accent)] bg-[rgba(255,107,0,0.04)]" : "border-[var(--mp-border)] hover:border-[var(--mp-border-hover)]"}`}>
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[rgba(16,185,129,0.1)]">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--mp-success)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>

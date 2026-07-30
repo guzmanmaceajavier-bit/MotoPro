@@ -115,10 +115,10 @@ export default function CategoryList() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total */}
-        <div className="mp-kpi group hover:border-[rgba(20,184,166,0.2)] transition-all">
+        <div className="mp-kpi group hover:border-[rgba(255,107,0,0.2)] transition-all">
           <div className="flex items-start justify-between mb-3">
             <span className="text-xs font-medium text-[var(--mp-text-tertiary)] uppercase tracking-wider">Total Categorías</span>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
               <FolderTree size={18} />
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function CategoryList() {
         </div>
 
         {/* Con subcategorías */}
-        <div className="mp-kpi group hover:border-[rgba(20,184,166,0.2)] transition-all">
+        <div className="mp-kpi group hover:border-[rgba(255,107,0,0.2)] transition-all">
           <div className="flex items-start justify-between mb-3">
             <span className="text-xs font-medium text-[var(--mp-text-tertiary)] uppercase tracking-wider">Con Subcategorías</span>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(59,130,246,0.1)] text-[var(--mp-info)]">
@@ -147,7 +147,7 @@ export default function CategoryList() {
         </div>
 
         {/* Sin subcategorías */}
-        <div className="mp-kpi group hover:border-[rgba(20,184,166,0.2)] transition-all">
+        <div className="mp-kpi group hover:border-[rgba(255,107,0,0.2)] transition-all">
           <div className="flex items-start justify-between mb-3">
             <span className="text-xs font-medium text-[var(--mp-text-tertiary)] uppercase tracking-wider">Sin Subcategorías</span>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(245,158,11,0.1)] text-[var(--mp-warning)]">
@@ -159,7 +159,7 @@ export default function CategoryList() {
         </div>
 
         {/* Productos asociados */}
-        <div className="mp-kpi group hover:border-[rgba(20,184,166,0.2)] transition-all">
+        <div className="mp-kpi group hover:border-[rgba(255,107,0,0.2)] transition-all">
           <div className="flex items-start justify-between mb-3">
             <span className="text-xs font-medium text-[var(--mp-text-tertiary)] uppercase tracking-wider">Productos Asociados</span>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(139,92,246,0.1)] text-[#8b5cf6]">

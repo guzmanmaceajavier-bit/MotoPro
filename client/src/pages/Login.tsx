@@ -27,7 +27,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex bg-surface-primary">
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col items-center justify-center p-12 overflow-hidden bg-[rgba(20,184,166,0.04)]">
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col items-center justify-center p-12 overflow-hidden bg-[rgba(255,107,0,0.04)]">
         <div className="absolute inset-0 bg-grid-subtle" />
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-interactive-accent/5 blur-[120px]" />
         <div className="relative z-10 text-center">

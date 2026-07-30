@@ -9,11 +9,34 @@ function getAuthToken() {
   return localStorage.getItem("customer_token") || "";
 }
 
-async function request(url: string, options: RequestInit = {}) {
+async function request(url: string, options: RequestInit = {}): Promise<any> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const token = getAuthToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API}${url}`, { headers, ...options });
+  let res = await fetch(`${API}${url}`, { headers, ...options });
+  if (res.status === 401 && token && !url.includes("/auth/refresh")) {
+    try {
+      const refreshRes = await fetch(`${API}/customer-auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({}),
+      });
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        const newToken = refreshData.data?.token || refreshData.token;
+        if (newToken) {
+          setAuthToken(newToken);
+          headers["Authorization"] = `Bearer ${newToken}`;
+          res = await fetch(`${API}${url}`, { headers, ...options });
+        }
+      }
+    } catch {}
+    if (!res.ok) {
+      setAuthToken("");
+      window.location.href = "/login";
+      throw new Error("Sesión expirada");
+    }
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: `Error ${res.status}` }));
     throw new Error(err.message || `Error ${res.status}`);

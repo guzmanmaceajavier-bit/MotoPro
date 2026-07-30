@@ -42,7 +42,7 @@ export default function ProductForm() {
 
   useEffect(() => {
     api.get("/categories").then((r) => setCategories(r || []));
-    api.get("/brands").then((r) => setBrands(r || []));
+    api.get("/brands?all=1").then((r) => setBrands(r || []));
     api.get("/suppliers").then((r) => setSuppliers(Array.isArray(r) ? r : r?.data || [])).catch(() => {});
     if (isEdit) {
       api.get(`/products/${id}`).then((p) => {
@@ -377,7 +377,7 @@ export default function ProductForm() {
                   </div>
                 )}
               </div>
-              <ImageUpload value={form.image} onChange={(url) => setForm(p => ({ ...p, image: url }))} />
+              <ImageUpload folder="taller-motos/products" value={form.image} onChange={(url) => setForm(p => ({ ...p, image: url }))} />
             </SectionCard>
 
             <SectionCard title="Resumen">

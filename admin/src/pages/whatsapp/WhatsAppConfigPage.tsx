@@ -56,7 +56,9 @@ export default function WhatsAppConfigPage() {
         whatsapp_phone_number_id: config.whatsapp_phone_number_id,
         whatsapp_business_account_id: config.whatsapp_business_account_id,
       });
-      await api.put("/whatsapp-admin/templates", { templates });
+      const existing = await api.get("/system-config/whatsapp_templates").catch(() => ({}));
+      const current = existing?.data || existing?.value ? (typeof existing.value === "string" ? JSON.parse(existing.value) : {}) : {};
+      await api.put("/system-config/whatsapp_templates", { value: JSON.stringify({ ...current, ...templates }) });
       showToast("success", "Configuracion de WhatsApp guardada");
     } catch (err: unknown) {
       showToast("error", err instanceof Error ? err.message : "Error al guardar");

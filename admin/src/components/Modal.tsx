@@ -27,12 +27,12 @@ export default function Modal({ open, onClose, title, children, size = "md" }: P
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative w-full ${widths[size] || "max-w-lg"} rounded-xl animate-scale-in`}
-        style={{ background: "var(--bg-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-lg)" }}
+      <div className={`relative w-full ${widths[size] || "max-w-lg"} rounded-xl animate-scale-in shadow-elevation-3`}
+        style={{ background: "var(--mp-bg-elevated)", border: "1px solid var(--mp-border)" }}
       >
-        <div className="flex items-center justify-between px-5 py-3.5 border-b" style={{ borderColor: "var(--border-light)" }}>
-          <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>{title}</h2>
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-[var(--bg-muted)] transition-all" style={{ color: "var(--text-tertiary)" }} type="button">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b" style={{ borderColor: "var(--mp-border-subtle)" }}>
+          <h2 className="text-sm font-semibold" style={{ color: "var(--mp-text-primary)" }}>{title}</h2>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-[var(--mp-bg-hover)] transition-all" style={{ color: "var(--mp-text-tertiary)" }} type="button">
             <X size={15} />
           </button>
         </div>

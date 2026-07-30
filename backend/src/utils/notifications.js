@@ -22,7 +22,7 @@ async function sendMail({ to, subject, html }) {
       from: `"${cfg.from_name || "Taller Motos"}" <${cfg.from_email || cfg.smtp_user}>`,
       to, subject, html,
     });
-  } catch {}
+  } catch (e) { console.error("[backend]", e.message); }
 }
 
 async function notifyAdmin(subject, html) {

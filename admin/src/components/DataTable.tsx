@@ -173,7 +173,7 @@ export default function DataTable({
                 const id = String(row.id || i);
                 return (
                   <tr key={id}
-                    className={`h-[var(--density-row-height)] border-b border-border-subtle transition-colors duration-fast hover:bg-surface-tertiary ${selected.has(id) ? 'bg-[rgba(20,184,166,0.06)]' : ''} ${onRowClick ? "cursor-pointer" : ""}`}
+                    className={`h-[var(--density-row-height)] border-b border-border-subtle transition-colors duration-fast hover:bg-surface-tertiary ${selected.has(id) ? 'bg-[rgba(255,107,0,0.06)]' : ''} ${onRowClick ? "cursor-pointer" : ""}`}
                     onClick={() => onRowClick?.(row)}
                   >
                     {selectable && (

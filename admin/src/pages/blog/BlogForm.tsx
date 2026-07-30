@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { api } from "@/api/client";
+import { api, uploadFile } from "@/api/client";
 import { useToast } from "@/components/Toast";
 import { Save, PenLine, User, Globe, Sparkles, Image as ImageIcon } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -13,7 +13,7 @@ const accentOptions = [
   "#F59E0B",
   "#EC4899",
   "#F97316",
-  "#14B8A6",
+  "#FF6B00",
 ];
 
 interface BlogCategory {
@@ -37,6 +37,13 @@ export default function BlogForm() {
   const navigate = useNavigate();
   const isEdit = !!id;
   const { showToast } = useToast();
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const addTag = () => {
+    const t = tagInput.trim();
+    if (t && !tags.includes(t)) { setTags([...tags, t]); setTagInput(""); }
+  };
+  const removeTag = (tag: string) => setTags(tags.filter(t => t !== tag));
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -89,7 +96,7 @@ export default function BlogForm() {
     e.preventDefault();
     setSaving(true);
     try {
-      const data = { ...form, is_published: parseInt(form.is_published) };
+      const data = { ...form, tags: JSON.stringify(tags), is_published: parseInt(form.is_published) };
       if (isEdit) await api.put(`/blog/${id}`, data);
       else await api.post("/blog", data);
       showToast("success", "Artículo guardado");
@@ -257,6 +264,27 @@ export default function BlogForm() {
 
             <div className="mp-card p-5">
               <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)]">
+                  Etiquetas
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {tags.map(tag => (
+                  <span key={tag} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--mp-interactive-accent)]/10 text-xs font-medium text-[var(--mp-interactive-accent)]">
+                    {tag}
+                    <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-400">&times;</button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+                  className="mp-input text-sm w-full" placeholder="Agregar etiqueta..." />
+                <button type="button" onClick={addTag} className="mp-btn text-sm whitespace-nowrap">+ Añadir</button>
+              </div>
+            </div>
+
+            <div className="mp-card p-5">
+              <div className="flex items-center gap-2 mb-3">
                 <User size={13} className="text-[var(--mp-text-tertiary)]" />
                 <span className="text-xs font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)]">
                   Autor
@@ -314,17 +342,14 @@ export default function BlogForm() {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (ev) =>
-                              setForm((p) => ({
-                                ...p,
-                                image: ev.target?.result as string,
-                              }));
-                            reader.readAsDataURL(file);
-                          }
+                          if (!file) return;
+                          try {
+                            const res = await uploadFile("/upload", file, "taller-motos/blog");
+                            const url = res.data?.url || res.url || res.image || "";
+                            if (url) setForm((p) => ({ ...p, image: url }));
+                          } catch { showToast("error", "Error al subir imagen"); }
                         }}
                       />
                     </label>

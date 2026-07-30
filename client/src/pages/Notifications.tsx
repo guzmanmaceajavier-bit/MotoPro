@@ -75,7 +75,7 @@ export default function Notifications() {
               <div key={n.id} className="flex items-start gap-4 rounded-xl p-4 transition-all hover:shadow-sm cursor-pointer"
                 style={{
                   border: `1px solid ${n.is_read ? "var(--border)" : "var(--accent)"}`,
-                  background: n.is_read ? "var(--bg-card)" : "rgba(20,184,166,0.03)",
+                  background: n.is_read ? "var(--bg-card)" : "rgba(255,107,0,0.03)",
                 }}
                 onClick={() => !n.is_read && markAsRead(n.id)}>
                 <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: meta.bg, color: meta.color }}>

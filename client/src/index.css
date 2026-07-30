@@ -20,8 +20,8 @@
   --accent: var(--interactive-accent);
   --accent-light: var(--interactive-accent-hover);
   --accent-hover: var(--interactive-accent-hover);
-  --accent-glow: rgba(20,184,166,0.12);
-  --accent-subtle: rgba(20,184,166,0.06);
+  --accent-glow: rgba(255,107,0,0.12);
+  --accent-subtle: rgba(255,107,0,0.06);
   --shadow-lg: var(--elevation-4-shadow);
 }
 

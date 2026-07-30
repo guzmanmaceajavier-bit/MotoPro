@@ -18,25 +18,7 @@
   }
 }
 
-@layer components {
-  .card {
-    @apply rounded-lg border bg-surface-secondary;
-    border-color: var(--border);
-  }
-  .card:hover {
-    border-color: var(--border-accent);
-  }
-  .btn-premium {
-    @apply rounded-lg bg-interactive-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-interactive-accent-hover transition-all;
-  }
-  .input-premium {
-    @apply rounded-lg border bg-surface-secondary px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-interactive-accent transition-colors;
-    border-color: var(--border);
-  }
-  .badge-premium {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
-  }
-}
+
 
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -50,4 +32,31 @@
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+/* ── Industrial Textures ── */
+.bg-texture-carbon {
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(255,107,0,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(255,107,0,0.02) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px);
+}
+
+.bg-texture-brushed {
+  background-image:
+    repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,0.03) 1px, rgba(255,255,255,0.03) 2px),
+    radial-gradient(ellipse at 50% 0%, rgba(255,107,0,0.04) 0%, transparent 60%);
+}
+
+.bg-texture-blueprint {
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(20,184,166,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(20,184,166,0.03) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(20,184,166,0.04) 40px, rgba(20,184,166,0.04) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(20,184,166,0.04) 40px, rgba(20,184,166,0.04) 41px);
+}
+
+.bg-texture-dots {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FF6B00' fill-opacity='0.04'%3E%3Ccircle cx='2' cy='2' r='1'/%3E%3C/g%3E%3C/svg%3E");
 }

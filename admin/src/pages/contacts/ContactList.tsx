@@ -134,7 +134,7 @@ export default function ContactList() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center gap-3 mb-1">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(20,184,166,0.1)] text-[var(--mp-accent)]">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
           <Mail size={20} />
         </div>
         <div>

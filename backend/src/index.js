@@ -8,6 +8,7 @@ const { noCache, cache, invalidateOnWrite } = require("./middleware/cache");
 const { initDatabase, get, run, query } = require("./config/database");
 const { startScheduler } = require("./utils/scheduler");
 const { auditLogger } = require("./utils/settings");
+const { verifyToken, requirePermission } = require("./middleware/auth");
 
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
@@ -49,21 +50,22 @@ app.use("/api", require("./routes/content.routes"));
 app.use("/api", require("./routes/system.routes"));
 app.use("/api", require("./routes/misc.routes"));
 
-app.use("/api/surveys", noCache(), require("./routes/surveys.routes"));
-app.use("/api/reports", require("./routes/reports.routes"));
-app.use("/api/backups", require("./routes/backups.routes"));
-app.use("/api/system-config", require("./routes/system-config.routes"));
-app.use("/api/whatsapp-admin", require("./routes/whatsapp-admin.routes"));
-app.use("/api/loyalty", require("./routes/loyalty.routes"));
+app.use("/api/surveys", noCache(), verifyToken, require("./routes/surveys.routes"));
+app.use("/api/reports", verifyToken, requirePermission("orders.read"), require("./routes/reports.routes"));
+app.use("/api/whatsapp-admin", verifyToken, requirePermission("settings.read"), require("./routes/whatsapp-admin.routes"));
+app.use("/api/loyalty", verifyToken, requirePermission("loyalty.read"), require("./routes/loyalty.routes"));
 app.use("/api/warehouses", require("./routes/warehouses.routes"));
 app.use("/api/client", noCache(), require("./routes/client.routes"));
 
 app.delete("/api/upload/:public_id", noCache(), require("./middleware/auth").verifyToken, require("./controllers/upload.controller").deleteImage);
 
-app.get("/api/backup", noCache(), (req, res) => {
+app.get("/api/backup", noCache(), verifyToken, requirePermission("settings.read"), (req, res) => {
   const dbPath = path.resolve(__dirname, "../data/database.sqlite");
   res.download(dbPath, `backup-${new Date().toISOString().split("T")[0]}.sqlite`);
 });
+
+// Swagger API docs
+app.get("/api/docs.json", (req, res) => { res.json(require("./docs/swagger")); });
 
 const SITE_URL = process.env.SITE_URL || "https://tallermotos.com";
 
@@ -105,12 +107,21 @@ app.use((err, req, res, next) => {
   });
 });
 
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET no está configurado en el archivo .env");
+  process.exit(1);
+}
+
 initDatabase().then(() => {
   const adminExists = get("SELECT id FROM users LIMIT 1");
   if (!adminExists) {
-    const hashed = bcrypt.hashSync("admin123", 10);
+    const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase();
+    const hashed = bcrypt.hashSync(generatedPassword, 10);
     run("INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)",
       ["user-admin-001", "Admin", "admin@motopro.com", hashed, "superadmin"]);
+    console.log("  ⚠️  Admin creado con email: admin@motopro.com");
+    console.log(`  🔑  Password: ${generatedPassword}`);
+    console.log("  ⚠️  GUARDA ESTA CONTRASEÑA. No se mostrará nuevamente.");
   }
 
   app.listen(PORT, () => {

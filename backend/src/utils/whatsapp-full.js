@@ -82,8 +82,9 @@ async function sendWhatsApp(phoneNumber, message) {
           const success = !!result.messages;
           logMessage(phoneNumber, message, success ? "sent" : "failed", result.error?.message);
           resolve(success);
-        } catch {
-          logMessage(phoneNumber, message, "failed", "Parse error");
+        } catch (e) {
+          console.error("[whatsapp]", e.message);
+          logMessage(phoneNumber, message, "failed", result.error?.message);
           resolve(false);
         }
       });
@@ -105,7 +106,7 @@ function logMessage(phone, message, status, error) {
       "INSERT INTO whatsapp_messages (id, phone, message, status, error, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))",
       [`wa-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, phone, message.substring(0, 500), status, error || ""]
     );
-  } catch {}
+  } catch (e) { console.error("[whatsapp]", e.message); }
 }
 
 

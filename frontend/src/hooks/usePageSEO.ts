@@ -29,7 +29,7 @@ export function usePageSEO(pageKey: string): PageSEOData {
         cache.set(pageKey, result);
         setSEO(result);
       })
-      .catch(() => {});
+      .catch((err) => console.warn("[fetch]", err));
   }, [pageKey]);
 
   return seo;

@@ -17,7 +17,7 @@ function publicIdFromUrl(url) {
 async function destroyImage(url) {
   const publicId = publicIdFromUrl(url);
   if (publicId && hasCloudinary) {
-    try { await cloudinary.uploader.destroy(publicId); } catch {}
+    try { await cloudinary.uploader.destroy(publicId); } catch (e) { console.error("[backend]", e.message); }
   }
 }
 

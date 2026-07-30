@@ -1,43 +1,26 @@
 const { query, get, run } = require("../config/database");
 const { generateId, success, error } = require("../utils/helpers");
-const { destroyImage } = require("../utils/cloudinary");
-const cloudinary = require("cloudinary").v2;
+const { destroyImage, uploadToCloudinary } = require("../utils/cloudinary");
 const { saveFileLocally } = require("../utils/file");
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const hasCloudinary = !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY);
-
-async function uploadToCloudinary(buffer) {
-  if (hasCloudinary) {
-    return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "taller-motos/gallery", resource_type: "image" },
-        (err, result) => (err ? reject(err) : resolve(result.secure_url))
-      );
-      stream.end(buffer);
-    });
-  }
-  return null;
-}
-
 exports.list = (req, res) => {
-  const images = query("SELECT * FROM gallery_images ORDER BY sort_order");
-  success(res, images);
+  const { category } = req.query;
+  let sql = "SELECT * FROM gallery_images";
+  const params = [];
+  if (category) { sql += " WHERE category = ?"; params.push(category); }
+  sql += " ORDER BY sort_order";
+  success(res, query(sql, params));
 };
 
 exports.create = async (req, res) => {
   try {
-    const { label, size } = req.body;
+    const { label, size, category } = req.body;
     if (!req.file) return error(res, "Imagen requerida", 400);
-    let image = await uploadToCloudinary(req.file.buffer);
+    let result = await uploadToCloudinary(req.file.buffer, 'taller-motos/gallery');
+    let image = result ? result.secure_url : null;
     if (!image) image = saveFileLocally(req.file.buffer, req.file.originalname);
     const id = generateId();
-    run("INSERT INTO gallery_images (id, label, image, size) VALUES (?, ?, ?, ?)", [id, label || "", image, size || "medium"]);
+    run("INSERT INTO gallery_images (id, label, image, size, category) VALUES (?, ?, ?, ?, ?)", [id, label || "", image, size || "medium", category || "fotos"]);
     success(res, { id, image }, "Imagen agregada", 201);
   } catch (err) {
     error(res, "Error al subir imagen: " + err.message, 500);
@@ -52,8 +35,8 @@ exports.update = async (req, res) => {
     let image = existing.image;
     if (req.file) {
       await destroyImage(existing.image);
-      const uploaded = await uploadToCloudinary(req.file.buffer);
-      if (uploaded) image = uploaded;
+      let result = await uploadToCloudinary(req.file.buffer, 'taller-motos/gallery');
+      if (result) image = result.secure_url;
       else image = saveFileLocally(req.file.buffer, req.file.originalname);
     }
     run("UPDATE gallery_images SET label = COALESCE(?, label), image = ?, size = COALESCE(?, size), sort_order = COALESCE(?, sort_order) WHERE id = ?",

@@ -188,7 +188,7 @@ export default function AgendaPage() {
           <span className="text-sm text-text-secondary">Capacidad hoy:</span>
         </div>
         <div className="flex-1 h-2 rounded-full bg-surface-tertiary overflow-hidden max-w-xs">
-          <div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 transition-all"
+          <div className="h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all"
             style={{ width: `${dayData.capacity.total > 0 ? (dayData.capacity.used / dayData.capacity.total) * 100 : 0}%` }} />
         </div>
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${capColor(dayData.capacity.used, dayData.capacity.total)}`}>
@@ -323,7 +323,7 @@ export default function AgendaPage() {
       </div>
 
       {/* Config Modal */}
-      <Modal isOpen={showConfig} onClose={() => setShowConfig(false)} title="Configuracion de Agenda" size="lg">
+      <Modal open={showConfig} onClose={() => setShowConfig(false)} title="Configuracion de Agenda" size="lg">
         <div className="p-5 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-text-secondary mb-1.5">Hora inicio</label><input type="time" value={cfg.working_hours_start} onChange={e => setCfg({ ...cfg, working_hours_start: e.target.value })} className="mp-input w-full" /></div>
@@ -344,7 +344,7 @@ export default function AgendaPage() {
       </Modal>
 
       {/* Holiday Modal */}
-      <Modal isOpen={showHolModal} onClose={() => setShowHolModal(false)} title="Agregar Festivo / Dia Bloqueado" size="md">
+      <Modal open={showHolModal} onClose={() => setShowHolModal(false)} title="Agregar Festivo / Dia Bloqueado" size="md">
         <div className="p-5 space-y-4">
           <div><label className="block text-xs font-medium text-text-secondary mb-1.5">Fecha</label><input type="date" value={holForm.date} onChange={e => setHolForm({ ...holForm, date: e.target.value })} className="mp-input w-full" /></div>
           <div><label className="block text-xs font-medium text-text-secondary mb-1.5">Nombre</label><input type="text" value={holForm.name} onChange={e => setHolForm({ ...holForm, name: e.target.value })} className="mp-input w-full" placeholder="Ej: Dia de la Independencia" /></div>
@@ -383,7 +383,7 @@ export default function AgendaPage() {
       </Modal>
 
       {/* Appointment Modal */}
-      <Modal isOpen={showAptModal} onClose={() => setShowAptModal(false)} title={editApt ? "Editar Cita" : "Nueva Cita"} size="lg">
+      <Modal open={showAptModal} onClose={() => setShowAptModal(false)} title={editApt ? "Editar Cita" : "Nueva Cita"} size="lg">
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-text-secondary mb-1.5">Nombre *</label><input type="text" value={aptForm.customer_name} onChange={e => setAptForm({ ...aptForm, customer_name: e.target.value })} className="mp-input w-full" /></div>

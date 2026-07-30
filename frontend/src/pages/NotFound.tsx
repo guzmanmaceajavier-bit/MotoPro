@@ -1,13 +1,10 @@
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 
 export default function NotFound() {
   return (
     <>
       <SEO title="Página no encontrada" description="La página que buscas no existe." />
-      <Navbar />
       <main className="flex flex-1 items-center justify-center px-4 pt-16">
         <div className="text-center">
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-interactive-accent/10">
@@ -22,7 +19,6 @@ export default function NotFound() {
           </Link>
         </div>
       </main>
-      <Footer />
     </>
   );
 }

@@ -170,7 +170,7 @@ export default function POSPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {filtered.map(p => (
                 <button key={p.id} onClick={() => addToCart(p)}
-                  className="p-3 rounded-xl border border-[var(--mp-border)] hover:border-[var(--mp-accent)] hover:bg-[rgba(20,184,166,0.04)] transition-all text-left group">
+                  className="p-3 rounded-xl border border-[var(--mp-border)] hover:border-[var(--mp-accent)] hover:bg-[rgba(255,107,0,0.04)] transition-all text-left group">
                   <div className="w-full aspect-square rounded-lg bg-[var(--mp-bg-elevated)] flex items-center justify-center mb-2 overflow-hidden">
                     {p.image ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" /> :
                       <Package size={24} className="text-[var(--mp-text-tertiary)]" />}
@@ -262,7 +262,7 @@ export default function POSPage() {
               {paymentMethods.map(m => (
                 <button key={m.value} onClick={() => setSelectedPayment(m.value)}
                   className={`p-2 rounded-lg border text-center transition-all ${
-                    selectedPayment === m.value ? "border-[var(--mp-accent)] bg-[rgba(20,184,166,0.08)]" : "border-[var(--mp-border)]"
+                    selectedPayment === m.value ? "border-[var(--mp-accent)] bg-[rgba(255,107,0,0.08)]" : "border-[var(--mp-border)]"
                   }`}>
                   <m.icon size={14} className="mx-auto mb-0.5" style={{ color: selectedPayment === m.value ? m.color : "var(--mp-text-tertiary)" }} />
                   <span className="text-[9px] block">{m.label}</span>

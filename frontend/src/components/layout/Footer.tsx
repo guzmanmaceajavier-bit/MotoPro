@@ -59,40 +59,45 @@ export function Footer() {
           }) : (
             <>
               <div>
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">Servicios</h4>
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">MotoPro</h4>
                 <ul className="space-y-3">
-                  <li><Link to="/servicios" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Mantenimiento</Link></li>
-                  <li><Link to="/servicios" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Reparaciones</Link></li>
-                  <li><Link to="/servicios" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Personalización</Link></li>
-                  <li><Link to="/servicios" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Diagnóstico</Link></li>
+                  <li><Link to="/nosotros" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Sobre nosotros</Link></li>
+                  <li><Link to="/nosotros" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Nuestro equipo</Link></li>
+                  <li><Link to="/galeria" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Galería de trabajos</Link></li>
+                  <li><Link to="/blog" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Blog de consejos</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">Tienda</h4>
                 <ul className="space-y-3">
-                  <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Repuestos</Link></li>
-                  <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Accesorios</Link></li>
-                  <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Equipamiento</Link></li>
-                  <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Lubricantes</Link></li>
-                  <li><Link to="/comparar" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Comparar</Link></li>
+                  <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Productos</Link></li>
+                  <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Categorías</Link></li>
+                  <li><Link to="/tienda?sort=promo" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Promociones</Link></li>
+                  <li><Link to="/tienda?sort=best" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Más vendidos</Link></li>
                 </ul>
               </div>
               <div>
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">MotoPro</h4>
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">Servicios</h4>
                 <ul className="space-y-3">
-                  <li><Link to="/nosotros" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Sobre nosotros</Link></li>
-                  <li><Link to="/blog" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Blog</Link></li>
-                  <li><Link to="/galeria" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Galería</Link></li>
-                  <li><Link to="/faq" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">FAQ</Link></li>
-                  <li><Link to="/promociones" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Promociones</Link></li>
+                  <li><Link to="/servicios" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Todos los servicios</Link></li>
+                  <li><Link to="/agendar-cita" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Agendar servicio</Link></li>
+                  <li><Link to="/estado-servicio" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Estado del servicio</Link></li>
                 </ul>
               </div>
               <div>
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">Contacto</h4>
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">Ayuda</h4>
                 <ul className="space-y-3">
-                  <li><Link to="/contacto" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Formulario de contacto</Link></li>
-                  <li><Link to="/agendar-cita" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Agendar cita</Link></li>
-                  <li><Link to="/estado-servicio" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Consultar estado</Link></li>
+                  <li><Link to="/contacto" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Contacto</Link></li>
+                  <li><Link to="/preguntas-frecuentes" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Preguntas frecuentes</Link></li>
+                  <li><Link to="/garantia" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Garantías</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">Legal</h4>
+                <ul className="space-y-3">
+                  <li><Link to="/privacidad" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Privacidad</Link></li>
+                  <li><Link to="/terminos" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Términos</Link></li>
+                  <li><Link to="/legal/cookies" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Cookies</Link></li>
                 </ul>
               </div>
             </>

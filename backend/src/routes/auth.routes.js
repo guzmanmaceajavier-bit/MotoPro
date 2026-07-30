@@ -1,20 +1,23 @@
 const router = require("express").Router();
-const authCtrl = require("../controllers/auth.controller");
-const customerAuthCtrl = require("../controllers/customer-auth.controller");
-const usersCtrl = require("../controllers/users.controller");
-const rolesCtrl = require("../controllers/roles.controller");
+const { wrapController } = require("../utils/helpers");
+const authCtrl = wrapController(require("../controllers/auth.controller"));
+const customerAuthCtrl = wrapController(require("../controllers/customer-auth.controller"));
+const usersCtrl = wrapController(require("../controllers/users.controller"));
+const rolesCtrl = wrapController(require("../controllers/roles.controller"));
 const { verifyToken, requirePermission } = require("../middleware/auth");
+const validate = require("../middleware/validate");
 
-router.post("/auth/login", authCtrl.login);
-router.post("/auth/register", authCtrl.register);
+router.post("/auth/login", validate({ body: { email: { required: true, email: true }, password: { required: true, minLength: 4 } } }), authCtrl.login);
+router.post("/auth/register", validate({ body: { name: { required: true, minLength: 2 }, email: { required: true, email: true }, password: { required: true, minLength: 6 } } }), authCtrl.register);
 router.get("/auth/me", verifyToken, authCtrl.me);
 router.put("/auth/profile", verifyToken, authCtrl.updateProfile);
 
-router.post("/customer-auth/register", customerAuthCtrl.register);
-router.post("/customer-auth/login", customerAuthCtrl.login);
-router.post("/customer-auth/forgot-password", customerAuthCtrl.forgotPassword);
-router.post("/customer-auth/reset-password", customerAuthCtrl.resetPassword);
-router.post("/customer-auth/verify-email", customerAuthCtrl.verifyEmail);
+router.post("/customer-auth/register", validate({ body: { name: { required: true, minLength: 2 }, email: { required: true, email: true }, password: { required: true, minLength: 6 }, phone: { required: true, minLength: 7 } } }), customerAuthCtrl.register);
+router.post("/customer-auth/login", validate({ body: { email: { required: true, email: true }, password: { required: true, minLength: 4 } } }), customerAuthCtrl.login);
+router.post("/customer-auth/forgot-password", validate({ body: { email: { required: true, email: true } } }), customerAuthCtrl.forgotPassword);
+router.post("/customer-auth/reset-password", validate({ body: { token: { required: true }, password: { required: true, minLength: 6 } } }), customerAuthCtrl.resetPassword);
+router.post("/customer-auth/verify-email", validate({ body: { token: { required: true } } }), customerAuthCtrl.verifyEmail);
+router.post("/customer-auth/refresh", customerAuthCtrl.refresh);
 router.post("/customer-auth/resend-verification", verifyToken, customerAuthCtrl.resendVerification);
 router.get("/customer-auth/me", verifyToken, customerAuthCtrl.me);
 router.put("/customer-auth/profile", verifyToken, customerAuthCtrl.updateProfile);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "@/api/client";
+import { api, uploadFile } from "@/api/client";
 import { useToast } from "@/components/Toast";
 import PageHeader from "@/components/PageHeader";
 import {
@@ -179,8 +179,8 @@ export default function ReceptionPage() {
           {steps.map((s, i) => (
             <div key={s.key} className="flex items-center gap-2 flex-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                i < step ? "bg-[#14B8A6] text-white" :
-                i === step ? "bg-[rgba(20,184,166,0.15)] text-[#14B8A6] ring-2 ring-[#14B8A6]" :
+                i < step ? "bg-[#FF6B00] text-white" :
+                i === step ? "bg-[rgba(255,107,0,0.15)] text-[#FF6B00] ring-2 ring-[#FF6B00]" :
                 "bg-[var(--mp-bg-elevated)] text-[var(--mp-text-tertiary)]"
               }`}>
                 {i < step ? <CheckCircle2 size={14} /> : <s.icon size={14} />}
@@ -188,7 +188,7 @@ export default function ReceptionPage() {
               <span className={`text-xs font-medium hidden sm:block ${i === step ? "text-[var(--mp-text-primary)]" : "text-[var(--mp-text-tertiary)]"}`}>
                 {s.label}
               </span>
-              {i < steps.length - 1 && <div className={`flex-1 h-0.5 mx-2 rounded ${i < step ? "bg-[#14B8A6]" : "bg-[var(--mp-border)]"}`} />}
+              {i < steps.length - 1 && <div className={`flex-1 h-0.5 mx-2 rounded ${i < step ? "bg-[#FF6B00]" : "bg-[var(--mp-border)]"}`} />}
             </div>
           ))}
         </div>
@@ -269,9 +269,9 @@ export default function ReceptionPage() {
       {/* Step 1: Vehicle */}
       {step === 1 && (
         <div className="space-y-4">
-          <div className="mp-card p-4 bg-[rgba(20,184,166,0.04)] border border-[rgba(20,184,166,0.15)]">
+          <div className="mp-card p-4 bg-[rgba(255,107,0,0.04)] border border-[rgba(255,107,0,0.15)]">
             <div className="flex items-center gap-2">
-              <User size={14} className="text-[#14B8A6]" />
+              <User size={14} className="text-[#FF6B00]" />
               <span className="text-sm text-[var(--mp-text-primary)]">Cliente: <b>{selectedCustomer?.name}</b></span>
               <button onClick={() => { setSelectedCustomer(null); setStep(0); }} className="ml-auto text-xs text-[var(--mp-accent)] hover:underline">Cambiar</button>
             </div>
@@ -363,13 +363,13 @@ export default function ReceptionPage() {
       {/* Step 2: Intake */}
       {step === 2 && (
         <div className="space-y-4">
-          <div className="mp-card p-4 bg-[rgba(20,184,166,0.04)] border border-[rgba(20,184,166,0.15)] space-y-2">
+          <div className="mp-card p-4 bg-[rgba(255,107,0,0.04)] border border-[rgba(255,107,0,0.15)] space-y-2">
             <div className="flex items-center gap-2">
-              <User size={14} className="text-[#14B8A6]" />
+              <User size={14} className="text-[#FF6B00]" />
               <span className="text-sm text-[var(--mp-text-primary)]">Cliente: <b>{selectedCustomer?.name}</b></span>
             </div>
             <div className="flex items-center gap-2">
-              <Bike size={14} className="text-[#14B8A6]" />
+              <Bike size={14} className="text-[#FF6B00]" />
               <span className="text-sm text-[var(--mp-text-primary)]">Vehículo: <b>{selectedVehicle?.brand} {selectedVehicle?.model} {selectedVehicle?.year} — {selectedVehicle?.plate}</b></span>
             </div>
           </div>
@@ -432,16 +432,16 @@ export default function ReceptionPage() {
                   <label className="aspect-square rounded-lg border-2 border-dashed border-[var(--mp-border)] bg-[var(--mp-bg-elevated)] hover:border-[var(--mp-accent)] transition-colors cursor-pointer flex flex-col items-center justify-center gap-1">
                     <Camera size={20} className="text-[var(--mp-text-tertiary)]" />
                     <span className="text-[10px] text-[var(--mp-text-tertiary)]">Agregar foto</span>
-                    <input type="file" accept="image/*" className="hidden" multiple onChange={(e) => {
+                    <input type="file" accept="image/*" className="hidden" multiple onChange={async (e) => {
                       const files = e.target.files;
                       if (!files) return;
-                      Array.from(files).forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          if (ev.target?.result) setPhotos(ps => [...ps, ev.target!.result as string]);
-                        };
-                        reader.readAsDataURL(file);
-                      });
+                      for (const file of Array.from(files)) {
+                        try {
+                          const res = await uploadFile("/upload", file, "taller-motos/work-orders");
+                          const url = res.data?.url || res.url || res.image || "";
+                          if (url) setPhotos(ps => [...ps, url]);
+                        } catch { showToast("error", "Error al subir foto"); }
+                      }
                     }} />
                   </label>
                 </div>
@@ -481,8 +481,8 @@ export default function ReceptionPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-[rgba(20,184,166,0.06)] border border-[rgba(20,184,166,0.15)]">
-                <Info size={16} className="text-[#14B8A6] mt-0.5 shrink-0" />
+              <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-[rgba(255,107,0,0.06)] border border-[rgba(255,107,0,0.15)]">
+                <Info size={16} className="text-[#FF6B00] mt-0.5 shrink-0" />
                 <p className="text-xs text-[var(--mp-text-secondary)]">Se creará la orden con estado <b>Recibido</b> y un checklist de recepción por defecto.</p>
               </div>
             </div>

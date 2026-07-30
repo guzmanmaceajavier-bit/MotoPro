@@ -66,7 +66,7 @@ async function migrate() {
           const status = row[3] === "pending" ? "received" : row[3] === "in_progress" ? "diagnosed" : row[3] === "completed" ? "delivered" : "received";
           const desc = row[4] || row[5] || "";
           const createdAt = row[6] || new Date().toISOString();
-          run(`INSERT OR IGNORE INTO work_orders (id, order_number, customer_id, vehicle_id, status, description, created_at) VALUES ('${id}', '${orderNumber}', '${customerId}', '${vehicleId}', '${status}', '${desc.replace(/'/g, "''")}', '${createdAt}')`);
+          try { db.run("INSERT OR IGNORE INTO work_orders (id, order_number, customer_id, vehicle_id, status, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)", [id, orderNumber, customerId, vehicleId, status, desc, createdAt]); } catch (e) { console.log(`  ⚠ ${e.message}`); }
         }
         console.log(`    → ${rows.length} registros migrados`);
       }

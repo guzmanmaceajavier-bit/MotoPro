@@ -60,27 +60,26 @@ router.get("/financial", (req, res) => {
     const { from, to } = req.query;
     const dateFrom = from || new Date(new Date().setDate(1)).toISOString().split("T")[0];
     const dateTo = to || new Date().toISOString().split("T")[0];
-    const filter = `created_at BETWEEN '${dateFrom}' AND '${dateTo} 23:59:59'`;
+    const dateToEnd = `${dateTo} 23:59:59`;
 
-    const serviceRevenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM work_orders WHERE status = 'delivered' AND ${filter}`);
-    const storeRevenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM store_orders WHERE status IN ('completed','paid') AND ${filter}`);
-    const totalInvoiced = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE ${filter}`);
-    const totalPaid = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status = 'paid' AND ${filter}`);
-    const totalPending = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status != 'paid' AND ${filter}`);
-    const totalExpenses = get(`SELECT COALESCE(SUM(amount), 0) as total FROM cash_transactions WHERE type = 'expense' AND ${filter}`);
+    const serviceRevenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM work_orders WHERE status = 'delivered' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const storeRevenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM store_orders WHERE status IN ('completed','paid') AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const totalInvoiced = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const totalPaid = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status = 'paid' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const totalPending = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status != 'paid' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const totalExpenses = get(`SELECT COALESCE(SUM(amount), 0) as total FROM cash_transactions WHERE type = 'expense' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
     const netProfit = (totalPaid?.total || 0) - (totalExpenses?.total || 0);
 
     const revenueByMonth = query(`SELECT strftime('%Y-%m', created_at) as month, SUM(total) as revenue
-      FROM invoices WHERE status = 'paid' AND created_at >= date('${dateFrom}', '-12 months')
-      GROUP BY month ORDER BY month`);
+      FROM invoices WHERE status = 'paid' AND created_at >= ? GROUP BY month ORDER BY month`, [dateFrom + " -12 months"]);
 
     const expensesByCategory = query(`SELECT category, SUM(amount) as total
-      FROM cash_transactions WHERE type = 'expense' AND ${filter}
-      GROUP BY category ORDER BY total DESC`);
+      FROM cash_transactions WHERE type = 'expense' AND created_at BETWEEN ? AND ?
+      GROUP BY category ORDER BY total DESC`, [dateFrom, dateToEnd]);
 
     const paymentsByMethod = query(`SELECT payment_method, COUNT(*) as count, SUM(total) as total
-      FROM invoices WHERE status = 'paid' AND ${filter}
-      GROUP BY payment_method ORDER BY total DESC`);
+      FROM invoices WHERE status = 'paid' AND created_at BETWEEN ? AND ?
+      GROUP BY payment_method ORDER BY total DESC`, [dateFrom, dateToEnd]);
 
     res.json({
       success: true,
@@ -106,21 +105,21 @@ router.get("/workshop", (req, res) => {
     const { from, to } = req.query;
     const dateFrom = from || new Date(new Date().setDate(1)).toISOString().split("T")[0];
     const dateTo = to || new Date().toISOString().split("T")[0];
-    const filter = `wo.created_at BETWEEN '${dateFrom}' AND '${dateTo} 23:59:59'`;
+    const dateToEnd = `${dateTo} 23:59:59`;
 
-    const totalOrders = get(`SELECT COUNT(*) as count FROM work_orders wo WHERE ${filter}`);
-    const byStatus = query(`SELECT wo.status, COUNT(*) as count FROM work_orders wo WHERE ${filter} GROUP BY wo.status`);
+    const totalOrders = get(`SELECT COUNT(*) as count FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const byStatus = query(`SELECT wo.status, COUNT(*) as count FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ? GROUP BY wo.status`, [dateFrom, dateToEnd]);
     const byServiceType = query(`SELECT wo.service_type, COUNT(*) as count, AVG(wo.total) as avg_total
-      FROM work_orders wo WHERE ${filter} GROUP BY wo.service_type ORDER BY count DESC`);
+      FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ? GROUP BY wo.service_type ORDER BY count DESC`, [dateFrom, dateToEnd]);
     const avgCompletionTime = get(`SELECT AVG(julianday(wo.actual_completion) - julianday(wo.created_at)) as avg_days
-      FROM work_orders wo WHERE wo.status = 'delivered' AND wo.actual_completion IS NOT NULL AND ${filter}`);
+      FROM work_orders wo WHERE wo.status = 'delivered' AND wo.actual_completion IS NOT NULL AND wo.created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
     const avgPartsCost = get(`SELECT AVG(wop.total) as avg FROM work_order_parts wop
       JOIN work_orders wo ON wop.work_order_id = wo.id
-      WHERE ${filter} AND wop.total > 0`);
+      WHERE wo.created_at BETWEEN ? AND ? AND wop.total > 0`, [dateFrom, dateToEnd]);
     const avgLaborCost = get(`SELECT AVG(wo.total - COALESCE((SELECT SUM(total) FROM work_order_parts WHERE work_order_id = wo.id), 0)) as avg
-      FROM work_orders wo WHERE ${filter} AND wo.total > 0`);
+      FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ? AND wo.total > 0`, [dateFrom, dateToEnd]);
     const cancelledRate = get(`SELECT COUNT(CASE WHEN wo.status = 'cancelled' THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0) as rate
-      FROM work_orders wo WHERE ${filter}`);
+      FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
 
     const mechanicPerformance = query(`SELECT tm.name as mechanic_name,
       COUNT(wo.id) as orders_completed,
@@ -128,14 +127,14 @@ router.get("/workshop", (req, res) => {
       SUM(wo.total) as total_revenue
       FROM work_orders wo
       JOIN team_members tm ON wo.assigned_to = tm.id
-      WHERE wo.status = 'delivered' AND wo.actual_completion IS NOT NULL AND ${filter}
-      GROUP BY tm.name ORDER BY orders_completed DESC`);
+      WHERE wo.status = 'delivered' AND wo.actual_completion IS NOT NULL AND wo.created_at BETWEEN ? AND ?
+      GROUP BY tm.name ORDER BY orders_completed DESC`, [dateFrom, dateToEnd]);
 
     const partsUsage = query(`SELECT wop.name, SUM(wop.quantity) as total_qty, SUM(wop.total) as total_cost
       FROM work_order_parts wop
       JOIN work_orders wo ON wop.work_order_id = wo.id
-      WHERE ${filter}
-      GROUP BY wop.name ORDER BY total_qty DESC LIMIT 10`);
+      WHERE wo.created_at BETWEEN ? AND ?
+      GROUP BY wop.name ORDER BY total_qty DESC LIMIT 10`, [dateFrom, dateToEnd]);
 
     res.json({
       success: true,
@@ -237,7 +236,7 @@ router.get("/mechanics", (req, res) => {
     const { from, to } = req.query;
     const dateFrom = from || new Date(new Date().setDate(1)).toISOString().split("T")[0];
     const dateTo = to || new Date().toISOString().split("T")[0];
-    const filter = `wo.created_at BETWEEN '${dateFrom}' AND '${dateTo} 23:59:59'`;
+    const dateToEnd = `${dateTo} 23:59:59`;
 
     const mechanics = query(`SELECT tm.id, tm.name, tm.specialty,
       COUNT(CASE WHEN wo.status = 'delivered' THEN 1 END) as completed,
@@ -246,15 +245,15 @@ router.get("/mechanics", (req, res) => {
         THEN julianday(wo.actual_completion) - julianday(wo.created_at) END) as avg_days,
       SUM(CASE WHEN wo.status = 'delivered' THEN wo.total ELSE 0 END) as revenue,
       (SELECT COUNT(*) FROM satisfaction_surveys s JOIN work_orders wo2 ON s.work_order_id = wo2.id
-        WHERE wo2.assigned_to = tm.id AND s.created_at BETWEEN '${dateFrom}' AND '${dateTo} 23:59:59'
+        WHERE wo2.assigned_to = tm.id AND s.created_at BETWEEN ? AND ?
       ) as survey_count,
       (SELECT AVG(s2.rating) FROM satisfaction_surveys s2 JOIN work_orders wo3 ON s2.work_order_id = wo3.id
         WHERE wo3.assigned_to = tm.id
       ) as avg_rating
       FROM team_members tm
-      LEFT JOIN work_orders wo ON wo.assigned_to = tm.id AND ${filter}
+      LEFT JOIN work_orders wo ON wo.assigned_to = tm.id AND wo.created_at BETWEEN ? AND ?
       WHERE tm.is_active = 1
-      GROUP BY tm.id ORDER BY completed DESC`);
+      GROUP BY tm.id ORDER BY completed DESC`, [dateFrom, dateToEnd, dateFrom, dateToEnd]);
 
     res.json({ success: true, data: mechanics });
   } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error" }); }
@@ -266,19 +265,20 @@ router.get("/export/:type", (req, res) => {
     const { from, to, format = "csv" } = req.query;
     const dateFrom = from || new Date(new Date().setDate(1)).toISOString().split("T")[0];
     const dateTo = to || new Date().toISOString().split("T")[0];
+    const dateToEnd = `${dateTo} 23:59:59`;
 
     let data, filename;
 
     if (type === "work-orders") {
       data = query(`SELECT wo.order_number, wo.service_type, wo.status, wo.total, wo.created_at,
         wo.customer_name, wo.vehicle_description
-        FROM work_orders wo WHERE wo.created_at BETWEEN '${dateFrom}' AND '${dateTo} 23:59:59'
-        ORDER BY wo.created_at DESC`);
+        FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ?
+        ORDER BY wo.created_at DESC`, [dateFrom, dateToEnd]);
       filename = `ordenes-servicio-${dateFrom}-${dateTo}`;
     } else if (type === "invoices") {
       data = query(`SELECT invoice_number, total, status, payment_method, created_at
-        FROM invoices WHERE created_at BETWEEN '${dateFrom}' AND '${dateTo} 23:59:59'
-        ORDER BY created_at DESC`);
+        FROM invoices WHERE created_at BETWEEN ? AND ?
+        ORDER BY created_at DESC`, [dateFrom, dateToEnd]);
       filename = `facturas-${dateFrom}-${dateTo}`;
     } else if (type === "inventory") {
       data = query(`SELECT p.name, p.sku, p.stock, p.min_stock, p.purchase_price, p.price, c.name as category
@@ -291,8 +291,8 @@ router.get("/export/:type", (req, res) => {
       filename = `clientes-${dateFrom}`;
     } else if (type === "sales") {
       data = query(`SELECT so.order_number, so.total, so.status, so.payment_method, so.created_at
-        FROM store_orders so WHERE so.created_at BETWEEN '${dateFrom}' AND '${dateTo} 23:59:59'
-        ORDER BY so.created_at DESC`);
+        FROM store_orders so WHERE so.created_at BETWEEN ? AND ?
+        ORDER BY so.created_at DESC`, [dateFrom, dateToEnd]);
       filename = `ventas-${dateFrom}-${dateTo}`;
     } else {
       return res.status(400).json({ success: false, message: "Tipo de reporte no válido" });

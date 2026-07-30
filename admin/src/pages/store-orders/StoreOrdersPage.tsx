@@ -135,7 +135,7 @@ export default function StoreOrdersPage() {
   ];
 
   const iconColorMap: Record<string, string> = {
-    teal: "rgba(20,184,166,0.12)",
+    teal: "rgba(255,107,0,0.12)",
     orange: "rgba(249,115,22,0.12)",
     green: "rgba(34,197,94,0.12)",
     purple: "rgba(139,92,246,0.12)",
@@ -143,7 +143,7 @@ export default function StoreOrdersPage() {
   };
 
   const iconFgMap: Record<string, string> = {
-    teal: "#14b8a6",
+    teal: "#ff6b00",
     orange: "#f97316",
     green: "#22c55e",
     purple: "#8b5cf6",

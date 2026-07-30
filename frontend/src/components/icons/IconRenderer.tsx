@@ -26,7 +26,7 @@ import {
   HeartHandshake, FishSymbol, Birdhouse, PawPrint, Smile, Skull,
   Stethoscope, Pill, ThumbsUp, Scale, Shirt, Sparkles, Paintbrush,
   Workflow, ScanLine, TreePine, Warehouse,
-  Store
+  Store, Clipboard, CheckCircle
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -78,11 +78,12 @@ export const ICON_LIBRARY: Record<string, LucideIcon> = {
   car: Car, flaskConical: FlaskConical, frown: Frown, angry: Angry,
   brain: Brain, bookOpen: BookOpen, gift: Gift, ear: Ear,
   footprints: Footprints, heartHandshake: HeartHandshake,
-  fish: FishSymbol, birdhouse: Birdhouse, pawPrint: PawPrint,
+  birdhouse: Birdhouse, pawPrint: PawPrint,
   smile: Smile, skull: Skull, stethoscope: Stethoscope, pill: Pill,
   thumbsUp: ThumbsUp, scale: Scale, shirt: Shirt, sparkles: Sparkles,
   paintbrush: Paintbrush, workflow: Workflow, scanLine: ScanLine,
-  treePine: TreePine, warehouse: Warehouse, store: Store, package: Package,
+  treePine: TreePine, warehouse: Warehouse, store: Store,
+  clipboard: Clipboard, checkCircle: CheckCircle,
 };
 
 export const ICON_CATEGORIES = [

@@ -204,7 +204,7 @@ async function sendEmail(templateName, data, toEmail) {
 }
 
 async function notifyAdminEmail(subject, html) {
-  try { await notifyAdmin(subject, html); } catch {}
+  try { await notifyAdmin(subject, html); } catch (e) { console.error("[backend]", e.message); }
 }
 
 // Call these from controllers after state changes

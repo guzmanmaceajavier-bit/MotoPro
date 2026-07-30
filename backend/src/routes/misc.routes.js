@@ -1,6 +1,7 @@
 const router = require("express").Router();
-const mercadopagoCtrl = require("../controllers/mercadopago.controller");
-const uploadCtrl = require("../controllers/upload.controller");
+const { wrapController } = require("../utils/helpers");
+const mercadopagoCtrl = wrapController(require("../controllers/mercadopago.controller"));
+const uploadCtrl = wrapController(require("../controllers/upload.controller"));
 const { verifyToken, requirePermission } = require("../middleware/auth");
 const upload = require("../middleware/upload");
 const { query, get } = require("../config/database");

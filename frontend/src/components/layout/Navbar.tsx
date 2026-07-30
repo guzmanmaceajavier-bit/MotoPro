@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCMS } from "@/providers/CMSProvider";
 import { useCart } from "@/providers/CartProvider";
 import { useAuth } from "@/providers/AuthProvider";
+import { useMoto } from "@/providers/MotoProvider";
 import { api } from "@/api/client";
 import { ChevronDown, ChevronRight, X, Menu, Search, ShoppingCart, User, Bike, Wrench, CircleDot, Zap, Droplets, Disc } from "lucide-react";
+import { Spinner } from "@/components/ui";
 
 const fallbackLinks = [
   { href: "/", label: "Inicio" },
@@ -105,6 +107,7 @@ export function Navbar() {
   const { navbar } = useCMS();
   const { count, items, total, removeItem } = useCart();
   const { user, logout } = useAuth();
+  const { activeVehicle } = useMoto();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -142,6 +145,18 @@ export function Navbar() {
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   }, []);
 
   const handleSearch = (query: string) => {
@@ -303,23 +318,59 @@ export function Navbar() {
                       </button>
                     )}
                   </div>
-                  <div className="max-h-72 overflow-y-auto">
-                    {searching && (<div className="flex items-center justify-center py-6"><div className="h-5 w-5 animate-spin rounded-full border-2 border-interactive-accent border-t-transparent" /></div>)}
-                    {!searching && searchQuery && searchResults.length === 0 && (<p className="py-6 text-center text-sm text-text-tertiary">Sin resultados</p>)}
-                    {!searching && searchResults.map((item: any, i: number) => (
-                      <button key={i} onClick={() => goToResult(item)} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-tertiary/50 transition-colors">
-                        {item.image && <img src={item.image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm text-text-primary truncate">{item.name || item.title}</p>
-                          <p className="text-xs text-text-tertiary capitalize">{item.type === "product" ? "Producto" : item.type === "service" ? "Servicio" : "Articulo"}{item.price && ` · $${Number(item.price).toLocaleString()}`}</p>
-                        </div>
-                      </button>
-                    ))}
-                    {!searching && searchQuery && searchResults.length > 0 && (
-                      <Link to={`/tienda?search=${encodeURIComponent(searchQuery)}`} onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
-                        className="block border-t px-4 py-2.5 text-center text-xs font-medium text-interactive-accent hover:bg-surface-tertiary/50 transition-colors"
-                        style={{ borderColor: "var(--border)" }}>Ver todos los resultados</Link>
+                  <div className="max-h-80 overflow-y-auto">
+                    {searching && <Spinner size="sm" />}
+                    {!searching && searchQuery && searchResults.length === 0 && (
+                      <div className="py-8 text-center">
+                        <Search size={24} className="mx-auto text-text-tertiary mb-2" />
+                        <p className="text-sm text-text-tertiary">Sin resultados para "{searchQuery}"</p>
+                        <p className="text-xs text-text-tertiary mt-1">Intenta con otros términos</p>
+                      </div>
                     )}
+                    {!searching && searchQuery && searchResults.length > 0 && (() => {
+                      const grouped: Record<string, any[]> = {};
+                      searchResults.forEach((item: any) => {
+                        const type = item.type === "product" ? "product" : item.type === "service" ? "service" : "post";
+                        if (!grouped[type]) grouped[type] = [];
+                        grouped[type].push(item);
+                      });
+                      const typeInfo: Record<string, { label: string; icon: string }> = {
+                        product: { label: "Productos", icon: "🛒" },
+                        service: { label: "Servicios", icon: "🔧" },
+                        post: { label: "Blog", icon: "📄" },
+                      };
+                      return (
+                        <div>
+                          {Object.entries(grouped).map(([type, items]) => (
+                            <div key={type}>
+                              <div className="px-4 py-1.5 text-[10px] font-bold text-text-tertiary uppercase tracking-wider bg-surface-tertiary/30" style={{ borderBottom: "1px solid var(--border)", borderTop: "1px solid var(--border)" }}>
+                                {typeInfo[type]?.icon} {typeInfo[type]?.label} ({items.length})
+                              </div>
+                              {items.slice(0, 3).map((item: any, i: number) => (
+                                <button key={i} onClick={() => goToResult(item)} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-tertiary/50 transition-colors">
+                                  {item.image && <img src={item.image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />}
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm text-text-primary truncate">{item.name || item.title}</p>
+                                    <p className="text-xs text-text-tertiary">
+                                      {type === "product" && item.price && `$${Number(item.price).toLocaleString()}`}
+                                      {type === "product" && item.brand && ` · ${item.brand}`}
+                                      {type === "service" && item.duration && `${item.duration}`}
+                                    </p>
+                                  </div>
+                                </button>
+                              ))}
+                              {items.length > 3 && (
+                                <Link to={`/${type === "product" ? "tienda" : type === "service" ? "servicios" : "blog"}?search=${encodeURIComponent(searchQuery)}`}
+                                  onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                                  className="block px-4 py-1.5 text-center text-[11px] font-medium text-interactive-accent hover:bg-surface-tertiary/30 transition-colors">
+                                  Ver todos los {typeInfo[type]?.label.toLowerCase()} ({items.length})
+                                </Link>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </motion.div>
               )}
@@ -327,23 +378,41 @@ export function Navbar() {
           </div>
 
           {/* Consultar estado */}
-          <Link to="/estado-servicio" className="hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-medium text-text-secondary hover:text-text-primary hover:border-border-accent transition-all mr-0.5"
-            style={{ borderColor: "var(--border-subtle)" }}>
+          <Link to="/estado-servicio" className={`hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-medium transition-all mr-0.5 ${
+            pathname === "/consulta" || pathname === "/estado-servicio"
+              ? "text-interactive-accent border-interactive-accent/30 bg-interactive-accent/10"
+              : "text-text-secondary hover:text-text-primary hover:border-border-accent"
+          }`}
+            style={{ borderColor: pathname === "/consulta" || pathname === "/estado-servicio" ? undefined : "var(--border-subtle)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-            Consultar
+            Consultar estado
           </Link>
 
-          {/* Agendar */}
+          {/* Agendar servicio */}
           <Link to="/agendar-cita" className="hidden md:flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-interactive-accent text-xs font-semibold text-white hover:bg-interactive-accent-hover transition-all mr-0.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-            Agendar
+            Agendar servicio
           </Link>
 
           {/* Cart */}
           <div ref={cartRef} className="relative">
-            <button onClick={() => setCartOpen(!cartOpen)} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-tertiary/50 transition-all" aria-label="Carrito">
+            <button onClick={() => setCartOpen(!cartOpen)} className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-all ${
+              pathname === "/cart"
+                ? "text-interactive-accent bg-interactive-accent/10"
+                : "text-text-secondary hover:text-text-primary hover:bg-surface-tertiary/50"
+            }`} aria-label="Carrito">
               <ShoppingCart size={18} />
-              {count > 0 && (<span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-interactive-accent px-1 text-[9px] font-bold text-white">{count > 99 ? "99+" : count}</span>)}
+              {count > 0 && (
+                <motion.span
+                  key={count}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-interactive-accent px-1 text-[9px] font-bold text-white"
+                >
+                  {count > 99 ? "99+" : count}
+                </motion.span>
+              )}
             </button>
             <AnimatePresence>
               {cartOpen && (
@@ -367,7 +436,7 @@ export function Navbar() {
                           <div key={item.id} className="flex items-center gap-3 p-4 border-b" style={{ borderColor: "var(--border-subtle)" }}>
                             {item.image && <img src={item.image} alt="" className="h-12 w-12 rounded object-cover shrink-0" />}
                             <div className="flex-1 min-w-0"><p className="text-sm text-text-primary truncate">{item.name}</p><p className="text-xs text-text-tertiary">x{item.quantity} · ${Number(item.price).toLocaleString()}</p></div>
-                            <button onClick={() => removeItem(item.id)} className="text-text-tertiary hover:text-status-error transition-colors shrink-0"><X size={14} /></button>
+                            <button onClick={() => removeItem(item.id)} aria-label="Eliminar producto" className="text-text-tertiary hover:text-status-error transition-colors shrink-0"><X size={14} /></button>
                           </div>
                         ))}
                       </div>
@@ -382,11 +451,25 @@ export function Navbar() {
             </AnimatePresence>
           </div>
 
+          {/* Mi Moto */}
+          {user && activeVehicle && (
+            <Link to="/mi-moto"
+              className="hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-medium transition-all mr-0.5 text-interactive-accent border-interactive-accent/30 bg-interactive-accent/10 hover:bg-interactive-accent/20"
+            >
+              <Bike size={14} />
+              Mi Moto
+            </Link>
+          )}
+
           {/* User */}
           <div ref={userRef} className="relative hidden md:block">
             {user ? (
               <>
-                <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="flex h-9 w-9 items-center justify-center rounded-full bg-interactive-accent text-xs font-bold text-white hover:opacity-90 transition-all">
+                <button onClick={() => setUserMenuOpen(!userMenuOpen)} aria-label="Menú de usuario" className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white transition-all ${
+                  pathname.startsWith("/mi-cuenta") || pathname.startsWith("/perfil")
+                    ? "ring-2 ring-interactive-accent ring-offset-2 ring-offset-surface-primary"
+                    : "bg-interactive-accent hover:opacity-90"
+                }`}>
                   {user.name?.charAt(0).toUpperCase()}
                 </button>
                 <AnimatePresence>
@@ -414,7 +497,11 @@ export function Navbar() {
                 </AnimatePresence>
               </>
             ) : (
-              <Link to="/login" aria-label="Iniciar sesion" className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-tertiary/50 transition-all">
+              <Link to="/login" aria-label="Iniciar sesion" className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all ${
+                pathname === "/login"
+                  ? "text-interactive-accent bg-interactive-accent/10"
+                  : "text-text-secondary hover:text-text-primary hover:bg-surface-tertiary/50"
+              }`}>
                 <User size={18} />
               </Link>
             )}
@@ -492,14 +579,22 @@ export function Navbar() {
 
               {/* Action buttons */}
               <div className="flex gap-2 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
-                <Link to={user ? "/mi-cuenta" : "/login"} className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-surface-tertiary/50 px-4 py-3 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors">
+                <Link to={user ? "/mi-cuenta" : "/login"} className={`flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                  pathname === "/login"
+                    ? "bg-interactive-accent/10 text-interactive-accent"
+                    : "bg-surface-tertiary/50 text-text-secondary hover:text-text-primary"
+                }`}>
                   <User size={16} />
                   {user ? "Mi cuenta" : "Iniciar sesion"}
                 </Link>
               </div>
-              <Link to="/agendar-cita" className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-interactive-accent px-5 py-3 text-sm font-semibold text-white hover:bg-interactive-accent-hover transition-all">Agendar cita</Link>
-              <Link to="/estado-servicio" className="mt-2 flex items-center justify-center gap-2 rounded-lg border px-5 py-3 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-                style={{ borderColor: "var(--border)" }}>
+              <Link to="/agendar-cita" className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-interactive-accent px-5 py-3 text-sm font-semibold text-white hover:bg-interactive-accent-hover transition-all">Agendar servicio</Link>
+              <Link to="/estado-servicio" className={`mt-2 flex items-center justify-center gap-2 rounded-lg border px-5 py-3 text-sm font-medium transition-colors ${
+                pathname === "/consulta" || pathname === "/estado-servicio"
+                  ? "border-interactive-accent/30 bg-interactive-accent/10 text-interactive-accent"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+                style={{ borderColor: pathname === "/consulta" || pathname === "/estado-servicio" ? undefined : "var(--border)" }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                 Consultar estado
               </Link>

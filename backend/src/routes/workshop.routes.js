@@ -1,13 +1,15 @@
 const router = require("express").Router();
-const ordersCtrl = require("../controllers/work-orders.controller");
-const diagnosticsCtrl = require("../controllers/diagnostics.controller");
-const quotesCtrl = require("../controllers/quotes.controller");
-const timelineCtrl = require("../controllers/timeline.controller");
-const appointmentsCtrl = require("../controllers/appointments.controller");
-const mechanicsCtrl = require("../controllers/mechanics.controller");
-const holidaysCtrl = require("../controllers/holidays.controller");
+const { wrapController } = require("../utils/helpers");
+const ordersCtrl = wrapController(require("../controllers/work-orders.controller"));
+const diagnosticsCtrl = wrapController(require("../controllers/diagnostics.controller"));
+const quotesCtrl = wrapController(require("../controllers/quotes.controller"));
+const timelineCtrl = wrapController(require("../controllers/timeline.controller"));
+const appointmentsCtrl = wrapController(require("../controllers/appointments.controller"));
+const mechanicsCtrl = wrapController(require("../controllers/mechanics.controller"));
+const holidaysCtrl = wrapController(require("../controllers/holidays.controller"));
 const upload = require("../middleware/upload");
 const { verifyToken, requirePermission, optionalAuth } = require("../middleware/auth");
+const validate = require("../middleware/validate");
 
 router.get("/orders/search", ordersCtrl.search);
 router.get("/orders", verifyToken, requirePermission("orders.read"), ordersCtrl.list);
@@ -31,7 +33,14 @@ router.post("/orders/:id/timeline", verifyToken, requirePermission("orders.write
 router.get("/service-requests/search", ordersCtrl.search);
 router.get("/service-requests", verifyToken, requirePermission("services.read"), ordersCtrl.list);
 router.get("/service-requests/:id", verifyToken, requirePermission("services.read"), ordersCtrl.getById);
-router.post("/service-requests", optionalAuth, ordersCtrl.create);
+router.post("/service-requests", optionalAuth, validate({
+  body: {
+    customer_name: { required: true, type: "string", minLength: 2 },
+    customer_phone: { required: true, type: "string" },
+    brand_model: { required: true, type: "string" },
+    problem: { required: true, type: "string", minLength: 5 },
+  }
+}), ordersCtrl.create);
 router.put("/service-requests/:id", verifyToken, requirePermission("services.write"), ordersCtrl.update);
 router.delete("/service-requests/:id", verifyToken, requirePermission("services.delete"), ordersCtrl.remove);
 
@@ -44,11 +53,11 @@ router.get("/quotes/:id", verifyToken, requirePermission("orders.read"), quotesC
 router.post("/quotes", verifyToken, requirePermission("orders.write"), quotesCtrl.create);
 router.put("/quotes/:id", verifyToken, requirePermission("orders.write"), quotesCtrl.update);
 router.post("/quotes/:id/send", verifyToken, requirePermission("orders.write"), quotesCtrl.send);
-router.post("/quotes/:id/approve", quotesCtrl.approve);
-router.post("/quotes/:id/reject", quotesCtrl.reject);
+router.post("/quotes/:id/approve", verifyToken, quotesCtrl.approve);
+router.post("/quotes/:id/reject", verifyToken, quotesCtrl.reject);
 router.delete("/quotes/:id", verifyToken, requirePermission("orders.delete"), quotesCtrl.remove);
 
-router.get("/timeline", verifyToken, requirePermission("orders.read"), timelineCtrl.list);
+router.get("/timeline", timelineCtrl.list);
 router.post("/timeline", verifyToken, requirePermission("orders.write"), upload.single("image"), timelineCtrl.create);
 router.delete("/timeline/:id", verifyToken, requirePermission("orders.delete"), timelineCtrl.remove);
 
@@ -60,7 +69,15 @@ router.put("/appointments/schedule-config", verifyToken, requirePermission("orde
 router.get("/appointments/my", verifyToken, appointmentsCtrl.myAppointments);
 router.get("/appointments", verifyToken, requirePermission("orders.read"), appointmentsCtrl.list);
 router.get("/appointments/:id", verifyToken, requirePermission("orders.read"), appointmentsCtrl.getById);
-router.post("/appointments", appointmentsCtrl.create);
+router.post("/appointments", validate({
+  body: {
+    customer_name: { required: true, type: "string", minLength: 2 },
+    customer_phone: { required: true, type: "string" },
+    service_type: { required: true, type: "string" },
+    appointment_date: { required: true, type: "string" },
+    start_time: { required: true, type: "string" },
+  }
+}), appointmentsCtrl.create);
 router.put("/appointments/:id", verifyToken, requirePermission("orders.write"), appointmentsCtrl.update);
 router.delete("/appointments/:id", verifyToken, requirePermission("orders.delete"), appointmentsCtrl.remove);
 

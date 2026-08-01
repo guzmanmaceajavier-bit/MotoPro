@@ -33,6 +33,7 @@ const WarrantiesPage = lazy(() => import("@/pages/warranties/WarrantiesPage"));
 const CajaPage = lazy(() => import("@/pages/caja/CajaPage"));
 const POSPage = lazy(() => import("@/pages/pos/POSPage"));
 const CustomersPage = lazy(() => import("./pages/customers/CustomersPage"));
+const CustomerExpediente = lazy(() => import("./pages/customers/CustomerExpediente"));
 const VehiclesPage = lazy(() => import("./pages/vehicles/VehiclesPage"));
 const InventoryPage = lazy(() => import("./pages/inventory/InventoryPage"));
 const ProfilePage = lazy(() => import("./pages/profile/ProfilePage"));
@@ -50,6 +51,7 @@ const ReportsPage = lazy(() => import("./pages/reports/ReportsPage"));
 const LoyaltyPage = lazy(() => import("./pages/loyalty/LoyaltyPage"));
 const BranchesPage = lazy(() => import("./pages/branches/BranchesPage"));
 const LogsPage = lazy(() => import("./pages/logs/LogsPage"));
+const NotificationsPage = lazy(() => import("./pages/notifications/NotificationsPage"));
 const DiagnosticsPage = lazy(() => import("./pages/diagnostics/DiagnosticsPage"));
 const QuotesPage = lazy(() => import("./pages/quotes/QuotesPage"));
 const ReturnsPage = lazy(() => import("./pages/returns/ReturnsPage"));
@@ -103,7 +105,7 @@ const pageMeta: Record<string, { title: string; description?: string }> = {
   "/pedidos-tienda": { title: "Pedidos Tienda" },
   "/contacts": { title: "Contactos" },
   "/gallery": { title: "Galería" },
-  "/sliders": { title: "Sliders" },
+  "/sliders": { title: "Promociones", description: "Gestión de campañas promocionales" },
   "/settings": { title: "Configuración" },
   "/calendar": { title: "Calendario", description: "Gestión de citas del taller" },
   "/mechanics": { title: "Mecánicos", description: "Gestión del equipo de trabajo" },
@@ -116,6 +118,7 @@ const pageMeta: Record<string, { title: string; description?: string }> = {
   "/vehiculos": { title: "Vehiculos", description: "Gestion de motocicletas" },
   "/inventario": { title: "Inventario" },
   "/profile": { title: "Perfil" },
+  "/notificaciones": { title: "Notificaciones", description: "Mensajes centralizados del sistema" },
   "/multimedia": { title: "Multimedia" },
   "/newsletter": { title: "Newsletter" },
   "/homepage": { title: "Homepage CMS" },
@@ -238,6 +241,7 @@ export default function App() {
           <Route path="pos" element={<Suspense fallback={<SuspenseFallback />}><POSPage /></Suspense>} />
           <Route path="settings" element={<Suspense fallback={<SuspenseFallback />}><SettingsPage /></Suspense>} />
           <Route path="clientes" element={<Suspense fallback={<SuspenseFallback />}><CustomersPage /></Suspense>} />
+          <Route path="clientes/:id" element={<Suspense fallback={<SuspenseFallback />}><CustomerExpediente /></Suspense>} />
           <Route path="vehiculos" element={<Suspense fallback={<SuspenseFallback />}><VehiclesPage /></Suspense>} />
           <Route path="inventario" element={<Suspense fallback={<SuspenseFallback />}><InventoryPage /></Suspense>} />
           <Route path="profile" element={<Suspense fallback={<SuspenseFallback />}><ProfilePage /></Suspense>} />
@@ -257,6 +261,7 @@ export default function App() {
           <Route path="fidelidad" element={<Suspense fallback={<SuspenseFallback />}><LoyaltyPage /></Suspense>} />
           <Route path="sucursales" element={<Suspense fallback={<SuspenseFallback />}><BranchesPage /></Suspense>} />
           <Route path="logs" element={<Suspense fallback={<SuspenseFallback />}><LogsPage /></Suspense>} />
+          <Route path="notificaciones" element={<Suspense fallback={<SuspenseFallback />}><NotificationsPage /></Suspense>} />
           <Route path="diagnostics" element={<Suspense fallback={<SuspenseFallback />}><DiagnosticsPage /></Suspense>} />
           <Route path="quotes" element={<Suspense fallback={<SuspenseFallback />}><QuotesPage /></Suspense>} />
           <Route path="returns" element={<Suspense fallback={<SuspenseFallback />}><ReturnsPage /></Suspense>} />

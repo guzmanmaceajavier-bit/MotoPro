@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { api } from "@/api/client";
 import { useToast } from "@/providers/ToastProvider";
 import { MapPin, Phone, Clock, Mail, ExternalLink, MessageCircle, Star, HelpCircle, Send, CheckCircle, ChevronDown, Headphones } from "lucide-react";
-import { Spinner, InlineSpinner } from "@/components/ui";
+import { Spinner, InlineSpinner, EmptyState } from "@/components/ui";
 
 const contactReasons = [
   { id: "general", label: "Consulta general", description: "Información sobre servicios, productos, disponibilidad y más.", icon: MessageCircle, cta: "Realizar consulta" },

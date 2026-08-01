@@ -72,7 +72,7 @@ export function Footer() {
                 <ul className="space-y-3">
                   <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Productos</Link></li>
                   <li><Link to="/tienda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Categorías</Link></li>
-                  <li><Link to="/tienda?sort=promo" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Promociones</Link></li>
+                  <li><Link to="/promociones" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Promociones</Link></li>
                   <li><Link to="/tienda?sort=best" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Más vendidos</Link></li>
                 </ul>
               </div>
@@ -87,9 +87,11 @@ export function Footer() {
               <div>
                 <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-5">Ayuda</h4>
                 <ul className="space-y-3">
+                  <li><Link to="/ayuda" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Centro de ayuda</Link></li>
                   <li><Link to="/contacto" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Contacto</Link></li>
-                  <li><Link to="/preguntas-frecuentes" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Preguntas frecuentes</Link></li>
-                  <li><Link to="/garantia" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Garantías</Link></li>
+                  <li><Link to="/faq" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Preguntas frecuentes</Link></li>
+                  <li><Link to="/estado-servicio" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Consultar estado de orden</Link></li>
+                  <li><Link to="/mi-cuenta?tab=garantias" className="text-sm text-text-secondary hover:text-interactive-accent transition-colors">Garantías</Link></li>
                 </ul>
               </div>
               <div>
@@ -108,14 +110,6 @@ export function Footer() {
           <p className="text-xs text-text-tertiary">
             &copy; 2026 {config.site_name || "MotoPro"}. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-6">
-            <Link to="/privacidad" className="text-xs text-text-tertiary hover:text-text-secondary transition-colors">
-              Privacidad
-            </Link>
-            <Link to="/terminos" className="text-xs text-text-tertiary hover:text-text-secondary transition-colors">
-              Términos
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

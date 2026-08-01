@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ShoppingCart, X } from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import IconRenderer from "@/components/icons/IconRenderer";
 import type { Product } from "../types";
 
@@ -63,14 +63,6 @@ export function QuickViewModal({ product, onClose, onAddToCart }: { product: Pro
                 <span className="text-[10px] font-bold text-interactive-accent uppercase tracking-wider">{product.brand}</span>
               )}
               <h2 className="text-lg font-bold text-text-primary mt-1">{product.name}</h2>
-              <div className="flex items-center gap-1 mt-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={14} className={i < (product.rating || 0) ? "text-amber-400 fill-amber-400" : "text-text-tertiary/30"} />
-                ))}
-                {product.review_count !== undefined && (
-                  <span className="text-xs text-text-tertiary ml-1">({product.review_count} reseñas)</span>
-                )}
-              </div>
               <div className="mt-4">
                 {discount > 0 && product.compare_price && (
                   <div className="flex items-center gap-2">

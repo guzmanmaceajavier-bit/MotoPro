@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { api, uploadFile } from "@/api/client";
 import { useToast } from "@/components/Toast";
 import { downloadCSV, downloadExcel } from "@/utils/export";
@@ -24,16 +24,42 @@ interface SlideItem {
   is_active: number;
   overlay_color?: string;
   overlay_opacity?: number;
+  promo_type?: string;
+  ends_at?: string;
 }
 
-const tabs = [{ key: "hero", label: "Hero" }, { key: "offers", label: "Ofertas" }];
+const tabs = [{ key: "hero", label: "Hero" }, { key: "offers", label: "Promociones" }, { key: "coupons", label: "Cupones" }];
 
 const overlayColors = ["#000000", "#1E40AF", "#059669", "#9333EA", "#F97316", "#DC2626"];
 
 const emptyForm = {
   title: "", subtitle: "", description: "", image: "", gradient: "",
   cta_text: "", cta_link: "", is_active: "1", sort_order: "1",
-  overlay_color: "#000000", overlay_opacity: "60"
+  overlay_color: "#000000", overlay_opacity: "60", promo_type: "general", ends_at: ""
+};
+
+const promoTypes = [
+  { value: "product", label: "Producto (Tienda)" },
+  { value: "service", label: "Servicio (Taller)" },
+  { value: "general", label: "General (Tienda y Taller)" },
+];
+
+interface Coupon {
+  id: string;
+  code: string;
+  description: string;
+  discount_type: string;
+  discount_value: number;
+  min_purchase: number;
+  max_uses: number;
+  used_count: number;
+  expires_at: string | null;
+  is_active: number;
+}
+
+const emptyCoupon = {
+  code: "", description: "", discount_type: "percentage", discount_value: "10",
+  min_purchase: "0", max_uses: "0", expires_at: "", is_active: "1",
 };
 
 export default function SlidersPage() {
@@ -47,6 +73,12 @@ export default function SlidersPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [page, setPage] = useState(1);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [couponModal, setCouponModal] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+  const [couponForm, setCouponForm] = useState(emptyCoupon);
+  const [usages, setUsages] = useState<Record<string, any[]>>({});
+  const [expandedUsage, setExpandedUsage] = useState<string | null>(null);
   const { showToast } = useToast();
 
   const PAGE_SIZE = 10;
@@ -54,6 +86,10 @@ export default function SlidersPage() {
   const endpoint = activeTab === "hero" ? "/hero" : "/offers";
   const fetchData = () => {
     setLoading(true);
+    if (activeTab === "coupons") {
+      api.get("/coupons").then((r) => setCoupons(Array.isArray(r) ? r : [])).catch(() => {}).finally(() => setLoading(false));
+      return;
+    }
     api.get(endpoint).then((r) => setItems(Array.isArray(r) ? r : [])).catch(() => {}).finally(() => setLoading(false));
   };
   useEffect(() => { fetchData(); }, [activeTab]);
@@ -85,7 +121,9 @@ export default function SlidersPage() {
       cta_link: item.cta_link || "", is_active: String(item.is_active ?? "1"),
       sort_order: String(item.sort_order ?? "1"),
       overlay_color: item.overlay_color || "#000000",
-      overlay_opacity: String(item.overlay_opacity ?? 60)
+      overlay_opacity: String(item.overlay_opacity ?? 60),
+      promo_type: item.promo_type || "general",
+      ends_at: item.ends_at || ""
     });
     setModal(true);
   };
@@ -138,6 +176,54 @@ export default function SlidersPage() {
     if (type === "csv") downloadCSV(data, `sliders-${activeTab}`); else downloadExcel(data, `sliders-${activeTab}`);
   };
 
+  const openNewCoupon = () => { setEditingCoupon(null); setCouponForm(emptyCoupon); setCouponModal(true); };
+  const openEditCoupon = (c: Coupon) => {
+    setEditingCoupon(c);
+    setCouponForm({
+      code: c.code || "", description: c.description || "", discount_type: c.discount_type || "percentage",
+      discount_value: String(c.discount_value ?? 0), min_purchase: String(c.min_purchase ?? 0),
+      max_uses: String(c.max_uses ?? 0), expires_at: c.expires_at || "", is_active: String(c.is_active ?? "1"),
+    });
+    setCouponModal(true);
+  };
+
+  const handleSaveCoupon = async () => {
+    try {
+      const payload = {
+        ...couponForm,
+        discount_value: Number(couponForm.discount_value) || 0,
+        min_purchase: Number(couponForm.min_purchase) || 0,
+        max_uses: Number(couponForm.max_uses) || 0,
+        is_active: Number(couponForm.is_active),
+      };
+      if (editingCoupon) { await api.put(`/coupons/${editingCoupon.id}`, payload); showToast("success", "Cupón actualizado"); }
+      else { await api.post("/coupons", payload); showToast("success", "Cupón creado"); }
+      setCouponModal(false); fetchData();
+    } catch (err: unknown) { showToast("error", err instanceof Error ? err.message : "Error al guardar cupón"); }
+  };
+
+  const handleDeleteCoupon = async (c: Coupon) => {
+    if (!confirm(`¿Eliminar el cupón ${c.code}?`)) return;
+    try { await api.delete(`/coupons/${c.id}`); showToast("success", "Cupón eliminado"); fetchData(); }
+    catch (err: unknown) { showToast("error", err instanceof Error ? err.message : "Error al eliminar"); }
+  };
+
+  const handleToggleCoupon = async (c: Coupon) => {
+    try { await api.put(`/coupons/${c.id}`, { ...c, is_active: c.is_active ? 0 : 1 }); fetchData(); }
+    catch (err: unknown) { showToast("error", err instanceof Error ? err.message : "Error"); }
+  };
+
+  const toggleUsage = async (c: Coupon) => {
+    if (expandedUsage === c.id) { setExpandedUsage(null); return; }
+    setExpandedUsage(c.id);
+    if (!usages[c.id]) {
+      try {
+        const r = await api.get(`/coupons/${c.id}/usages`);
+        setUsages((prev) => ({ ...prev, [c.id]: Array.isArray(r) ? r : [] }));
+      } catch { setUsages((prev) => ({ ...prev, [c.id]: [] })); }
+    }
+  };
+
   const getCardBackground = (item: SlideItem) => {
     if (item.image) return undefined;
     if (item.gradient) return item.gradient;
@@ -147,12 +233,12 @@ export default function SlidersPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        title="Slides / Carruseles"
-        description="Administra los slides del Hero y las ofertas de tu sitio web."
-        breadcrumbs={[{ label: "Contenido", to: "/" }, { label: "Sliders" }]}
+        title="Promociones"
+        description="Módulo único de campañas: ofertas de tienda, talleres y temporadas. El sistema las muestra automáticamente donde corresponde."
+        breadcrumbs={[{ label: "Contenido", to: "/" }, { label: "Promociones" }]}
         action={
-          <button onClick={openNew} className="mp-btn-primary text-sm">
-            <Plus size={15} /> Nuevo Slide
+          <button onClick={activeTab === "coupons" ? openNewCoupon : openNew} className="mp-btn-primary text-sm">
+            <Plus size={15} /> {activeTab === "coupons" ? "Nuevo Cupón" : "Nuevo Slide"}
           </button>
         }
       />
@@ -168,22 +254,34 @@ export default function SlidersPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
         <KpiCard
-          title={`Total en ${activeTab === "hero" ? "Hero" : "Ofertas"}`}
+          title={`Total en ${activeTab === "hero" ? "Hero" : "Promociones"}`}
           value={items.length}
           icon={<Layers size={18} />}
           iconColor="blue"
-          subtitle="Slides configurados"
+          change={{ value: "Slides configurados", positive: true }}
         />
         <KpiCard
           title="Activos"
           value={activeCount}
           icon={<Eye size={18} />}
           iconColor="green"
-          subtitle="Actualmente publicados"
+          change={{ value: "Actualmente publicados", positive: true }}
         />
       </div>
 
-      {loading ? (
+      {activeTab === "coupons" ? (
+        <CouponsSection
+          coupons={coupons}
+          loading={loading}
+          usages={usages}
+          expandedUsage={expandedUsage}
+          onNew={openNewCoupon}
+          onEdit={openEditCoupon}
+          onDelete={handleDeleteCoupon}
+          onToggle={handleToggleCoupon}
+          onToggleUsage={toggleUsage}
+        />
+      ) : loading ? (
         <div className="mp-card p-5">
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
@@ -202,7 +300,7 @@ export default function SlidersPage() {
           <Layers size={32} className="mx-auto mb-3 text-[var(--mp-text-tertiary)]" />
           <p className="text-sm font-semibold text-[var(--mp-text-primary)]">Sin slides aun</p>
           <p className="text-xs text-[var(--mp-text-tertiary)] mt-1 mb-4">
-            {activeTab === "hero" ? "Los slides son las imagenes principales de tu pagina." : "Las ofertas promocionales destacan tus promociones."}
+            {activeTab === "hero" ? "Los slides son las imagenes principales de tu pagina." : "Las promociones se muestran automaticamente en Tienda, Servicios o Inicio segun su tipo."}
           </p>
           <button onClick={openNew} className="mp-btn-primary text-sm"><Plus size={15} /> Nuevo Slide</button>
         </div>
@@ -210,7 +308,7 @@ export default function SlidersPage() {
         <div className="mp-card">
           <div className="flex items-center justify-between p-4 border-b border-[var(--mp-border)]">
             <div>
-              <h3 className="text-sm font-semibold text-[var(--mp-text-primary)]">Lista de slides ({activeTab === "hero" ? "Hero" : "Ofertas"})</h3>
+              <h3 className="text-sm font-semibold text-[var(--mp-text-primary)]">Lista de slides ({activeTab === "hero" ? "Hero" : "Promociones"})</h3>
               <p className="text-xs text-[var(--mp-text-tertiary)]">Arrastra para reordenar</p>
             </div>
             <div className="flex items-center gap-2">
@@ -478,6 +576,32 @@ export default function SlidersPage() {
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${form.is_active === "1" ? "translate-x-6" : "translate-x-1"}`} />
                       </button>
                     </div>
+                    {activeTab === "offers" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100">
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Tipo de promoción</label>
+                          <select
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--mp-accent)]/20 focus:border-[var(--mp-accent)]"
+                            value={form.promo_type}
+                            onChange={(e) => setForm({ ...form, promo_type: e.target.value })}
+                          >
+                            {promoTypes.map((t) => (
+                              <option key={t.value} value={t.value}>{t.label}</option>
+                            ))}
+                          </select>
+                          <p className="text-[11px] text-gray-400 mt-1">Determina dónde se muestra la promoción automáticamente: Tienda, Servicios o ambos.</p>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 mb-1.5 block">Vence el (opcional)</label>
+                          <input type="datetime-local"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--mp-accent)]/20 focus:border-[var(--mp-accent)]"
+                            value={form.ends_at || ""}
+                            onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
+                          />
+                          <p className="text-[11px] text-gray-400 mt-1">Muestra un contador de tiempo regresivo.</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                       <div>
                         <p className="text-sm font-medium text-gray-900">Orden</p>
@@ -579,6 +703,224 @@ export default function SlidersPage() {
             </div>
 
           </div>
+        </div>
+      )}
+
+      {couponModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setCouponModal(false)} />
+          <div className="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl animate-scale-in max-h-[90vh] flex flex-col">
+            <div className="flex items-center gap-3 px-6 pt-6 pb-2">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[rgba(255,107,0,0.1)] text-[var(--mp-accent)]">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12M2 7h20v5H2z"/><circle cx="12" cy="16.5" r="1.5"/></svg>
+              </div>
+              <div>
+                <h3 className="text-[15px] font-semibold text-gray-900">{editingCoupon ? "Editar Cupón" : "Nuevo Cupón"}</h3>
+                <p className="text-xs text-gray-400">Descuentos aplicables en tienda y taller.</p>
+              </div>
+              <button onClick={() => setCouponModal(false)} type="button"
+                className="ml-auto w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Código del cupón <span className="text-red-500">*</span></label>
+                <input className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 uppercase placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--mp-accent)]/20 focus:border-[var(--mp-accent)]"
+                  placeholder="Ej: BIENVENIDO10" value={couponForm.code}
+                  onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 30) })} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Descripción</label>
+                <input className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--mp-accent)]/20 focus:border-[var(--mp-accent)]"
+                  placeholder="Qué ofrece este cupón" value={couponForm.description}
+                  onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value.slice(0, 120) })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1.5 block">Tipo de descuento</label>
+                  <select className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none"
+                    value={couponForm.discount_type}
+                    onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}>
+                    <option value="percentage">Porcentaje (%)</option>
+                    <option value="fixed">Monto fijo ($)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1.5 block">Valor del descuento</label>
+                  <input type="number" min="0" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none"
+                    value={couponForm.discount_value}
+                    onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1.5 block">Compra mínima ($)</label>
+                  <input type="number" min="0" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none"
+                    value={couponForm.min_purchase}
+                    onChange={(e) => setCouponForm({ ...couponForm, min_purchase: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1.5 block">Usos máximos (0 = ilimitado)</label>
+                  <input type="number" min="0" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none"
+                    value={couponForm.max_uses}
+                    onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Vence el (opcional)</label>
+                <input type="datetime-local" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 focus:outline-none"
+                  value={couponForm.expires_at || ""}
+                  onChange={(e) => setCouponForm({ ...couponForm, expires_at: e.target.value })} />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Cupón activo</p>
+                  <p className="text-xs text-gray-400">Disponible para ser usado en checkout</p>
+                </div>
+                <button onClick={() => setCouponForm({ ...couponForm, is_active: couponForm.is_active === "1" ? "0" : "1" })} type="button"
+                  className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                  style={{ background: couponForm.is_active === "1" ? "var(--mp-accent)" : "#D1D5DB" }}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${couponForm.is_active === "1" ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
+              <button onClick={() => setCouponModal(false)}
+                className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={handleSaveCoupon} disabled={!couponForm.code.trim()}
+                className="px-5 py-2.5 rounded-xl text-sm font-medium text-white flex items-center gap-2 disabled:opacity-50 transition-colors"
+                style={{ background: "var(--mp-accent)" }}>
+                <Check size={16} />
+                Guardar Cupón
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CouponsSection({
+  coupons, loading, usages, expandedUsage, onNew, onEdit, onDelete, onToggle, onToggleUsage,
+}: {
+  coupons: Coupon[];
+  loading: boolean;
+  usages: Record<string, any[]>;
+  expandedUsage: string | null;
+  onNew: () => void;
+  onEdit: (c: Coupon) => void;
+  onDelete: (c: Coupon) => void;
+  onToggle: (c: Coupon) => void;
+  onToggleUsage: (c: Coupon) => void;
+}) {
+  const activeCount = coupons.filter(c => c.is_active).length;
+  const usedCount = coupons.reduce((s, c) => s + (c.used_count || 0), 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <KpiCard title="Total Cupones" value={coupons.length} icon={<Layers size={18} />} iconColor="blue" />
+        <KpiCard title="Activos" value={activeCount} icon={<Eye size={18} />} iconColor="green" />
+        <KpiCard title="Usos acumulados" value={usedCount} icon={<Copy size={18} />} iconColor="purple" />
+      </div>
+
+      {loading ? (
+        <div className="mp-card p-8 text-center text-sm text-[var(--mp-text-tertiary)]">Cargando cupones...</div>
+      ) : coupons.length === 0 ? (
+        <div className="mp-card p-8 text-center">
+          <Layers size={32} className="mx-auto mb-3 text-[var(--mp-text-tertiary)]" />
+          <p className="text-sm font-semibold text-[var(--mp-text-primary)]">Sin cupones aún</p>
+          <p className="text-xs text-[var(--mp-text-tertiary)] mt-1 mb-4">Crea códigos de descuento para la tienda y el taller.</p>
+          <button onClick={onNew} className="mp-btn-primary text-sm"><Plus size={15} /> Nuevo Cupón</button>
+        </div>
+      ) : (
+        <div className="mp-card overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[var(--mp-border)]">
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] px-4 py-3">Código</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] px-4 py-3">Descripción</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] px-4 py-3">Descuento</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] px-4 py-3">Usos</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] px-4 py-3 hidden lg:table-cell">Vence</th>
+                <th className="text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] px-4 py-3">Estado</th>
+                <th className="text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] px-4 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {coupons.map((c) => {
+                const expired = c.expires_at && new Date(c.expires_at) < new Date();
+                return (
+                  <Fragment key={c.id}>
+                    <tr className="border-b border-[var(--mp-border)] hover:bg-[var(--mp-bg-elevated)] transition-colors">
+                      <td className="px-4 py-3">
+                        <button onClick={() => onToggleUsage(c)} type="button" className="text-sm font-bold text-[var(--mp-accent)] hover:underline">{c.code}</button>
+                        {expired && <span className="ml-2 text-[9px] font-bold text-[#EF4444] bg-[rgba(239,68,68,0.1)] px-1.5 py-0.5 rounded">EXPIRADO</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-xs text-[var(--mp-text-secondary)] truncate max-w-[220px]">{c.description || "—"}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-bold text-[var(--mp-text-primary)]">{c.discount_type === "percentage" ? `${c.discount_value}%` : `$${Number(c.discount_value).toLocaleString("es-CO")}`}</span>
+                        {Number(c.min_purchase) > 0 && <span className="block text-[9px] text-[var(--mp-text-tertiary)]">Mín ${Number(c.min_purchase).toLocaleString("es-CO")}</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-semibold text-[var(--mp-text-primary)]">{c.used_count || 0}</span>
+                        {Number(c.max_uses) > 0 && <span className="text-[10px] text-[var(--mp-text-tertiary)]"> / {c.max_uses}</span>}
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <span className="text-xs text-[var(--mp-text-tertiary)]">{c.expires_at ? new Date(c.expires_at).toLocaleDateString("es-CO") : "—"}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => onToggle(c)} type="button" className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                          style={{ background: c.is_active ? "var(--mp-accent)" : "var(--mp-border)" }}>
+                          <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${c.is_active ? "translate-x-6" : "translate-x-1"}`} />
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1 justify-end">
+                          <button onClick={() => onEdit(c)} className="p-1.5 rounded-lg hover:bg-[var(--mp-bg-elevated)] text-[var(--mp-text-tertiary)] hover:text-[var(--mp-accent)]" type="button" title="Editar">
+                            <Edit3 size={14} />
+                          </button>
+                          <button onClick={() => onDelete(c)} className="p-1.5 rounded-lg hover:bg-[rgba(239,68,68,0.08)] text-[var(--mp-text-tertiary)] hover:text-[var(--mp-danger)]" type="button" title="Eliminar">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {expandedUsage === c.id && (
+                      <tr key={`${c.id}-usage`} className="bg-[var(--mp-bg-elevated)]/60">
+                        <td colSpan={7} className="px-4 py-3">
+                          <div className="rounded-xl border border-[var(--mp-border)] bg-[var(--mp-bg-card)] p-3">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--mp-text-tertiary)] mb-2">Usos del cupón ({(usages[c.id] || []).length})</p>
+                            {(usages[c.id] || []).length === 0 ? (
+                              <p className="text-xs text-[var(--mp-text-tertiary)]">Sin usos registrados.</p>
+                            ) : (
+                              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                {usages[c.id].map((u) => (
+                                  <div key={u.id} className="flex items-center justify-between gap-3 text-xs">
+                                    <span className="text-[var(--mp-text-secondary)] truncate">{u.customer_name_resolved || u.customer_name || u.customer_email || "Cliente sin registro"}</span>
+                                    <span className="text-[var(--mp-text-tertiary)]">{u.created_at ? new Date(u.created_at.replace(" ", "T")).toLocaleString("es-CO") : ""}</span>
+                                    <span className="font-bold text-[var(--mp-accent)]">-${(u.discount_amount || 0).toLocaleString("es-CO")}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

@@ -56,14 +56,6 @@ export function ProductInfo({
       </div>
 
       <div className="flex items-center gap-3 mt-4 flex-wrap">
-        <div className="flex gap-0.5">
-          {[1, 2, 3, 4, 5].map(i => (
-            <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i <= Math.round(product.rating || 4) ? "#fbbf24" : "none"} stroke="#fbbf24" strokeWidth="2">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-          ))}
-        </div>
-        <span className="text-xs text-text-tertiary">{product.rating || 4} ({(Array.isArray(product.reviews) ? product.reviews.length : product.reviews) || 0} reseñas)</span>
         <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${stockColors[stockLevel]}`}>{stockLabels[stockLevel]}</span>
       </div>
 

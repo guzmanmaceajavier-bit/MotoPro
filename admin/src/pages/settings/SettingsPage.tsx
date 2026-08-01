@@ -222,6 +222,29 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+
+            <div className="mp-card p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F97316]/15 to-[#F97316]/5 flex items-center justify-center">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[var(--mp-text-primary)]">Promociones</h3>
+                  <p className="text-[11px] text-[var(--mp-text-tertiary)]">Controla la visibilidad de las campañas promocionales en el sitio.</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--mp-bg-elevated)]">
+                <div>
+                  <p className="text-sm font-semibold text-[var(--mp-text-primary)]">Activar promociones</p>
+                  <p className="text-[11px] text-[var(--mp-text-tertiary)] mt-0.5">Muestra las secciones de promociones en Inicio, Tienda y Servicios.</p>
+                </div>
+                <button onClick={() => handleChange("promotions_enabled", c.promotions_enabled === "1" ? "0" : "1")} type="button"
+                  className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ml-4"
+                  style={{ background: c.promotions_enabled === "1" ? "var(--mp-accent)" : "#D1D5DB" }}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${c.promotions_enabled === "1" ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
+              </div>
+            </div>
           </>
         )}
 

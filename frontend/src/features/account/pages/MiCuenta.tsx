@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SEO } from '@/components/SEO';
-import { Spinner } from '@/components/ui';
+import { EmptyState, Spinner } from '@/components/ui';
 
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
@@ -10,7 +10,6 @@ import { useCart } from '@/providers/CartProvider';
 import { api } from '@/api/client';
 import { ChevronDown, ChevronUp, Shield } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
-import { EmptyState } from '@shared/components/ui/EmptyState';
 import { ProfileForm } from '../components/ProfileForm';
 import { DashboardResumen } from '../components/DashboardResumen';
 import { VehicleManager } from '../components/VehicleManager';
@@ -47,14 +46,24 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
 function TabContent({ items, renderItem, emptyMessage, emptyAction }: { items: any[]; renderItem: (item: any) => React.ReactNode; emptyMessage: string; emptyAction?: { label: string; to: string } }) {
   const navigate = useNavigate();
   if (items.length === 0) {
-    const action = emptyAction ? { label: emptyAction.label, onClick: () => navigate(emptyAction.to) } : undefined;
-    return <EmptyState title="Sin datos" message={emptyMessage} action={action} />;
+    return (
+      <EmptyState
+        title="Sin datos"
+        description={emptyMessage}
+        action={emptyAction ? (
+          <button onClick={() => navigate(emptyAction.to)} className="mt-2 px-4 py-2 rounded-lg bg-interactive-accent text-sm font-semibold text-black hover:bg-interactive-accent-hover transition-colors">
+            {emptyAction.label}
+          </button>
+        ) : undefined}
+      />
+    );
   }
   return <div className="space-y-4">{items.map(renderItem)}</div>;
 }
 
 export default function MiCuenta() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, updateProfile, logout } = useAuth();
   const { addToast } = useToast();
   const { addItem, clearCart } = useCart();
@@ -93,6 +102,11 @@ export default function MiCuenta() {
     setProfileForm({ name: user.name || '', email: user.email || '', phone: user.phone || '', address: user.address || '' });
     fetchAll();
   }, [user, navigate, fetchAll]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && TABS.some(t => t.key === tab)) setActiveTab(tab as Tab);
+  }, [searchParams]);
 
   useEffect(() => { setServices(orders.filter((o: any) => o.type === 'service')); }, [orders]);
   const quotes = services.filter((s: any) => s.status === 'pending' || s.status === 'approved');
@@ -134,11 +148,11 @@ export default function MiCuenta() {
   };
 
   const dashboardStats = [
-    { label: 'Servicios', value: services.length, icon: 'services', to: '#servicios' },
-    { label: 'Pedidos', value: orders.length, icon: 'orders', to: '#compras' },
-    { label: 'Citas', value: appointments.length, icon: 'appointments', to: '#citas' },
-    { label: 'Vehículos', value: vehicles.length, icon: 'vehicles', to: '#vehiculos' },
-    { label: 'Garantías', value: warranties.length, icon: 'warranty', to: '#garantias' },
+    { label: 'Servicios', value: services.length, icon: 'services', to: '?tab=servicios' },
+    { label: 'Pedidos', value: orders.length, icon: 'orders', to: '?tab=compras' },
+    { label: 'Citas', value: appointments.length, icon: 'appointments', to: '?tab=citas' },
+    { label: 'Vehículos', value: vehicles.length, icon: 'vehicles', to: '?tab=vehiculos' },
+    { label: 'Garantías', value: warranties.length, icon: 'warranty', to: '?tab=garantias' },
   ];
 
   return (
@@ -158,9 +172,9 @@ export default function MiCuenta() {
               </button>
             </div>
 
-            <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+            <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
               {TABS.map((tab) => (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                <button key={tab.key} onClick={() => { setActiveTab(tab.key); if (tab.key === 'resumen') setSearchParams({}); else setSearchParams({ tab: tab.key }); }}
                   className={`px-5 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                     activeTab === tab.key ? 'bg-interactive-accent text-black' : 'bg-surface-secondary text-text-secondary hover:text-text-primary border border-border'
                   }`}>
@@ -190,7 +204,7 @@ export default function MiCuenta() {
                             <div className="flex items-center gap-3">
                               <Link to={`/estado-servicio?id=${s.id}`} className="text-xs text-interactive-accent hover:underline">Ver estado</Link>
                               <StatusBadge status={s.status} />
-                              <button onClick={() => setExpandedService(expandedService === s.id ? null : s.id)} className="text-text-tertiary hover:text-text-primary">
+                              <button onClick={() => setExpandedService(expandedService === s.id ? null : s.id)} aria-label={expandedService === s.id ? "Contraer detalles" : "Expandir detalles"} className="text-text-tertiary hover:text-text-primary">
                                 {expandedService === s.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                               </button>
                             </div>
@@ -209,7 +223,7 @@ export default function MiCuenta() {
                               {(s.photos || []).length > 0 && (
                                 <div>
                                   <h4 className="text-xs font-semibold text-text-secondary uppercase mb-2">Fotos</h4>
-                                  <div className="flex gap-2 overflow-x-auto">
+                                  <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                                     {s.photos.map((photo: string, i: number) => (
                                       <img key={i} src={photo} alt="" loading="lazy" className="w-16 h-16 rounded object-cover shrink-0" />
                                     ))}

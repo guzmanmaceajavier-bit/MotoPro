@@ -76,7 +76,7 @@ export function BeforeAfterSlider({
       {/* Slider handle */}
       <div
         className="absolute inset-y-0 z-20 cursor-ew-resize"
-        style={{ left: `${sliderPos}%`, translateX: "-50%" }}
+        style={{ left: `${sliderPos}%`, transform: "translateX(-50%)" }}
         onPointerDown={onPointerDown}
       >
         {/* Line */}

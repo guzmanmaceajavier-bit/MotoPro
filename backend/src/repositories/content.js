@@ -16,6 +16,13 @@ const map = {
   faqs: BaseRepository("faqs", { name: "FAQ" }),
   "blog-categories": BaseRepository("blog_categories", { name: "Categoría de Blog" }),
   "blog-comments": BaseRepository("blog_comments", { name: "Comentario" }),
+  "legal-pages": BaseRepository("legal_pages", { name: "Página Legal" }),
+  coupons: BaseRepository("coupons", { name: "Cupón" }),
+  "shipping-zones": BaseRepository("shipping_zones", { name: "Zona de Envío" }),
+  "payment-methods": BaseRepository("payment_methods", { name: "Método de Pago" }),
+  branches: BaseRepository("branches", { name: "Sucursal" }),
+  warehouses: BaseRepository("warehouses", { name: "Bodega" }),
+  holidays: BaseRepository("holidays", { name: "Festivo" }),
 };
 
 module.exports = map;

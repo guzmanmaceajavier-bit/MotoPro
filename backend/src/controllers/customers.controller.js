@@ -57,6 +57,39 @@ exports.getById = (req, res) => {
     [customer.id, customer.email]
   );
 
+  // Invoices
+  customer.invoices = query(
+    `SELECT id, invoice_number, total, status, payment_method, created_at, due_date, paid_at
+     FROM invoices WHERE customer_id = ? OR customer_email = ?
+     ORDER BY created_at DESC LIMIT 20`,
+    [customer.id, customer.email]
+  );
+
+  // Warranties
+  customer.warranties = query(
+    `SELECT id, entity_type, entity_id, service_name, product_name, duration_days,
+            start_date, end_date, status, created_at
+     FROM warranties WHERE customer_id = ? OR customer_email = ?
+     ORDER BY created_at DESC LIMIT 20`,
+    [customer.id, customer.email]
+  );
+
+  // Quotes
+  customer.quotes = query(
+    `SELECT id, quote_number, work_order_id, total, status, valid_until, created_at
+     FROM quotes WHERE customer_id = ? OR customer_email = ?
+     ORDER BY created_at DESC LIMIT 20`,
+    [customer.id, customer.email]
+  );
+
+  // Direct sales (POS)
+  customer.directSales = query(
+    `SELECT id, sale_number, total, payment_method, status, created_at
+     FROM direct_sales WHERE customer_email = ? OR customer_phone = ?
+     ORDER BY created_at DESC LIMIT 20`,
+    [customer.email, customer.phone]
+  );
+
   success(res, customer);
 };
 

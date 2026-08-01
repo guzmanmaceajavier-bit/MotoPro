@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "@/api/client";
 import { useToast } from "@/components/Toast";
-import { BarChart3, TrendingUp, Users, Wrench, Package, Download, Loader2 } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Wrench, Package, Download, Loader2, ShoppingCart, LayoutGrid } from "lucide-react";
 
 interface Report { label: string; value: number; color?: string; }
 interface ExecutiveReport { revenue: number; profit: number; completedOrders: number; newCustomers: number; trend: Report[]; }
@@ -50,6 +50,7 @@ function MiniPie({ data }: { data: Report[] }) {
 
 export default function ReportsPage() {
   const [activeReport, setActiveReport] = useState("executive");
+  const [module, setModule] = useState("all");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>({});
   const [period, setPeriod] = useState("month");
@@ -57,12 +58,37 @@ export default function ReportsPage() {
   const { showToast } = useToast();
 
   const reports = [
-    { key: "executive", label: "Ejecutivo", icon: <BarChart3 size={15} /> },
-    { key: "financial", label: "Financiero", icon: <TrendingUp size={15} /> },
-    { key: "workshop", label: "Taller", icon: <Wrench size={15} /> },
-    { key: "inventory", label: "Inventario", icon: <Package size={15} /> },
-    { key: "customers", label: "Clientes", icon: <Users size={15} /> },
+    { key: "executive", label: "Ejecutivo", icon: <BarChart3 size={15} />, module: ["taller", "comercial"] },
+    { key: "financial", label: "Financiero", icon: <TrendingUp size={15} />, module: ["comercial"] },
+    { key: "workshop", label: "Taller", icon: <Wrench size={15} />, module: ["taller"] },
+    { key: "inventory", label: "Inventario", icon: <Package size={15} />, module: ["inventario"] },
+    { key: "customers", label: "Clientes", icon: <Users size={15} />, module: ["comercial"] },
   ];
+
+  const modules = [
+    { key: "all", label: "Todos", icon: <LayoutGrid size={14} /> },
+    { key: "taller", label: "Taller", icon: <Wrench size={14} /> },
+    { key: "comercial", label: "Comercial", icon: <ShoppingCart size={14} /> },
+    { key: "inventario", label: "Inventario", icon: <Package size={14} /> },
+  ];
+
+  const visibleReports = reports.filter(r => module === "all" || r.module.includes(module));
+
+  const EXPORT_TYPES: Record<string, string> = {
+    executive: "work-orders",
+    financial: "invoices",
+    workshop: "work-orders",
+    inventory: "inventory",
+    customers: "customers",
+  };
+
+  const selectModule = (m: string) => {
+    setModule(m);
+    const visible = reports.filter(r => m === "all" || r.module.includes(m));
+    if (!visible.some(r => r.key === activeReport) && visible.length) {
+      setActiveReport(visible[0].key);
+    }
+  };
 
   const load = () => {
     setLoading(true);
@@ -71,13 +97,15 @@ export default function ReportsPage() {
 
   useEffect(() => { load(); }, [activeReport, period]);
 
-  const exportCSV = async (format: string) => {
+  const exportCSV = async (format: "csv" | "excel") => {
     setExporting(true);
     try {
-      const resp = await api.get(`/reports/export/${activeReport}?format=${period}&type=${format}`);
-      const blob = new Blob([typeof resp === "string" ? resp : JSON.stringify(resp)], { type: format === "excel" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "text/csv" });
+      const type = EXPORT_TYPES[activeReport] || "work-orders";
+      const resp = await api.download(`/reports/export/${type}?format=${format}`);
+      const blob = new Blob([resp], { type: format === "excel" ? "application/vnd.ms-excel" : "text/csv;charset=utf-8" });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `reporte_${activeReport}_${period}.${format === "excel" ? "xlsx" : "csv"}`; a.click();
+      const a = document.createElement("a"); a.href = url; a.download = `reporte_${activeReport}_${format === "excel" ? "xls" : "csv"}`; a.click();
+      window.URL.revokeObjectURL(url);
       showToast("success", "Reporte descargado");
     } catch { showToast("error", "Error al exportar"); } finally { setExporting(false); }
   };
@@ -107,8 +135,18 @@ export default function ReportsPage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-xs font-semibold text-[var(--mp-text-tertiary)] uppercase tracking-wider mr-1">Módulo:</span>
+        {modules.map((m) => (
+          <button key={m.key} onClick={() => selectModule(m.key)} type="button"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${module === m.key ? "bg-[var(--mp-accent)] text-white shadow-sm" : "bg-[var(--mp-bg-elevated)] text-[var(--mp-text-tertiary)] hover:text-[var(--mp-text-primary)]"}`}>
+            {m.icon} {m.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex gap-1 border-b border-[var(--mp-border)] overflow-x-auto">
-        {reports.map((r) => (
+        {visibleReports.map((r) => (
           <button key={r.key} onClick={() => setActiveReport(r.key)} className={`relative flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap ${activeReport === r.key ? "text-[var(--mp-accent)]" : "text-[var(--mp-text-tertiary)] hover:text-[var(--mp-text-primary)]"}`} type="button">
             {r.icon} {r.label}
             {activeReport === r.key && <span className="absolute bottom-0 left-0 h-0.5 w-full bg-[var(--mp-accent)] rounded-t-full" />}

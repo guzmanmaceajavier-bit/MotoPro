@@ -78,6 +78,9 @@ const defaultConfigs = {
   survey_enabled: "true",
   survey_delay_days: "3",
 
+  // Promociones
+  promotions_enabled: "0",
+
   // Backup
   auto_backup_enabled: "false",
   backup_interval_hours: "24",

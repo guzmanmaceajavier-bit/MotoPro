@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
-
-import { useConfig } from "@/providers/CMSProvider";
-import { SEO } from "@/components/SEO";
-import { Spinner } from "@/components/ui";
+import { SEO, faqSchema } from "@/components/SEO";
+import { Spinner, EmptyState } from "@/components/ui";
 import { api } from "@/api/client";
 
 const categoryIcons: Record<string, string> = {
@@ -13,7 +11,6 @@ const categoryIcons: Record<string, string> = {
 };
 
 export default function FAQ() {
-  const config = useConfig();
   const [faqs, setFaqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -28,7 +25,7 @@ export default function FAQ() {
 
   return (
     <>
-      <SEO title="Preguntas Frecuentes | MotoPro" />
+      <SEO title="Preguntas Frecuentes | MotoPro" structuredData={faqs.length > 0 ? faqSchema(faqs.map(f => ({ question: f.question, answer: f.answer }))) : undefined} />
       <main className="bg-surface-primary min-h-screen pt-24 pb-16">
         <div className="mx-auto max-w-3xl px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -37,14 +34,23 @@ export default function FAQ() {
             <p className="text-text-secondary mt-2">Respuestas a las dudas más comunes sobre nuestros servicios.</p>
           </div>
 
-          <div className="relative mb-8">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar preguntas..."
-              className="w-full rounded-lg border border-border bg-surface-tertiary pl-11 pr-4 py-3.5 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-border-accent"
-            />
+          <div className="relative mb-8 max-w-2xl mx-auto">
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar preguntas..."
+                className="w-full rounded-xl border border-border-subtle bg-surface-secondary pl-11 pr-4 py-3.5 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-interactive-accent focus:ring-2 focus:ring-interactive-accent/10 transition-all"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -97,9 +103,6 @@ export default function FAQ() {
               <Link to="/contacto" className="inline-flex items-center gap-2 rounded-lg bg-interactive-accent px-6 py-3 font-semibold text-black hover:bg-interactive-accent-hover transition-all">
                 <MessageCircle size={18} /> Contacto directo
               </Link>
-              <a href={`https://wa.me/${config.social_whatsapp || "573001234567"}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-interactive-accent px-6 py-3 font-semibold text-interactive-accent hover:bg-interactive-accent/10 transition-all">
-                WhatsApp
-              </a>
             </div>
           </div>
         </div>

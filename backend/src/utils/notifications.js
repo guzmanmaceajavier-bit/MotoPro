@@ -1,4 +1,5 @@
-const { query } = require("../config/database");
+const { query, run } = require("../config/database");
+const { generateId } = require("./helpers");
 
 function getConfig() {
   const configs = query("SELECT * FROM email_config");
@@ -26,6 +27,10 @@ async function sendMail({ to, subject, html }) {
 }
 
 async function notifyAdmin(subject, html) {
+  try {
+    run("INSERT INTO notifications (id, user_id, customer_id, type, title, message, entity_type, entity_id) VALUES (?, NULL, NULL, ?, ?, ?, NULL, NULL)",
+      [generateId(), "info", subject, (html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300)]);
+  } catch (e) { console.error("[backend]", e.message); }
   const cfg = getConfig();
   const adminEmail = cfg.admin_email || cfg.smtp_user;
   if (adminEmail) await sendMail({ to: adminEmail, subject, html });

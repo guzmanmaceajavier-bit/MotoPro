@@ -10,4 +10,4 @@ export { Breadcrumb } from "./Breadcrumb";
 export { Input } from "./Input";
 export { PageLoader } from "./PageLoader";
 export { Skeleton, ProductCardSkeleton, BlogCardSkeleton, ServiceCardSkeleton, TestimonialCardSkeleton } from "@/components/Skeleton";
-export { SectionTitle } from "./SectionTitle";
+export { default as SectionTitle } from "./SectionTitle";

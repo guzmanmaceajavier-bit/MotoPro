@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import { SEO } from "@/components/SEO";
@@ -7,6 +7,8 @@ import { Spinner } from "@/components/ui";
 import { api } from "@/api/client";
 
 export default function Comparar() {
+  const { ids } = useParams();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [selected, setSelected] = useState<any[]>([]);
   const [search, setSearch] = useState("");
@@ -16,8 +18,15 @@ export default function Comparar() {
     api.get("/products?all=1").then(d => {
       const items = Array.isArray(d) ? d : d?.data || [];
       setProducts(items);
+      const wanted = new Set<string>((ids || "").split(",").filter(Boolean));
+      const addId = searchParams.get("add");
+      if (addId) wanted.add(addId);
+      if (wanted.size > 0) {
+        const matched = items.filter((p: any) => wanted.has(String(p.id)) || wanted.has(p.slug)).slice(0, 4);
+        if (matched.length > 0) setSelected(matched);
+      }
     }).catch((err) => console.warn("[fetch]", err)).finally(() => setLoading(false));
-  }, []);
+  }, [ids, searchParams]);
 
   const toggleProduct = (p: any) => {
     if (selected.find(s => s.id === p.id)) {
@@ -68,13 +77,22 @@ export default function Comparar() {
 
           {/* Search */}
           {selected.length < 4 && (
-            <div className="relative mb-6">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar productos..."
-                className="w-full rounded-lg border border-border bg-surface-tertiary pl-11 pr-4 py-3 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-border-accent"
-              />
+            <div className="relative mb-6 max-w-xl">
+              <div className="relative">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar productos..."
+                  className="w-full rounded-xl border border-border-subtle bg-surface-secondary pl-11 pr-10 py-3 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-interactive-accent focus:ring-2 focus:ring-interactive-accent/10 transition-all"
+                />
+                {search && (
+                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

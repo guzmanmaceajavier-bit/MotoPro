@@ -105,7 +105,7 @@ export default function SolicitarServicio() {
                     {photos.map((file, i) => (
                       <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border bg-surface-tertiary">
                         <img src={URL.createObjectURL(file)} alt={`Foto ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
-                        <button type="button" onClick={() => setPhotos(photos.filter((_, j) => j !== i))}
+                        <button type="button" onClick={() => setPhotos(photos.filter((_, j) => j !== i))} aria-label="Eliminar foto"
                           className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center"
                         >
                           <X className="w-3 h-3 text-white" />

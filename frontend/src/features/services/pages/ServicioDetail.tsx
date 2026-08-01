@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { SEO } from "@/components/SEO";
+import { SEO, serviceSchema } from "@/components/SEO";
 
 import { useConfig } from "@/providers/CMSProvider";
 import { api } from "@/api/client";
@@ -72,7 +72,7 @@ export default function ServicioDetail() {
 
   return (
     <>
-      <SEO title={service.title} description={service.description} />
+      <SEO title={service.title} description={service.description} structuredData={serviceSchema({ name: service.title || service.name, description: service.description, price: service.price, image: service.image || service.hero_image })} />
       <main className="bg-surface-primary min-h-screen pt-16">
         {/* Hero section */}
         <section className="relative pt-20 pb-16 overflow-hidden">

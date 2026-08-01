@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import { SEO } from "@/components/SEO";
 import { Spinner } from "@/components/ui";
+import { BrandModelFields } from "@/components/forms/BrandModelFields";
 import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { useBrands } from "@/providers/CMSProvider";
@@ -18,6 +19,7 @@ export default function AgendarCita() {
   const { user } = useAuth();
   const { addToast } = useToast();
   const { brands } = useBrands();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
   const [services, setServices] = useState<any[]>([]);
   const [mechanics, setMechanics] = useState<any[]>([]);
@@ -41,6 +43,14 @@ export default function AgendarCita() {
       api.get("/client/vehicles").then(d => setVehicles(Array.isArray(d) ? d : [])).catch((err) => console.warn("[fetch]", err));
     }
   }, [user]);
+
+  useEffect(() => {
+    if (services.length === 0 || form.service_type) return;
+    const serviceParam = searchParams.get("service");
+    if (!serviceParam) return;
+    const svc = services.find(s => String(s.id) === serviceParam || s.slug === serviceParam || s.title === serviceParam);
+    if (svc) setForm(f => ({ ...f, service_type: svc.title || svc.name }));
+  }, [services, searchParams, form.service_type]);
 
   useEffect(() => {
     if (form.appointment_date && form.mechanic_id) {
@@ -179,21 +189,13 @@ export default function AgendarCita() {
                     </div>
                   ) : null}
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-text-secondary mb-1.5">Marca</label>
-                      <select value={form.vehicle_brand} onChange={(e) => setForm({ ...form, vehicle_brand: e.target.value })}
-                        className="w-full rounded-lg border border-border bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none focus:border-border-accent"
-                      >
-                        <option value="" className="bg-surface-secondary">Selecciona marca...</option>
-                        {brands.map((b) => (<option key={b.id || b.name} value={b.name} className="bg-surface-secondary">{b.name}</option>))}
-                        <option value="Otra" className="bg-surface-secondary">Otra</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-text-secondary mb-1.5">Modelo</label>
-                      <input value={form.vehicle_model} onChange={(e) => setForm({ ...form, vehicle_model: e.target.value })}
-                        className="w-full rounded-lg border border-border bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none focus:border-border-accent" placeholder="Ej: MT-07" />
-                    </div>
+                    <BrandModelFields
+                      brand={form.vehicle_brand}
+                      model={form.vehicle_model}
+                      onBrandChange={(b) => setForm({ ...form, vehicle_brand: b })}
+                      onModelChange={(m) => setForm({ ...form, vehicle_model: m })}
+                      extraBrands={brands.map(b => b.name)}
+                    />
                     <div>
                       <label className="block text-sm font-semibold text-text-secondary mb-1.5">Placa</label>
                       <input value={form.vehicle_plate} onChange={(e) => setForm({ ...form, vehicle_plate: e.target.value })}

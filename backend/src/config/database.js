@@ -160,6 +160,12 @@ async function initDatabase() {
       expires_at TEXT, is_active INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS coupon_usages (
+      id TEXT PRIMARY KEY, coupon_id TEXT NOT NULL, customer_id TEXT, customer_email TEXT,
+      customer_name TEXT DEFAULT '', order_id TEXT, discount_amount REAL DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE CASCADE
+    );
     CREATE TABLE IF NOT EXISTS inventory_movements (
       id TEXT PRIMARY KEY, product_id TEXT NOT NULL, type TEXT NOT NULL,
       quantity INTEGER NOT NULL, reference TEXT DEFAULT '', notes TEXT DEFAULT '',
@@ -643,6 +649,12 @@ async function initDatabase() {
   try { db.run("ALTER TABLE site_config ADD COLUMN service_durations TEXT DEFAULT '{}'"); } catch (e) {}
   try { db.run("ALTER TABLE site_config ADD COLUMN break_start TEXT DEFAULT '12:00'"); } catch (e) {}
   try { db.run("ALTER TABLE site_config ADD COLUMN break_end TEXT DEFAULT '13:00'"); } catch (e) {}
+
+  // Promociones: type (product/service/combo/campaign) + expiry for countdowns
+  try { db.run("ALTER TABLE offer_slides ADD COLUMN promo_type TEXT DEFAULT 'campaign'"); } catch (e) {}
+  try { db.run("ALTER TABLE offer_slides ADD COLUMN ends_at TEXT"); } catch (e) {}
+  // Promociones: master switch (admin controls visibility on the site)
+  try { db.run("INSERT OR IGNORE INTO site_config (key, value) VALUES ('promotions_enabled', '0')"); } catch (e) {}
 
   // Workshop flow: reception, QC, delivery, warranty columns
   try { db.run("ALTER TABLE work_orders ADD COLUMN reception_photos TEXT DEFAULT '[]'"); } catch (e) {}

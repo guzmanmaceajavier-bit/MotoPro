@@ -1,8 +1,21 @@
 import { Bell, Sun, Moon, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { api } from "@/api/client";
 
 export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { theme, toggleTheme } = useTheme();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    api.get("/notifications").then((r) => {
+      const arr = Array.isArray(r) ? r : [];
+      if (active) setUnread(arr.filter((n: any) => !n.is_read).length);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   return (
     <header className="h-14 flex items-center gap-3 px-5 border-b border-[var(--mp-border)] bg-[var(--mp-bg-surface)] shrink-0 header-glow">
@@ -25,10 +38,15 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
 
       {/* Actions */}
       <div className="flex items-center gap-1 ml-auto">
-        <button className="p-2 rounded-lg text-[var(--mp-text-tertiary)] hover:text-[var(--mp-text-primary)] hover:bg-[var(--mp-bg-hover)] transition-colors" aria-label="Notificaciones">
+        <Link to="/notificaciones" className="relative p-2 rounded-lg text-[var(--mp-text-tertiary)] hover:text-[var(--mp-text-primary)] hover:bg-[var(--mp-bg-hover)] transition-colors" aria-label="Notificaciones">
           <Bell size={16} strokeWidth={1.5} />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[var(--mp-danger)] ring-2 ring-[var(--mp-bg-surface)]" />
-        </button>
+          {unread > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold text-white flex items-center justify-center ring-2 ring-[var(--mp-bg-surface)]"
+              style={{ background: "var(--mp-danger)" }}>
+              {unread > 99 ? "99+" : unread}
+            </span>
+          )}
+        </Link>
         <button onClick={toggleTheme} className="p-2 rounded-lg text-[var(--mp-text-tertiary)] hover:text-[var(--mp-text-primary)] hover:bg-[var(--mp-bg-hover)] transition-colors" aria-label="Cambiar tema">
           {theme === 'dark' ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
         </button>

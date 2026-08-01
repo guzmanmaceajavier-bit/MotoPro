@@ -1,16 +1,80 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShoppingCart, Star, Eye } from "lucide-react";
+import { ShoppingCart, Eye } from "lucide-react";
 import IconRenderer from "@/components/icons/IconRenderer";
 import type { Product } from "../types";
 
-export function ProductCard({ product, onAddToCart, onQuickView }: { product: Product; onAddToCart: (p: Product) => void; onQuickView: (p: Product) => void }) {
+interface ProductCardProps {
+  product: Product;
+  onAddToCart: (p: Product) => void;
+  onQuickView: (p: Product) => void;
+  compact?: boolean;
+}
+
+export function ProductCard({ product, onAddToCart, onQuickView, compact }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const discount = product.compare_price && product.compare_price > product.price
     ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
     : 0;
   const inStock = (product.stock ?? 0) > 0;
+
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-30px" }}
+        transition={{ duration: 0.3 }}
+        className="group bg-surface-secondary border border-border-subtle rounded-xl overflow-hidden hover:border-interactive-accent/30 hover:shadow-md transition-all duration-300 relative"
+      >
+        {/* Badges */}
+        {(discount > 0 || !inStock) && (
+          <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+            {discount > 0 && <span className="px-1.5 py-0.5 rounded bg-red-500 text-white text-[9px] font-bold">-{discount}%</span>}
+            {!inStock && <span className="px-1.5 py-0.5 rounded bg-text-tertiary text-white text-[9px] font-bold">Agotado</span>}
+          </div>
+        )}
+
+        <Link to={`/tienda/${product.slug}`} className="block">
+          <div className="relative aspect-square bg-surface-tertiary overflow-hidden">
+            {product.image ? (
+              <img src={product.image} alt={product.name} loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <IconRenderer name="package" size={28} className="text-text-tertiary/20" />
+              </div>
+            )}
+          </div>
+        </Link>
+
+        <div className="p-2.5">
+          <Link to={`/tienda/${product.slug}`}>
+            <h3 className="text-[11px] font-medium text-text-primary line-clamp-1 group-hover:text-interactive-accent transition-colors">
+              {product.name}
+            </h3>
+          </Link>
+          <div className="flex items-end justify-between mt-1.5">
+            <div>
+              {discount > 0 && product.compare_price && (
+                <span className="text-[9px] text-text-tertiary line-through block">${Math.round(product.compare_price).toLocaleString()}</span>
+              )}
+              <span className="text-sm font-bold text-interactive-accent">${Math.round(product.price).toLocaleString()}</span>
+            </div>
+            <button
+              onClick={() => onAddToCart(product)}
+              disabled={!inStock}
+              aria-label="Agregar al carrito"
+              className="w-7 h-7 rounded-lg bg-interactive-accent/10 text-interactive-accent flex items-center justify-center hover:bg-interactive-accent hover:text-white transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ShoppingCart size={12} />
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -85,16 +149,6 @@ export function ProductCard({ product, onAddToCart, onQuickView }: { product: Pr
           </h3>
         </Link>
         <p className="text-[11px] text-text-tertiary mt-1 truncate">{product.sku || ""}</p>
-
-        {/* Rating */}
-        <div className="flex items-center gap-0.5 mt-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={11} className={i < (product.rating || 0) ? "text-amber-400 fill-amber-400" : "text-text-tertiary/30"} />
-          ))}
-          {product.review_count !== undefined && product.review_count > 0 && (
-            <span className="text-[10px] text-text-tertiary ml-1">({product.review_count})</span>
-          )}
-        </div>
 
         {/* Price + Cart */}
         <div className="flex items-end justify-between mt-3">

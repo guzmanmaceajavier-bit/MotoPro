@@ -23,7 +23,7 @@ const fallbackOffers: OfferItem[] = [
 export function PromotionsSection() {
   const { offers } = useOffers();
   const items: OfferItem[] = offers.length > 0
-    ? offers.filter((o: any) => o.is_active).sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0)).slice(0, 3)
+    ? offers.filter((o: any) => o.is_active).sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0)).slice(0, 3) as OfferItem[]
     : fallbackOffers;
 
   if (items.length === 0) return null;

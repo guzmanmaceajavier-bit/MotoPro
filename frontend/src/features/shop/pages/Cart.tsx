@@ -171,7 +171,7 @@ export default function Cart() {
                           <p className="text-xs text-text-tertiary mt-0.5">{product.description}</p>
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-sm font-bold text-interactive-accent">${product.price.toLocaleString()}</span>
-                            <button
+                            <button aria-label="Agregar producto"
                               onClick={(e) => {
                                 e.preventDefault();
                                 addItem({

@@ -63,7 +63,7 @@ export function AboutSection() {
                 {/* dots indicator */}
                 <div className="absolute bottom-3 right-3 flex gap-1.5 z-10">
                   {imageSets.map((_, i) => (
-                    <button key={i} onClick={() => setImgSet(i)}
+                    <button key={i} onClick={() => setImgSet(i)} aria-label={`Ir a la imagen ${i + 1}`}
                       className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgSet ? "bg-white w-3" : "bg-white/40 hover:bg-white/60"}`}
                     />
                   ))}

@@ -7,7 +7,7 @@ import {
   BookOpen, FolderTree, Tags, Layers, HelpCircle, LogOut,
   Sliders, Grid3X3, X, Globe, Type,
   Calendar, Shield, Clock, ClipboardList, Car, ClipboardCheck, Truck, Wallet, CreditCard,
-  MessageCircle, BarChart3, Award, Building2, Activity, RotateCcw, Mail, Bike, Heart
+  MessageCircle, BarChart3, Award, Building2, Activity, RotateCcw, Mail, Bike, Heart, Bell
 } from "lucide-react";
 
 interface NavItem {
@@ -81,7 +81,7 @@ const navSections: NavSection[] = [
       { label: "Certificaciones", to: "/certifications", icon: Award },
       { label: "Confianza", to: "/trust-items", icon: Shield },
       { label: "Galería", to: "/gallery", icon: Image },
-      { label: "Sliders", to: "/sliders", icon: Sliders },
+      { label: "Promociones", to: "/sliders", icon: Sliders },
       { label: "Homepage", to: "/homepage", icon: Globe },
       { label: "Navbar", to: "/navbar", icon: Type },
       { label: "Footer", to: "/footer", icon: FileText },
@@ -107,6 +107,7 @@ const navSections: NavSection[] = [
       { label: "WhatsApp", to: "/whatsapp", icon: MessageCircle },
       { label: "Sucursales", to: "/sucursales", icon: Building2 },
       { label: "Monitoreo", to: "/logs", icon: Activity },
+      { label: "Notificaciones", to: "/notificaciones", icon: Bell },
       { label: "Perfil", to: "/profile", icon: UserCog },
     ]
   },

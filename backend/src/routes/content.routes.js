@@ -10,6 +10,7 @@ const configCtrl = wrapController(require("../controllers/config.controller"));
 const legalCtrl = wrapController(require("../controllers/legal.controller"));
 const mediaCtrl = wrapController(require("../controllers/media.controller"));
 const galleryCtrl = wrapController(require("../controllers/gallery.controller"));
+const uploadCtrl = wrapController(require("../controllers/upload.controller"));
 const upload = require("../middleware/upload");
 const { verifyToken, requirePermission } = require("../middleware/auth");
 const { cache } = require("../middleware/cache");
@@ -51,6 +52,11 @@ addCrudRoutes("/certifications", contentRepos.certifications, "Certificación", 
 addCrudRoutes("/trust-items", contentRepos["trust-items"], "Item", "cms.homepage");
 addCrudRoutes("/offers", contentRepos.offers, "Oferta", "coupons.write");
 addCrudRoutes("/faqs", contentRepos.faqs, "FAQ", "cms.homepage");
+
+// ── Extended CRUD entities (no route conflicts) ──
+addCrudRoutes("/branches", contentRepos.branches, "Sucursal", "settings.write");
+addCrudRoutes("/warehouses", contentRepos.warehouses, "Bodega", "inventory.write");
+addCrudRoutes("/holidays", contentRepos.holidays, "Festivo", "settings.write");
 
 // ── Blog ──
 router.get("/blog", cache(300), blogCtrl.list);

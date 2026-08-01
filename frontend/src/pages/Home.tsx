@@ -1,37 +1,29 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { SEO } from "@/components/SEO";
+import { SEO, localBusinessSchema } from "@/components/SEO";
 import { api } from "@/api/client";
 import IconRenderer from "@/components/icons/IconRenderer";
 import { BrandLogo } from "@/components/BrandLogo";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flame, ArrowRight, TicketPercent } from "lucide-react";
 import { BeforeAfterSlider } from "@/features/home/sections/BeforeAfterSlider";
-import { useCMS } from "@/providers/CMSProvider";
+import { useCMS, useConfig } from "@/providers/CMSProvider";
 import { useMoto } from "@/providers/MotoProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { Bike } from "lucide-react";
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < rating ? "currentColor" : "none"} stroke={i < rating ? "currentColor" : "var(--text-tertiary)"} strokeWidth="2" className={i < rating ? "text-amber-400" : ""}>
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-      ))}
-    </div>
-  );
-}
+import { PromoCard } from "@/components/promos/PromoCard";
 
 export default function Home() {
   const { services, testimonials, brands: globalBrands, heroSlides: globalHero, faqs } = useCMS();
   const { user } = useAuth();
   const { activeVehicle } = useMoto();
+  const config = useConfig();
   const brands = globalBrands;
   const [garageBays, setGarageBays] = useState<any[]>([]);
   const [processSteps, setProcessSteps] = useState<any[]>([]);
   const [trustItems, setTrustItems] = useState<any[]>([]);
+  const [promoOffers, setPromoOffers] = useState<any[]>([]);
+  const [promoCoupons, setPromoCoupons] = useState<any[]>([]);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [heroIdx, setHeroIdx] = useState(0);
   const defaultHeroImages = [
@@ -97,6 +89,16 @@ export default function Home() {
       if (Array.isArray(stepData) && stepData.length > 0) setProcessSteps(stepData);
       if (Array.isArray(trustData) && trustData.length > 0) setTrustItems(trustData);
     });
+
+    api.get("/offers").then(data => {
+      const items = Array.isArray(data) ? data.filter((o: any) => o.is_active !== 0) : [];
+      setPromoOffers(items.slice(0, 6));
+    }).catch(() => {});
+
+    api.get("/coupons/public").then(data => {
+      const items = Array.isArray(data) ? data : [];
+      setPromoCoupons(items.slice(0, 3));
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -107,7 +109,8 @@ export default function Home() {
 
   return (
     <>
-      <SEO title="Inicio" description="MotoPro - Taller especializado en mantenimiento, reparación y personalización de motocicletas." />
+      <SEO title="Inicio" description="MotoPro - Taller especializado en mantenimiento, reparación y personalización de motocicletas."
+        structuredData={localBusinessSchema({ name: "MotoPro Taller", description: "Taller especializado en mantenimiento, reparación y personalización de motocicletas." })} />
       <main className="pt-16">
 
         {/* ── 1. Hero with Slideshow ── */}
@@ -223,6 +226,63 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── 2b. Promociones Destacadas ── */}
+        {config.promotions_enabled === "1" && (promoOffers.length > 0 || promoCoupons.length > 0) && (
+        <section className="py-14 bg-surface-primary border-b border-border-subtle relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-rose-500/[0.04] via-transparent to-transparent pointer-events-none" />
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 relative">
+            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+              <div>
+                <span className="inline-flex items-center gap-2 text-[11px] font-bold text-rose-500 uppercase tracking-[0.2em]">
+                  <Flame size={14} /> Promociones destacadas
+                </span>
+                <h2 className="mt-2 text-2xl md:text-3xl font-heading font-bold text-text-primary">
+                  Ofertas que no puedes dejar pasar
+                </h2>
+                <p className="text-sm text-text-secondary mt-1">Descuentos en productos y servicios por tiempo limitado</p>
+              </div>
+              <div className="flex gap-3 shrink-0">
+                <Link to="/tienda" className="inline-flex items-center gap-1.5 text-sm font-semibold text-interactive-accent hover:underline">
+                  Ofertas en tienda <ArrowRight size={14} />
+                </Link>
+                <Link to="/servicios" className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-secondary hover:text-interactive-accent transition-colors">
+                  Promos del taller <ArrowRight size={14} />
+                </Link>
+              </div>
+            </motion.div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {promoOffers.map((o, i) => <PromoCard key={o.id} offer={o} index={i} />)}
+            </div>
+
+            {promoCoupons.length > 0 && (
+              <div className="mt-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <TicketPercent size={15} className="text-emerald-500" />
+                  <p className="text-sm font-bold text-text-primary uppercase tracking-wider">Cupones activos</p>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {promoCoupons.map((c) => (
+                    <div key={c.id} className="relative overflow-hidden rounded-2xl border border-dashed border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 to-teal-400/5 p-5">
+                      <div className="absolute -right-3 -top-3 w-20 h-20 rounded-full bg-emerald-500/10" />
+                      <p className="text-2xl font-extrabold text-text-primary">
+                        {c.discount_type === "percentage" ? `${c.discount_value}% OFF` : `$${Math.round(c.discount_value || 0).toLocaleString()} OFF`}
+                      </p>
+                      <p className="text-xs text-text-tertiary mt-1">{c.description || "Descuento exclusivo"}</p>
+                      {c.min_purchase > 0 && (
+                        <p className="text-[11px] text-text-tertiary mt-1">Compras mayores a ${Math.round(c.min_purchase).toLocaleString()}</p>
+                      )}
+                      <span className="mt-3 inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white">{c.code}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+        )}
 
         {/* ── 3. Tu Moto ── */}
         {user && activeVehicle && (
@@ -531,7 +591,6 @@ export default function Home() {
                         <p className="text-xs text-text-tertiary">{t.bike || t.role || ""}</p>
                       </div>
                     </div>
-                    <StarRating rating={t.rating || 5} />
                   </div>
                 ))}
               </div>
@@ -615,7 +674,7 @@ export default function Home() {
             <div className="overflow-hidden">
               <div ref={brandsTrackRef} className="flex gap-14 items-center w-max">
                 {[...brands, ...brands].map((brand: any, i: number) => (
-                  <BrandLogo key={i} name={brand.name} image={brand.image} size="sm" showName={false} className="!px-0 !py-0 !border-0 !bg-transparent hover:!bg-transparent opacity-70 hover:opacity-100 transition-opacity" />
+                  <BrandLogo key={i} name={brand.name} image={brand.image} size="lg" showName={false} className="!px-0 !py-0 !border-0 !bg-transparent hover:!bg-transparent opacity-80 hover:opacity-100 transition-opacity" />
                 ))}
               </div>
             </div>

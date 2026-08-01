@@ -54,10 +54,10 @@ export function DashboardResumen({ stats, user }: DashboardResumenProps) {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           {[
-            { label: "Servicios", to: "#servicios" },
-            { label: "Compras", to: "#compras" },
-            { label: "Vehículos", to: "#vehiculos" },
-            { label: "Perfil", to: "#perfil" },
+            { label: "Servicios", to: "?tab=servicios" },
+            { label: "Compras", to: "?tab=compras" },
+            { label: "Vehículos", to: "?tab=vehiculos" },
+            { label: "Perfil", to: "?tab=perfil" },
           ].map((link) => (
             <Link key={link.label} to={link.to}
               className="text-center text-xs font-semibold text-interactive-accent bg-interactive-accent/5 border border-interactive-accent/20 rounded-lg py-2 hover:bg-interactive-accent/10 transition-all"

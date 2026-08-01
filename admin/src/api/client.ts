@@ -54,4 +54,12 @@ export const api = {
       return r.json();
     });
   },
+  download: async (url: string) => {
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${API}${url}`, { headers });
+    if (!res.ok) throw new Error("Error al descargar");
+    return res.text();
+  },
 };

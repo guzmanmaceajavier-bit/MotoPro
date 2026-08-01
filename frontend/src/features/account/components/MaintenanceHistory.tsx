@@ -176,7 +176,7 @@ export default function MaintenanceHistory() {
   }
 
   if (orders.length === 0) {
-    return <EmptyState icon={<History />} title="Sin historial" message="No hay historial de mantenimiento" />;
+    return <EmptyState icon={<History />} title="Sin historial" description="No hay historial de mantenimiento" />;
   }
 
   const grouped: GroupedOrders = {};

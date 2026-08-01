@@ -6,7 +6,7 @@ import { Spinner, Badge } from "@/components/ui";
 import { useMoto } from "@/providers/MotoProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { api } from "@/api/client";
-import { Wrench, Calendar, Clock, Shield, AlertCircle, CheckCircle, ArrowRight, Bike, Star, Tool, Plus, Settings } from "lucide-react";
+import { Wrench, Calendar, Clock, Shield, AlertCircle, CheckCircle, ArrowRight, Bike, Star, Plus, Settings } from "lucide-react";
 
 export default function MiMoto() {
   const { user } = useAuth();
@@ -231,7 +231,7 @@ export default function MiMoto() {
                       ))}
                       <Link to="/servicios"
                         className="mt-2 flex items-center justify-center gap-2 w-full rounded-lg border border-border py-2.5 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-tertiary transition-all">
-                        <Tool className="w-4 h-4" />
+                        <Wrench className="w-4 h-4" />
                         Ver servicios disponibles
                       </Link>
                     </div>

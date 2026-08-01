@@ -11,8 +11,17 @@ exports.getById = (req, res) => {
   success(res, coupon);
 };
 
+exports.getPublic = (req, res) => {
+  const now = new Date().toISOString();
+  const rows = query(
+    "SELECT id, code, description, discount_type, discount_value, min_purchase, expires_at FROM coupons WHERE is_active = 1 AND (max_uses = 0 OR used_count < max_uses) AND (expires_at IS NULL OR expires_at = '' OR expires_at >= ?) ORDER BY discount_value DESC",
+    [now]
+  );
+  success(res, rows);
+};
+
 exports.validate = (req, res) => {
-  const { code, cartTotal } = req.body;
+  const { code, cartTotal, customer_email, customer_id, customer_name, order_id } = req.body;
   if (!code) return error(res, "Código requerido", 400);
   const coupon = get("SELECT * FROM coupons WHERE code = ? AND is_active = 1", [code.toUpperCase()]);
   if (!coupon) return error(res, "Cupón no válido", 404);
@@ -22,7 +31,23 @@ exports.validate = (req, res) => {
   run("UPDATE coupons SET used_count = used_count + 1 WHERE id = ?", [coupon.id]);
   let discount = coupon.discount_type === "percentage" ? cartTotal * (coupon.discount_value / 100) : coupon.discount_value;
   if (discount > cartTotal) discount = cartTotal;
+  if (customer_email || customer_id) {
+    run("INSERT INTO coupon_usages (id, coupon_id, customer_id, customer_email, customer_name, order_id, discount_amount) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [generateId(), coupon.id, customer_id || null, customer_email || null, customer_name || "", order_id || null, discount]);
+  }
   success(res, { ...coupon, discount });
+};
+
+exports.usages = (req, res) => {
+  const coupon = get("SELECT id FROM coupons WHERE id = ?", [req.params.id]);
+  if (!coupon) return error(res, "Cupón no encontrado", 404);
+  const usages = query(
+    `SELECT cu.*, c.name as customer_name_resolved FROM coupon_usages cu
+     LEFT JOIN customers c ON c.id = cu.customer_id
+     WHERE cu.coupon_id = ? ORDER BY cu.created_at DESC LIMIT 50`,
+    [req.params.id]
+  );
+  success(res, usages);
 };
 
 exports.create = (req, res) => {

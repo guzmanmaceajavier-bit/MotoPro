@@ -57,7 +57,9 @@ router.post("/cash-transactions", verifyToken, requirePermission("settings.write
 router.get("/cash-transactions/summary", verifyToken, requirePermission("settings.read"), cashTxCtrl.summary);
 
 router.get("/coupons", verifyToken, requirePermission("coupons.read"), couponsCtrl.list);
+router.get("/coupons/public", couponsCtrl.getPublic);
 router.get("/coupons/:id", verifyToken, requirePermission("coupons.read"), couponsCtrl.getById);
+router.get("/coupons/:id/usages", verifyToken, requirePermission("coupons.read"), couponsCtrl.usages);
 router.post("/coupons/validate", couponsCtrl.validate);
 router.post("/coupons", verifyToken, requirePermission("coupons.write"), couponsCtrl.create);
 router.put("/coupons/:id", verifyToken, requirePermission("coupons.write"), couponsCtrl.update);

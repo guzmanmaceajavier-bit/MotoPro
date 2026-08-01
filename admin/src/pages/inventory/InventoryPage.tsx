@@ -93,7 +93,7 @@ export default function InventoryPage() {
     api.get("/inventory").then((r) => setMovements(r || [])).catch(() => setMovements([])).finally(() => setLoading(false));
   };
   const fetchAlerts = () => {
-    api.get("/inventory/alerts").then((r) => setAlerts({ low_stock: r?.low_stock || [], out_of_stock: r?.out_of_stock || [] })).catch(() => setAlerts({ low_stock: [], out_of_stock: [] }));
+    api.get("/inventory/alerts").then((r) => setAlerts({ low_stock: r?.lowStock || [], out_of_stock: r?.outOfStock || [] })).catch(() => setAlerts({ low_stock: [], out_of_stock: [] }));
   };
   const fetchProducts = () => { api.get("/products").then((r) => setProducts(r.data || r || [])).catch(() => setProducts([])); };
   const fetchWarehouses = () => { api.get("/warehouses").then((r) => setWarehouses(r || [])).catch(() => setWarehouses([{ id: "main", name: "Almacén Principal" }])); };

@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { SEO } from "@/components/SEO";
+import { SEO, breadcrumbSchema } from "@/components/SEO";
 import { api } from "@/api/client";
-import { useBrands } from "@/providers/CMSProvider";
+import { useBrands, useConfig } from "@/providers/CMSProvider";
 import IconRenderer from "@/components/icons/IconRenderer";
 import { EmptyState, Spinner, Badge, ServiceCardSkeleton } from "@/components/ui";
-import { useConfig } from "@/providers/CMSProvider";
-import { Clock, Search, ChevronDown, X, CalendarCheck, MessageCircle, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { PromoCard } from "@/components/promos/PromoCard";
+import { Clock, Search, ChevronDown, X, ArrowRight, ChevronLeft, ChevronRight, Wrench, Flame } from "lucide-react";
 
 const FALLBACK_CATEGORIES = [
   { name: "Mecánica", icon: "wrench", description: "Revisión y reparación general del motor, transmisión y sistemas." },
@@ -28,9 +28,11 @@ export default function Servicios() {
   const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
   const [sortBy, setSortBy] = useState("");
   const [tips, setTips] = useState<any[]>([]);
+  const [works, setWorks] = useState<any[]>([]);
+  const [promoOffers, setPromoOffers] = useState<any[]>([]);
   const { brands } = useBrands();
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const config = useConfig();
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const scrollCarousel = (direction: "left" | "right") => {
@@ -57,6 +59,16 @@ export default function Servicios() {
 
     api.get("/blog-posts").then(data => {
       if (Array.isArray(data)) setTips(data.slice(0, 3));
+    }).catch(() => {});
+
+    api.get("/before-after").then(data => {
+      const items = Array.isArray(data) ? data : [];
+      setWorks(items.filter((w: any) => w.is_active !== 0).slice(0, 4));
+    }).catch(() => {});
+
+    api.get("/offers").then(data => {
+      const items = Array.isArray(data) ? data : [];
+      setPromoOffers(items.filter((o: any) => o.is_active !== 0 && (o.promo_type === "service" || o.promo_type === "general")).slice(0, 3));
     }).catch(() => {});
   }, []);
 
@@ -111,7 +123,8 @@ export default function Servicios() {
 
   return (
     <>
-      <SEO title="Servicios" description="Servicios especializados para tu motocicleta con garantía y el mejor equipo técnico." />
+      <SEO title="Servicios" description="Servicios especializados para tu motocicleta con garantía y el mejor equipo técnico."
+        structuredData={breadcrumbSchema([{ name: "Inicio", url: "/" }, { name: "Servicios", url: "/servicios" }])} />
       <main className="pt-16">
 
         {/* ── Hero ── */}
@@ -362,6 +375,26 @@ export default function Servicios() {
           </div>
         </section>
 
+        {/* ── Promociones de servicio ── */}
+        {config.promotions_enabled === "1" && promoOffers.length > 0 && (
+        <section className="bg-surface-primary pb-16">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <span className="inline-flex items-center gap-2 text-[10px] font-bold text-rose-500 uppercase tracking-[0.2em]">
+                  <Flame size={13} /> Promociones en servicios
+                </span>
+                <h2 className="mt-2 text-2xl font-heading font-bold text-text-primary">Ofertas del taller</h2>
+                <p className="text-sm text-text-secondary mt-1">Descuentos especiales, combos de mantenimiento y campañas por temporada.</p>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {promoOffers.map((o, i) => <PromoCard key={o.id} offer={o} index={i} />)}
+            </div>
+          </div>
+        </section>
+        )}
+
         {/* ── Service Cards ── */}
         <section className="py-16 bg-surface-primary">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -369,7 +402,7 @@ export default function Servicios() {
               <div>
                 <span className="text-[10px] font-bold text-interactive-accent uppercase tracking-[0.2em]">Servicios</span>
                 <h2 className="mt-2 text-2xl md:text-3xl font-heading font-bold text-text-primary">
-                  {selectedCategory ? selectedCategory : `${filtered.length} servicios disponibles`}
+                  {selectedCategory ? selectedCategory : "Servicios"}
                 </h2>
               </div>
               <Link to="/solicitar-servicio" className="hidden md:flex items-center gap-2 text-sm font-semibold text-interactive-accent hover:underline">
@@ -450,6 +483,57 @@ export default function Servicios() {
           </div>
         </section>
 
+        {/* ── Trabajos realizados (antes/después) ── */}
+        {works.length > 0 && (
+        <section className="py-16 bg-surface-secondary border-t border-border-subtle">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <span className="text-[10px] font-bold text-interactive-accent uppercase tracking-[0.2em]">Galería</span>
+                <h2 className="mt-2 text-2xl md:text-3xl font-heading font-bold text-text-primary">Trabajos realizados</h2>
+                <p className="text-sm text-text-secondary mt-1">Antes y después de algunas de nuestras intervenciones</p>
+              </div>
+              <Link to="/galeria" className="hidden md:flex items-center gap-1.5 text-sm font-semibold text-interactive-accent hover:underline">
+                Ver galería completa <ArrowRight size={14} />
+              </Link>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+              {works.map((w: any, i: number) => (
+                <motion.div key={w.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                  className="group rounded-2xl border border-border-subtle bg-surface-primary overflow-hidden hover:border-interactive-accent/30 hover:shadow-lg transition-all">
+                  <div className="relative aspect-square overflow-hidden">
+                    {w.after_image ? (
+                      <img src={w.after_image} alt={w.title} loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-surface-tertiary/40 text-text-tertiary">
+                        <Wrench size={36} />
+                      </div>
+                    )}
+                    {w.before_image && (
+                      <div className="absolute bottom-2 left-2">
+                        <img src={w.before_image} alt={`${w.title} (antes)`} loading="lazy"
+                          className="h-16 w-16 rounded-lg border-2 border-white/80 object-cover shadow-lg" />
+                      </div>
+                    )}
+                    <span className="absolute top-2 right-2 rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">Antes</span>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-sm font-heading font-bold text-text-primary line-clamp-1">{w.title}</h3>
+                    {w.description && <p className="text-xs text-text-secondary mt-1 line-clamp-2">{w.description}</p>}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            <div className="mt-8 text-center md:hidden">
+              <Link to="/galeria" className="inline-flex items-center gap-1.5 text-sm font-semibold text-interactive-accent hover:underline">
+                Ver galería completa <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+        )}
+
         {/* ── Aprendizaje: Tips y consejos ── */}
         {tips.length > 0 && (
         <section className="py-16 bg-surface-primary border-t border-border-subtle">
@@ -495,26 +579,6 @@ export default function Servicios() {
           </div>
         </section>
         )}
-
-        {/* ── CTA: ¿Necesitas asesoría? ── */}
-        <section className="bg-surface-secondary py-10 border-t border-border-subtle">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row items-center gap-6 rounded-2xl border border-border-subtle bg-surface-primary p-6 md:p-8">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-interactive-accent/10 text-interactive-accent shrink-0">
-                <CalendarCheck size={26} />
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-lg font-heading font-bold text-text-primary">¿Necesitas asesoría?</h3>
-                <p className="text-sm text-text-secondary mt-1">Nuestro equipo está listo para ayudarte a elegir el servicio que tu moto necesita.</p>
-              </div>
-              <a href={`https://wa.me/${config.social_whatsapp || "573001234567"}`} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-interactive-accent/30 px-5 py-3 text-sm font-semibold text-interactive-accent hover:bg-interactive-accent/5 transition-all shrink-0">
-                <MessageCircle size={16} />
-                Consultar ahora
-              </a>
-            </div>
-          </div>
-        </section>
       </main>
     </>
   );

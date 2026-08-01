@@ -18,7 +18,7 @@ const fallbackGallery: GalleryImg[] = [
 export function GallerySection() {
   const { gallery } = useGallery();
   const config = useConfig();
-  const images: GalleryImg[] = gallery.length > 0 ? gallery : fallbackGallery;
+  const images: GalleryImg[] = gallery.length > 0 ? (gallery as GalleryImg[]) : fallbackGallery;
   const [open, setOpen] = useState<GalleryImg | null>(null);
 
   return (
@@ -76,7 +76,7 @@ export function GallerySection() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-heading font-bold text-white">{open.label}</h3>
-                <button onClick={() => setOpen(null)} className="text-gray-400 hover:text-white transition-colors">
+                <button onClick={() => setOpen(null)} aria-label="Cerrar" className="text-gray-400 hover:text-white transition-colors">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>

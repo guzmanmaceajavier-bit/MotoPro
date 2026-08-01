@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { SEO } from "@/components/SEO";
-import { Spinner, Badge } from "@/components/ui";
+import { Spinner, Badge, EmptyState } from "@/components/ui";
 import { useConfig } from "@/providers/CMSProvider";
 import { api } from "@/api/client";
 import { ServiceTimeline, ServiceStatusProgress, STATUS_STEPS, STATUS_COLORS, STATUS_LABELS } from "../components/ServiceTimeline";
@@ -16,6 +16,7 @@ const formatDate = (d: string) => {
 
 export default function EstadoServicio() {
   const config = useConfig();
+  const [searchParams] = useSearchParams();
   const [searchType, setSearchType] = useState<"orden" | "placa" | "documento">("orden");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
@@ -26,6 +27,20 @@ export default function EstadoServicio() {
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [error, setError] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval>>(null);
+
+  useEffect(() => {
+    const q = searchParams.get("id") || searchParams.get("order");
+    if (!q) return;
+    setSearchType("orden");
+    setSearchQuery(q);
+    setSearchLoading(true);
+    setError(false);
+    api.get(`/service-requests/search?q=${encodeURIComponent(q)}&type=orden`).then((data) => {
+      const arr = Array.isArray(data) ? data : data?.data ? data.data : [];
+      if (arr.length > 0) setCurrent(arr[0]);
+      else { setCurrent(null); setError(true); }
+    }).catch(() => { setCurrent(null); setError(true); }).finally(() => setSearchLoading(false));
+  }, [searchParams]);
 
   useEffect(() => {
     if (!current?.id) { setTimeline([]); return; }
@@ -244,12 +259,12 @@ export default function EstadoServicio() {
                     </div>
 
                     {/* Amazon-style Horizontal Progress Tracker */}
-                    <div className="mb-8 overflow-x-auto">
-                      <div className="flex items-center min-w-[640px]">
+                    <div className="mb-8 overflow-x-auto scrollbar-hide">
+                      <div className="flex items-center min-w-[360px] sm:min-w-[640px]">
                         {STATUS_STEPS.slice(0, -1).map((step, i) => {
                           const isComplete = currentStepIndex >= i;
                           const isCurrent = currentStepIndex === i;
-                          const stepIcon = step.icon;
+                          const StepIcon = step.icon;
                           return (
                             <div key={step.key} className="flex-1 flex flex-col items-center relative">
                               <div className="flex items-center w-full">
@@ -268,7 +283,7 @@ export default function EstadoServicio() {
                                   {isComplete ? (
                                     <CheckCircle className="w-5 h-5 text-black" />
                                   ) : (
-                                    <stepIcon className={`w-4 h-4 ${isCurrent ? "text-interactive-accent" : "text-text-tertiary"}`} />
+                                    <StepIcon className={`w-4 h-4 ${isCurrent ? "text-interactive-accent" : "text-text-tertiary"}`} />
                                   )}
                                 </div>
                                 {/* Connecting line after */}

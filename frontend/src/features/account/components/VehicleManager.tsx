@@ -2,43 +2,23 @@ import { useState } from "react";
 import { api } from "@/api/client";
 import { useToast } from "@/providers/ToastProvider";
 import { EmptyState } from "@/components/ui";
-
-const VEHICLE_BRANDS = [
-  { name: "AKT", models: ["AK 100", "AK 125", "CR5", "EVO", "FLEX", "JET", "NKD", "SM", "SPECIAL", "TT", "TTR", "XM"] },
-  { name: "BAJAJ", models: ["BOXER", "CALIBER", "DISCOVER", "DOMINAR", "PULSAR"] },
-  { name: "HONDA", models: ["CB", "CLICK", "DIO", "NAVI", "WAVE", "XR", "XRE", "BIZ", "C-70", "C-90"] },
-  { name: "YAMAHA", models: ["AXIS", "BWS", "CRYPTON", "FZ", "FINO", "MT", "N-MAX", "R-15", "XTZ"] },
-  { name: "SUZUKI", models: ["AX", "BEST", "DR", "GN", "GIXXER", "GS", "HAYATE"] },
-  { name: "KTM", models: ["DUKE"] },
-  { name: "KAWASAKI", models: ["GTO", "KLX", "NINJA", "VERSYS"] },
-  { name: "TVS", models: ["DAZZ", "FLAME", "NEO", "NTORQ", "RAIDER", "RTR", "SPORT"] },
-  { name: "HERO", models: ["DASH", "ECO", "GLAMOUR", "HUNK", "IGNITOR", "SPLENDOR", "XPULSE"] },
-  { name: "ROYAL ENFIELD", models: ["CLASSIC", "HIMALAYAN", "HNTR", "INTERCEPTOR", "METEOR"] },
-];
+import { BrandModelFields } from "@/components/forms/BrandModelFields";
 
 function VehicleForm({ onSave, onCancel, initial }: { onSave: (data: any) => void; onCancel: () => void; initial?: any }) {
   const [form, setForm] = useState({ brand: initial?.brand || "", model: initial?.model || "", year: initial?.year || "", plate: initial?.plate || "", vin: initial?.vin || "", color: initial?.color || "", cilindraje: initial?.cilindraje || "" });
-  const selectedBrand = VEHICLE_BRANDS.find(b => b.name === form.brand);
 
   return (
     <div className="bg-surface-secondary border border-border rounded-lg p-5 space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-text-secondary mb-1">Marca</label>
-          <select value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value, model: "" })}
-            className="w-full bg-surface-tertiary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-interactive-accent">
-            <option value="">Seleccionar</option>
-            {VEHICLE_BRANDS.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-text-secondary mb-1">Modelo</label>
-          <select value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })}
-            className="w-full bg-surface-tertiary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-interactive-accent">
-            <option value="">Seleccionar</option>
-            {selectedBrand?.models.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
+        <BrandModelFields
+          brand={form.brand}
+          model={form.model}
+          onBrandChange={(brand) => setForm({ ...form, brand, model: "" })}
+          onModelChange={(model) => setForm({ ...form, model })}
+          size="sm"
+          brandPlaceholder="Seleccionar"
+          modelPlaceholder="Seleccionar"
+        />
         <div>
           <label className="block text-xs font-semibold text-text-secondary mb-1">Año</label>
           <input type="text" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })}

@@ -1,56 +1,65 @@
 const router = require("express").Router();
 const { query, get } = require("../config/database");
+const { ok, toSeries } = require("../utils/helpers");
+
+function periodFilter(period) {
+  if (period === "today") return "date(created_at) = date('now')";
+  if (period === "week") return "created_at >= date('now', '-7 days')";
+  if (period === "quarter") return "created_at >= date('now', 'start of month', '-2 months')";
+  if (period === "year") return "created_at >= date('now', '-1 year')";
+  return "created_at >= date('now', 'start of month')";
+}
 
 router.get("/executive", (req, res) => {
   try {
     const { period = "month" } = req.query;
-    let dateFilter;
-    if (period === "today") dateFilter = "date(created_at) = date('now')";
-    else if (period === "week") dateFilter = "created_at >= date('now', '-7 days')";
-    else if (period === "year") dateFilter = "created_at >= date('now', '-1 year')";
-    else dateFilter = "created_at >= date('now', 'start of month')";
+    const df = periodFilter(period);
 
-    const revenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status = 'paid' AND ${dateFilter}`);
-    const workOrders = get(`SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM work_orders WHERE ${dateFilter}`);
-    const storeSales = get(`SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM store_orders WHERE status IN ('completed','paid') AND ${dateFilter}`);
-    const newCustomers = get(`SELECT COUNT(*) as count FROM customers WHERE ${dateFilter}`);
-    const appointments = get(`SELECT COUNT(*) as count FROM appointments WHERE ${dateFilter}`);
+    const revenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status = 'paid' AND ${df}`);
+    const expenses = get(`SELECT COALESCE(SUM(amount), 0) as total FROM cash_transactions WHERE type = 'expense' AND ${df}`);
+    const workOrders = get(`SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM work_orders WHERE ${df}`);
+    const completedOrders = get(`SELECT COUNT(*) as count FROM work_orders WHERE status = 'delivered' AND ${df}`);
+    const storeSales = get(`SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM store_orders WHERE status IN ('completed','paid') AND ${df}`);
+    const newCustomers = get(`SELECT COUNT(*) as count FROM customers WHERE ${df}`);
+    const appointments = get(`SELECT COUNT(*) as count FROM appointments WHERE ${df}`);
     const pendingQuotes = get("SELECT COUNT(*) as count FROM quotes WHERE status IN ('pending','sent')");
     const activeOrders = get("SELECT COUNT(*) as count FROM work_orders WHERE status NOT IN ('delivered','cancelled')");
-    const avgTicket = get(`SELECT COALESCE(AVG(total), 0) as avg FROM invoices WHERE status = 'paid' AND ${dateFilter}`);
+    const avgTicket = get(`SELECT COALESCE(AVG(total), 0) as avg FROM invoices WHERE status = 'paid' AND ${df}`);
 
     const revenueByDay = query(`SELECT date(created_at) as date, SUM(total) as revenue
-      FROM invoices WHERE status = 'paid' AND ${dateFilter}
+      FROM invoices WHERE status = 'paid' AND ${df}
       GROUP BY date(created_at) ORDER BY date`);
 
     const topServices = query(`SELECT service_type, COUNT(*) as count, SUM(total) as revenue
-      FROM work_orders WHERE ${dateFilter} AND status = 'delivered'
+      FROM work_orders WHERE ${df} AND status = 'delivered'
       GROUP BY service_type ORDER BY count DESC LIMIT 5`);
 
     const topProducts = query(`SELECT json_extract(je.value, '$.name') as name,
       SUM(json_extract(je.value, '$.quantity')) as sold,
       SUM(json_extract(je.value, '$.quantity') * json_extract(je.value, '$.unit_price')) as revenue
       FROM store_orders so, json_each(so.items) je
-      WHERE so.status IN ('completed','paid') AND ${dateFilter}
+      WHERE so.status IN ('completed','paid') AND ${df}
       GROUP BY json_extract(je.value, '$.name') ORDER BY sold DESC LIMIT 5`);
 
-    res.json({
-      success: true,
-      data: {
-        revenue: revenue?.total || 0,
-        work_orders: workOrders?.count || 0,
-        work_order_revenue: workOrders?.revenue || 0,
-        store_sales: storeSales?.count || 0,
-        store_revenue: storeSales?.revenue || 0,
-        new_customers: newCustomers?.count || 0,
-        appointments: appointments?.count || 0,
-        pending_quotes: pendingQuotes?.count || 0,
-        active_orders: activeOrders?.count || 0,
-        avg_ticket: Math.round(avgTicket?.avg || 0),
-        revenue_by_day: revenueByDay,
-        top_services: topServices,
-        top_products: topProducts,
-      },
+    const totalRevenue = revenue?.total || 0;
+    const totalExpenses = expenses?.total || 0;
+
+    ok(res, {
+      revenue: totalRevenue,
+      profit: totalRevenue - totalExpenses,
+      completedOrders: completedOrders?.count || 0,
+      newCustomers: newCustomers?.count || 0,
+      workOrders: workOrders?.count || 0,
+      workOrderRevenue: workOrders?.revenue || 0,
+      storeSales: storeSales?.count || 0,
+      storeRevenue: storeSales?.revenue || 0,
+      appointments: appointments?.count || 0,
+      pendingQuotes: pendingQuotes?.count || 0,
+      activeOrders: activeOrders?.count || 0,
+      avgTicket: Math.round(avgTicket?.avg || 0),
+      trend: toSeries(revenueByDay, "date", "revenue"),
+      topServices: toSeries(topServices, "service_type", "count"),
+      topProducts: toSeries(topProducts, "name", "sold"),
     });
   } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error" }); }
 });
@@ -64,8 +73,8 @@ router.get("/financial", (req, res) => {
 
     const serviceRevenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM work_orders WHERE status = 'delivered' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
     const storeRevenue = get(`SELECT COALESCE(SUM(total), 0) as total FROM store_orders WHERE status IN ('completed','paid') AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
-    const totalInvoiced = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
-    const totalPaid = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status = 'paid' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const invoices = get(`SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as total FROM invoices WHERE created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const totalPaid = get(`SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as total FROM invoices WHERE status = 'paid' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
     const totalPending = get(`SELECT COALESCE(SUM(total), 0) as total FROM invoices WHERE status != 'paid' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
     const totalExpenses = get(`SELECT COALESCE(SUM(amount), 0) as total FROM cash_transactions WHERE type = 'expense' AND created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
     const netProfit = (totalPaid?.total || 0) - (totalExpenses?.total || 0);
@@ -81,21 +90,20 @@ router.get("/financial", (req, res) => {
       FROM invoices WHERE status = 'paid' AND created_at BETWEEN ? AND ?
       GROUP BY payment_method ORDER BY total DESC`, [dateFrom, dateToEnd]);
 
-    res.json({
-      success: true,
-      data: {
-        service_revenue: serviceRevenue?.total || 0,
-        store_revenue: storeRevenue?.total || 0,
-        total_invoiced: totalInvoiced?.total || 0,
-        total_paid: totalPaid?.total || 0,
-        total_pending: totalPending?.total || 0,
-        total_expenses: totalExpenses?.total || 0,
-        net_profit: netProfit,
-        profit_margin: totalPaid?.total > 0 ? Math.round((netProfit / totalPaid.total) * 100) : 0,
-        revenue_by_month: revenueByMonth,
-        expenses_by_category: expensesByCategory,
-        payments_by_method: paymentsByMethod,
-      },
+    ok(res, {
+      revenue: totalPaid?.total || 0,
+      expenses: totalExpenses?.total || 0,
+      profit: netProfit,
+      invoices: invoices?.count || 0,
+      payments: totalPaid?.count || 0,
+      pending: totalPending?.total || 0,
+      serviceRevenue: serviceRevenue?.total || 0,
+      storeRevenue: storeRevenue?.total || 0,
+      totalInvoiced: invoices?.total || 0,
+      profitMargin: totalPaid?.total > 0 ? Math.round((netProfit / totalPaid.total) * 100) : 0,
+      byMonth: toSeries(revenueByMonth, "month", "revenue"),
+      byPaymentMethod: toSeries(paymentsByMethod, "payment_method", "total"),
+      expensesByCategory: toSeries(expensesByCategory, "category", "total"),
     });
   } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error" }); }
 });
@@ -108,6 +116,7 @@ router.get("/workshop", (req, res) => {
     const dateToEnd = `${dateTo} 23:59:59`;
 
     const totalOrders = get(`SELECT COUNT(*) as count FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const deliveredOrders = get(`SELECT COUNT(*) as count FROM work_orders wo WHERE wo.status = 'delivered' AND wo.created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
     const byStatus = query(`SELECT wo.status, COUNT(*) as count FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ? GROUP BY wo.status`, [dateFrom, dateToEnd]);
     const byServiceType = query(`SELECT wo.service_type, COUNT(*) as count, AVG(wo.total) as avg_total
       FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ? GROUP BY wo.service_type ORDER BY count DESC`, [dateFrom, dateToEnd]);
@@ -120,6 +129,7 @@ router.get("/workshop", (req, res) => {
       FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ? AND wo.total > 0`, [dateFrom, dateToEnd]);
     const cancelledRate = get(`SELECT COUNT(CASE WHEN wo.status = 'cancelled' THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0) as rate
       FROM work_orders wo WHERE wo.created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
+    const warrantyClaims = get(`SELECT COUNT(*) as count FROM warranties WHERE created_at BETWEEN ? AND ?`, [dateFrom, dateToEnd]);
 
     const mechanicPerformance = query(`SELECT tm.name as mechanic_name,
       COUNT(wo.id) as orders_completed,
@@ -136,19 +146,19 @@ router.get("/workshop", (req, res) => {
       WHERE wo.created_at BETWEEN ? AND ?
       GROUP BY wop.name ORDER BY total_qty DESC LIMIT 10`, [dateFrom, dateToEnd]);
 
-    res.json({
-      success: true,
-      data: {
-        total_orders: totalOrders?.count || 0,
-        by_status: byStatus,
-        by_service_type: byServiceType,
-        avg_completion_days: Math.round((avgCompletionTime?.avg_days || 0) * 10) / 10,
-        avg_parts_cost: Math.round(avgPartsCost?.avg || 0),
-        avg_labor_cost: Math.round(avgLaborCost?.avg || 0),
-        cancelled_rate: Math.round(cancelledRate?.rate || 0),
-        mechanic_performance: mechanicPerformance,
-        parts_usage: partsUsage,
-      },
+    const total = totalOrders?.count || 0;
+    ok(res, {
+      total,
+      avgDays: Math.round((avgCompletionTime?.avg_days || 0) * 10) / 10,
+      warrantyClaims: warrantyClaims?.count || 0,
+      completionRate: total > 0 ? Math.round(((deliveredOrders?.count || 0) / total) * 100) : 0,
+      byStatus: toSeries(byStatus, "status", "count"),
+      byMechanic: toSeries(mechanicPerformance, "mechanic_name", "orders_completed"),
+      byServiceType: toSeries(byServiceType, "service_type", "count"),
+      avgPartsCost: Math.round(avgPartsCost?.avg || 0),
+      avgLaborCost: Math.round(avgLaborCost?.avg || 0),
+      cancelledRate: Math.round(cancelledRate?.rate || 0),
+      partsUsage,
     });
   } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error" }); }
 });
@@ -174,31 +184,29 @@ router.get("/inventory", (req, res) => {
       FROM products p LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.is_active = 1 AND p.stock = 0 ORDER BY p.name LIMIT 20`);
 
-    const topSelling = query(`SELECT p.name, SUM(si.quantity) as sold, SUM(si.quantity * si.unit_price) as revenue
-      FROM store_order_items si JOIN products p ON si.product_id = p.id
-      JOIN store_orders so ON si.order_id = so.id
+    const topSelling = query(`SELECT json_extract(je.value, '$.name') as name,
+      SUM(json_extract(je.value, '$.quantity')) as sold,
+      SUM(json_extract(je.value, '$.quantity') * json_extract(je.value, '$.unit_price')) as revenue
+      FROM store_orders so, json_each(so.items) je
       WHERE so.status IN ('completed','paid')
-      GROUP BY p.name ORDER BY sold DESC LIMIT 10`);
+      GROUP BY json_extract(je.value, '$.name') ORDER BY sold DESC LIMIT 10`);
 
     const movements = query(`SELECT im.type, COUNT(*) as count, SUM(im.quantity) as total_qty
       FROM inventory_movements im
       WHERE im.created_at >= date('now', '-30 days')
       GROUP BY im.type`);
 
-    res.json({
-      success: true,
-      data: {
-        total_products: totalProducts?.count || 0,
-        total_value: totalValue?.total || 0,
-        low_stock: lowStock?.count || 0,
-        out_of_stock: outOfStock?.count || 0,
-        over_stock: overStock?.count || 0,
-        by_category: byCategory,
-        low_stock_items: lowStockItems,
-        out_of_stock_items: outOfStockItems,
-        top_selling: topSelling,
-        recent_movements: movements,
-      },
+    ok(res, {
+      totalProducts: totalProducts?.count || 0,
+      totalValue: totalValue?.total || 0,
+      lowStock: lowStock?.count || 0,
+      outOfStock: outOfStock?.count || 0,
+      overStock: overStock?.count || 0,
+      byCategory: toSeries(byCategory, "category", "count"),
+      lowStockItems,
+      outOfStockItems,
+      topSelling: toSeries(topSelling, "name", "sold"),
+      recentMovements: movements,
     });
   } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error" }); }
 });
@@ -208,6 +216,7 @@ router.get("/customers", (req, res) => {
     const totalCustomers = get("SELECT COUNT(*) as count FROM customers");
     const newThisMonth = get("SELECT COUNT(*) as count FROM customers WHERE created_at >= date('now', 'start of month')");
     const avgSpent = get("SELECT COALESCE(AVG(total_spent), 0) as avg FROM customers WHERE total_spent > 0");
+    const recurrent = get("SELECT COUNT(*) as count FROM customers WHERE total_orders >= 2");
     const topSpenders = query(`SELECT name, email, total_spent, total_orders, created_at
       FROM customers ORDER BY total_spent DESC LIMIT 10`);
     const customersByOrders = query(`SELECT
@@ -217,16 +226,15 @@ router.get("/customers", (req, res) => {
       FROM work_orders wo JOIN customers c ON wo.customer_id = c.id
       ORDER BY wo.created_at DESC LIMIT 10`);
 
-    res.json({
-      success: true,
-      data: {
-        total: totalCustomers?.count || 0,
-        new_this_month: newThisMonth?.count || 0,
-        avg_spent: Math.round(avgSpent?.avg || 0),
-        top_spenders: topSpenders,
-        by_orders: customersByOrders,
-        recent_activity: recentActivity,
-      },
+    const total = totalCustomers?.count || 0;
+    ok(res, {
+      total,
+      newThisMonth: newThisMonth?.count || 0,
+      retentionRate: total > 0 ? Math.round(((recurrent?.count || 0) / total) * 100) : 0,
+      avgSpent: Math.round(avgSpent?.avg || 0),
+      topSpenders: toSeries(topSpenders, "name", "total_spent"),
+      byOrders: toSeries(customersByOrders, "range", "count"),
+      recentActivity,
     });
   } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error" }); }
 });
@@ -255,7 +263,7 @@ router.get("/mechanics", (req, res) => {
       WHERE tm.is_active = 1
       GROUP BY tm.id ORDER BY completed DESC`, [dateFrom, dateToEnd, dateFrom, dateToEnd]);
 
-    res.json({ success: true, data: mechanics });
+    ok(res, mechanics);
   } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error" }); }
 });
 

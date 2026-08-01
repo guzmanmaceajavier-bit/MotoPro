@@ -6,6 +6,7 @@ import { SEO, productSchema } from "@/components/SEO";
 import { api } from "@/api/client";
 import { useCart } from "@/providers/CartProvider";
 import { useToast } from "@/providers/ToastProvider";
+import { useAuth } from "@/providers/AuthProvider";
 
 import { ProductImageGallery } from "../components/ProductImageGallery";
 import { ProductInfo } from "../components/ProductInfo";
@@ -30,6 +31,7 @@ export default function ProductDetail() {
   const spinRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCart();
   const { addToast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!slug) { setLoading(false); return; }
@@ -38,6 +40,14 @@ export default function ProductDetail() {
       setProduct(p || null);
     }).catch(() => setProduct(null)).finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    if (!user || !product?.id) return;
+    api.get("/customer-auth/wishlist").then((data) => {
+      const items = Array.isArray(data) ? data : data?.data || [];
+      setLiked(items.some((i: any) => String(i.product_id ?? i.id) === String(product.id)));
+    }).catch(() => {});
+  }, [user, product?.id]);
 
   const handleImageMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();

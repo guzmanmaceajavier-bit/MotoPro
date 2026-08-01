@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Target, Eye, Star, Building2, Wrench, Camera, Users, Award } from "lucide-react";
 import { SEO } from "@/components/SEO";
@@ -59,6 +59,11 @@ export default function Nosotros() {
   const [certifications, setCertifications] = useState<any[]>([]);
   const { brands } = useBrands();
   const { values } = useValues();
+  const brandsRef = useRef<HTMLDivElement>(null);
+  const brandsTrackRef = useRef<HTMLDivElement>(null);
+  const brandsAnimRef = useRef<number>(0);
+  const brandsPosRef = useRef(0);
+  const [brandsPaused, setBrandsPaused] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -80,6 +85,40 @@ export default function Nosotros() {
       if (Array.isArray(certData) && certData.length > 0) setCertifications(certData);
     });
   }, []);
+
+  useEffect(() => {
+    const track = brandsTrackRef.current;
+    if (!track) return;
+    let lastTime = performance.now();
+    const speed = 40;
+
+    const animate = (now: number) => {
+      const delta = (now - lastTime) / 1000;
+      lastTime = now;
+      if (!brandsPaused) {
+        brandsPosRef.current -= speed * delta;
+        const halfWidth = track.scrollWidth / 2;
+        if (Math.abs(brandsPosRef.current) >= halfWidth) {
+          brandsPosRef.current += halfWidth;
+        }
+        track.style.transform = `translateX(${brandsPosRef.current}px)`;
+      }
+      brandsAnimRef.current = requestAnimationFrame(animate);
+    };
+    brandsAnimRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(brandsAnimRef.current);
+  }, [brandsPaused]);
+
+  const scrollBrands = (dir: "left" | "right") => {
+    setBrandsPaused(true);
+    const amount = dir === "left" ? 250 : -250;
+    brandsPosRef.current += amount;
+    if (brandsTrackRef.current) {
+      brandsTrackRef.current.style.transform = `translateX(${brandsPosRef.current}px)`;
+    }
+    setTimeout(() => setBrandsPaused(false), 2500);
+  };
+
   return (
     <>
       <SEO title="Nosotros | MotoPro" description="Conoce nuestra historia y equipo de profesionales apasionados por las motos." />
@@ -328,15 +367,27 @@ export default function Nosotros() {
 
         {/* ── Aliados Comerciales ── */}
         {brands.length > 0 && (
-        <section className="py-16 md:py-20 border-t border-border-subtle">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+        <section className="py-16 md:py-20 border-t border-border-subtle overflow-hidden">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 mb-8 text-center">
             <span className="text-[11px] font-bold text-interactive-accent uppercase tracking-[0.2em]">Aliados Comerciales</span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-text-primary mt-2 mb-10">Marcas que confían en nosotros</h2>
-            <div className="flex flex-wrap justify-center gap-6">
-              {brands.map((brand, i) => (
-                <BrandLogo key={i} name={brand.name} image={brand.image} />
-              ))}
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-text-primary mt-2">Marcas que confían en nosotros</h2>
+          </div>
+          <div ref={brandsRef} className="relative group" onMouseEnter={() => setBrandsPaused(true)} onMouseLeave={() => setBrandsPaused(false)}>
+            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-surface-primary to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-surface-primary to-transparent z-10 pointer-events-none" />
+            <div className="overflow-hidden">
+              <div ref={brandsTrackRef} className="flex gap-14 items-center w-max">
+                {[...brands, ...brands].map((brand: any, i: number) => (
+                  <BrandLogo key={i} name={brand.name} image={brand.image} size="lg" showName={false} className="!px-0 !py-0 !border-0 !bg-transparent hover:!bg-transparent opacity-80 hover:opacity-100 transition-opacity" />
+                ))}
+              </div>
             </div>
+            <button onClick={() => scrollBrands("left")} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-surface-secondary/90 backdrop-blur-sm border border-border text-text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-interactive-accent hover:text-white hover:border-interactive-accent shadow-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button onClick={() => scrollBrands("right")} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-surface-secondary/90 backdrop-blur-sm border border-border text-text-primary opacity-0 group-hover:opacity-100 transition-all hover:bg-interactive-accent hover:text-white hover:border-interactive-accent shadow-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
           </div>
         </section>
         )}

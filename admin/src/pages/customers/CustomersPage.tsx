@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { api, uploadFile } from "@/api/client";
 import { Modal } from "@shared/components/ui/Modal";
 import { Badge } from "@shared/components/ui/Badge";
@@ -59,9 +59,6 @@ export default function CustomersPage() {
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [detailCustomer, setDetailCustomer] = useState<Customer | null>(null);
-  const [customerOrders, setCustomerOrders] = useState<any[]>([]);
-  const [ordersLoading, setOrdersLoading] = useState(false);
   const [sortBy, setSortBy] = useState<"name" | "orders" | "spent" | "date">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -69,6 +66,7 @@ export default function CustomersPage() {
   const [registeredFilter, setRegisteredFilter] = useState(searchParams.get("registered") || "");
   const { showToast } = useToast();
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchData = useCallback(() => {
     setLoading(true);
@@ -110,13 +108,7 @@ export default function CustomersPage() {
     setModal(true);
   };
   const openDetail = (c: Customer) => {
-    setDetailCustomer(c);
-    setCustomerOrders([]);
-    setOrdersLoading(true);
-    api.get("/direct-sales").then((orders) => {
-      const arr = Array.isArray(orders) ? orders : [];
-      setCustomerOrders(arr.filter((o: any) => o.customer_email?.toLowerCase() === c.email?.toLowerCase()));
-    }).catch(() => {}).finally(() => setOrdersLoading(false));
+    navigate(`/clientes/${c.id}`);
   };
 
   const handleSave = async () => {
@@ -189,10 +181,10 @@ export default function CustomersPage() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard title="Total Clientes" value={items.length} icon={<Users size={18} />} iconColor="teal" subtitle="Registrados" sparkline={<SparkLine data={SparkData.orders} color="#FF6B00" />} />
-        <KpiCard title="Total Pedidos" value={totalOrders} icon={<ShoppingBag size={18} />} iconColor="purple" sparkline={<SparkLine data={SparkData.orders} color="#8B5CF6" />} />
-        <KpiCard title="Ingresos Totales" value={`$${totalSpent.toLocaleString()}`} icon={<DollarSign size={18} />} iconColor="orange" sparkline={<SparkLine data={SparkData.spent} color="#F59E0B" />} />
-        <KpiCard title="Promedio por Cliente" value={`$${avgSpent.toFixed(0)}`} icon={<TrendingUp size={18} />} iconColor="pink" sparkline={<SparkLine data={SparkData.spent} color="#EC4899" />} />
+        <KpiCard title="Total Clientes" value={items.length} icon={<Users size={18} />} iconColor="teal" change={{ value: "Registrados", positive: true }} />
+        <KpiCard title="Total Pedidos" value={totalOrders} icon={<ShoppingBag size={18} />} iconColor="purple" />
+        <KpiCard title="Ingresos Totales" value={`$${totalSpent.toLocaleString()}`} icon={<DollarSign size={18} />} iconColor="orange" />
+        <KpiCard title="Promedio por Cliente" value={`$${avgSpent.toFixed(0)}`} icon={<TrendingUp size={18} />} iconColor="purple" />
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -446,74 +438,6 @@ export default function CustomersPage() {
             </label>
           </div>
         </div>
-      </Modal>
-
-      {/* Detail Modal */}
-      <Modal open={!!detailCustomer} onClose={() => setDetailCustomer(null)} size="md"
-        title={detailCustomer?.name || "Detalle del Cliente"}>
-        {detailCustomer && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-[rgba(255,107,0,0.04)] border border-[rgba(255,107,0,0.15)]">
-              <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
-                style={{ background: `${avatarColors[7]}18`, color: avatarColors[7] }}>
-                {detailCustomer.avatar ? <img src={detailCustomer.avatar} alt="" className="w-full h-full rounded-full object-cover" /> : getInitials(detailCustomer.name)}
-              </div>
-              <div>
-                <p className="text-base font-bold text-[var(--mp-text-primary)]">{detailCustomer.name}</p>
-                <p className="text-xs text-[var(--mp-text-tertiary)]">{detailCustomer.email}</p>
-                {detailCustomer.phone && <p className="text-xs text-[var(--mp-text-secondary)] mt-0.5">{detailCustomer.phone}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
-                <p className="text-lg font-bold text-[var(--mp-text-primary)]">{detailCustomer.total_orders || 0}</p>
-                <p className="text-[10px] text-[var(--mp-text-tertiary)]">Pedidos</p>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
-                <p className="text-lg font-bold text-[#F59E0B]">${(detailCustomer.total_spent || 0).toLocaleString()}</p>
-                <p className="text-[10px] text-[var(--mp-text-tertiary)]">Gastado</p>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
-                <p className="text-lg font-bold text-[#FF6B00]">{detailCustomer.created_at ? new Date(detailCustomer.created_at).toLocaleDateString("es-CO") : "—"}</p>
-                <p className="text-[10px] text-[var(--mp-text-tertiary)]">Registro</p>
-              </div>
-            </div>
-
-            <h4 className="text-sm font-semibold flex items-center gap-2 text-[var(--mp-text-primary)]">
-              <ShoppingBag size={14} /> Historial de Pedidos
-              <span className="text-xs font-normal text-[var(--mp-text-tertiary)]">({customerOrders.length})</span>
-            </h4>
-
-            {ordersLoading ? (
-              <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="skeleton h-12 rounded-lg" />)}</div>
-            ) : customerOrders.length === 0 ? (
-              <div className="rounded-xl py-8 px-6 text-center border border-dashed border-[var(--mp-border)]">
-                <ShoppingBag size={24} className="mx-auto mb-2 text-[var(--mp-text-tertiary)]" />
-                <p className="text-sm text-[var(--mp-text-secondary)]">Este cliente no tiene pedidos.</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                {customerOrders.map((order: any) => {
-                  const st: any = { pending: { color: "#F59E0B", variant: "warning" }, paid: { color: "#10B981", variant: "success" }, shipped: { color: "#8B5CF6", variant: "info" }, delivered: { color: "#22C55E", variant: "success" }, cancelled: { color: "#EF4444", variant: "danger" } };
-                  const s = st[order.status] || st.pending;
-                  return (
-                    <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-[var(--mp-bg-elevated)]">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold truncate text-[var(--mp-text-primary)]">#{order.id?.slice(0, 8)}</p>
-                        <p className="text-[11px] text-[var(--mp-text-tertiary)]">{order.created_at ? new Date(order.created_at).toLocaleDateString() : ""} · {Array.isArray(order.items) ? order.items.length : 0} items</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold">${(Number(order.total) || 0).toLocaleString()}</span>
-                        <Badge variant={s.variant}>{order.status === "pending" ? "Pendiente" : order.status === "paid" ? "Pagado" : order.status === "shipped" ? "Enviado" : order.status === "delivered" ? "Entregado" : "Cancelado"}</Badge>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
       </Modal>
 
       {/* Delete Confirm */}

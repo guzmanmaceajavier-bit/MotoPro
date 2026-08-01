@@ -16,6 +16,12 @@
   :root:not(.light) input, :root:not(.light) select, :root:not(.light) textarea {
     color-scheme: dark;
   }
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-interactive-accent outline-dashed;
+  }
+  a, button, input, select, textarea, [tabindex]:not([tabindex="-1"]) {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-accent focus-visible:outline-dashed;
+  }
 }
 
 

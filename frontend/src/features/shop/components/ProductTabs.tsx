@@ -120,13 +120,6 @@ export function ProductTabs({
                           <p className="text-xs text-text-tertiary">{r.date}</p>
                         </div>
                       </div>
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map(i => (
-                          <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={i <= r.rating ? "#fbbf24" : "none"} stroke="#fbbf24" strokeWidth="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                          </svg>
-                        ))}
-                      </div>
                     </div>
                     <p className="text-sm text-text-secondary">{r.comment}</p>
                   </div>

@@ -49,6 +49,7 @@ const Galeria = lazyLoad(() => import("@/features/content").then(m => ({ default
 const LegalPage = lazyLoad(() => import("@/features/content").then(m => ({ default: m.LegalPage })));
 const Contacto = lazyLoad(() => import("@/features/content").then(m => ({ default: m.Contacto })));
 const Consulta = lazyLoad(() => import("@/features/content").then(m => ({ default: m.Consulta })));
+const Ayuda = lazyLoad(() => import("@/features/content").then(m => ({ default: m.Ayuda })));
 
 export function AppRoutes() {
   return (
@@ -98,6 +99,7 @@ export function AppRoutes() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/consulta" element={<Consulta />} />
         <Route path="/faq" element={<FAQ />} />
+        <Route path="/ayuda" element={<Ayuda />} />
         <Route path="/privacidad" element={<LegalPage />} />
         <Route path="/terminos" element={<LegalPage />} />
         <Route path="/legal/:slug" element={<LegalPage />} />

@@ -43,7 +43,7 @@ const fallbackData: BeforeAfterItem[] = [
 
 export function BeforeAfter() {
   const { beforeAfter, loading } = useBeforeAfter();
-  const items: BeforeAfterItem[] = beforeAfter.length > 0 ? beforeAfter : fallbackData;
+  const items: BeforeAfterItem[] = beforeAfter.length > 0 ? (beforeAfter as BeforeAfterItem[]) : fallbackData;
   const [current, setCurrent] = useState(0);
 
   const prev = useCallback(() => setCurrent((c) => (c === 0 ? items.length - 1 : c - 1)), [items.length]);
@@ -72,14 +72,14 @@ export function BeforeAfter() {
         </motion.div>
 
         <div className="relative max-w-5xl mx-auto">
-          <button onClick={prev}
+          <button onClick={prev} aria-label="Anterior"
             className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-lg border border-white/10 bg-surface-primary/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-white hover:border-interactive-accent/40 transition-all shadow-lg"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
-          <button onClick={next}
+          <button onClick={next} aria-label="Siguiente"
             className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-lg border border-white/10 bg-surface-primary/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-white hover:border-interactive-accent/40 transition-all shadow-lg"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

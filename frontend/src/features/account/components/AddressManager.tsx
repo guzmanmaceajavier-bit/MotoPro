@@ -153,7 +153,7 @@ export default function AddressManager() {
         <EmptyState
           title="No tienes direcciones guardadas"
           action={
-            <button onClick={() => setIsAdding(true)} className="rounded-lg bg-interactive-accent px-6 py-3 text-sm font-semibold text-black hover:bg-interactive-accent-hover transition-all">
+            <button onClick={() => setShowForm(true)} className="rounded-lg bg-interactive-accent px-6 py-3 text-sm font-semibold text-black hover:bg-interactive-accent-hover transition-all">
               Agregar dirección
             </button>
           }

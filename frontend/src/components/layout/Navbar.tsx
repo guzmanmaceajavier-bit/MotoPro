@@ -14,7 +14,6 @@ const fallbackLinks = [
   { href: "/servicios", label: "Servicios" },
   { href: "/tienda", label: "Tienda" },
   { href: "/nosotros", label: "Nosotros" },
-  { href: "/contacto", label: "Contacto" },
 ];
 
 interface MegaMenuItem {
@@ -125,8 +124,12 @@ export function Navbar() {
   const searchTimeout = useRef<any>(null);
 
   const navLinks = navbar.length > 0
-    ? navbar.filter(n => n.is_visible).map(n => ({ href: n.link, label: n.label }))
+    ? navbar.filter(n => n.is_visible && (n.link || "").toLowerCase() !== "/ayuda" && n.label?.toLowerCase() !== "ayuda").map(n => ({ href: n.link, label: n.label }))
     : fallbackLinks;
+
+  if (!navLinks.some(l => (l.href || "").toLowerCase() === "/contacto")) {
+    navLinks.push({ href: "/contacto", label: "Contacto" });
+  }
 
   useEffect(() => {
     setMobileOpen(false);
@@ -183,6 +186,62 @@ export function Navbar() {
 
   const handleLogout = () => { logout(); setUserMenuOpen(false); navigate("/"); };
 
+  const renderSearchResults = () => {
+    if (searching) return <div className="p-4"><Spinner size="sm" /></div>;
+    if (!searchQuery.trim()) return null;
+    if (searchResults.length === 0) {
+      return (
+        <div className="py-10 text-center">
+          <Search size={24} className="mx-auto text-text-tertiary mb-2" />
+          <p className="text-sm text-text-tertiary">Sin resultados para "{searchQuery}"</p>
+          <p className="text-xs text-text-tertiary mt-1">Intenta con otros términos</p>
+        </div>
+      );
+    }
+    const grouped: Record<string, any[]> = {};
+    searchResults.forEach((item: any) => {
+      const type = item.type === "product" ? "product" : item.type === "service" ? "service" : "post";
+      if (!grouped[type]) grouped[type] = [];
+      grouped[type].push(item);
+    });
+    const typeInfo: Record<string, { label: string; icon: string }> = {
+      product: { label: "Productos", icon: "🛒" },
+      service: { label: "Servicios", icon: "🔧" },
+      post: { label: "Blog", icon: "📄" },
+    };
+    return (
+      <div>
+        {Object.entries(grouped).map(([type, items]) => (
+          <div key={type}>
+            <div className="px-5 py-1.5 text-[10px] font-bold text-text-tertiary uppercase tracking-wider bg-surface-tertiary/30" style={{ borderBottom: "1px solid var(--border)", borderTop: "1px solid var(--border)" }}>
+              {typeInfo[type]?.icon} {typeInfo[type]?.label} ({items.length})
+            </div>
+            {items.slice(0, 3).map((item: any, i: number) => (
+              <button key={i} onClick={() => goToResult(item)} className="w-full flex items-center gap-3 px-5 py-2.5 text-left hover:bg-surface-tertiary/50 transition-colors">
+                {item.image && <img src={item.image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-text-primary truncate">{item.name || item.title}</p>
+                  <p className="text-xs text-text-tertiary">
+                    {type === "product" && item.price && `$${Number(item.price).toLocaleString()}`}
+                    {type === "product" && item.brand && ` · ${item.brand}`}
+                    {type === "service" && item.duration && `${item.duration}`}
+                  </p>
+                </div>
+              </button>
+            ))}
+            {items.length > 3 && (
+              <Link to={`/${type === "product" ? "tienda" : type === "service" ? "servicios" : "blog"}?search=${encodeURIComponent(searchQuery)}`}
+                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                className="block px-5 py-1.5 text-center text-[11px] font-medium text-interactive-accent hover:bg-surface-tertiary/30 transition-colors">
+                Ver todos los {typeInfo[type]?.label.toLowerCase()} ({items.length})
+              </Link>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
@@ -207,7 +266,34 @@ export function Navbar() {
         height: "64px",
       }}
     >
-      <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div ref={searchRef} className="relative">
+      {searchOpen ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}
+          className="mx-auto flex h-[64px] max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+          <Search size={19} className="text-text-tertiary shrink-0" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Escape") { setSearchOpen(false); setSearchQuery(""); setSearchResults([]); } }}
+            placeholder="Buscar productos, servicios, artículos..."
+            className="h-10 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none"
+            aria-label="Buscar en el sitio"
+          />
+          {searchQuery && (
+            <button onClick={() => { setSearchQuery(""); setSearchResults([]); searchInputRef.current?.focus(); }}
+              className="shrink-0 p-1.5 text-text-tertiary hover:text-text-primary transition-colors" aria-label="Limpiar búsqueda">
+              <X size={16} />
+            </button>
+          )}
+          <button onClick={() => { setSearchOpen(false); setSearchQuery(""); setSearchResults([]); }}
+            className="shrink-0 rounded-lg border border-border-subtle px-3.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-tertiary/50 transition-colors">
+            Cancelar
+          </button>
+        </motion.div>
+      ) : (
+        <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-interactive-accent">
@@ -274,6 +360,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 to={link.href}
+                aria-current={isActive(link.href) ? "page" : undefined}
                 className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-md ${
                   isActive(link.href)
                     ? "text-interactive-accent"
@@ -296,86 +383,12 @@ export function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-0.5">
           {/* Search */}
-          <div ref={searchRef} className="relative hidden md:block">
-            <button onClick={() => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-tertiary/50 transition-all" aria-label="Buscar">
-              <Search size={18} />
-            </button>
-            <AnimatePresence>
-              {searchOpen && (
-                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                  className="absolute right-0 top-full mt-2 w-80 rounded-lg border bg-surface-secondary shadow-elevation-3 overflow-hidden"
-                  style={{ borderColor: "var(--border)" }}>
-                  <div className="flex items-center border-b" style={{ borderColor: "var(--border)" }}>
-                    <Search size={16} className="ml-3 text-text-tertiary shrink-0" />
-                    <input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => handleSearch(e.target.value)}
-                      placeholder="Buscar productos, servicios..."
-                      className="h-10 w-full bg-transparent px-3 text-sm text-text-primary placeholder:text-text-tertiary outline-none" />
-                    {searchQuery && (
-                      <button onClick={() => { setSearchQuery(""); setSearchResults([]); searchInputRef.current?.focus(); }}
-                        className="mr-2 p-1 text-text-tertiary hover:text-text-primary" aria-label="Limpiar">
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {searching && <Spinner size="sm" />}
-                    {!searching && searchQuery && searchResults.length === 0 && (
-                      <div className="py-8 text-center">
-                        <Search size={24} className="mx-auto text-text-tertiary mb-2" />
-                        <p className="text-sm text-text-tertiary">Sin resultados para "{searchQuery}"</p>
-                        <p className="text-xs text-text-tertiary mt-1">Intenta con otros términos</p>
-                      </div>
-                    )}
-                    {!searching && searchQuery && searchResults.length > 0 && (() => {
-                      const grouped: Record<string, any[]> = {};
-                      searchResults.forEach((item: any) => {
-                        const type = item.type === "product" ? "product" : item.type === "service" ? "service" : "post";
-                        if (!grouped[type]) grouped[type] = [];
-                        grouped[type].push(item);
-                      });
-                      const typeInfo: Record<string, { label: string; icon: string }> = {
-                        product: { label: "Productos", icon: "🛒" },
-                        service: { label: "Servicios", icon: "🔧" },
-                        post: { label: "Blog", icon: "📄" },
-                      };
-                      return (
-                        <div>
-                          {Object.entries(grouped).map(([type, items]) => (
-                            <div key={type}>
-                              <div className="px-4 py-1.5 text-[10px] font-bold text-text-tertiary uppercase tracking-wider bg-surface-tertiary/30" style={{ borderBottom: "1px solid var(--border)", borderTop: "1px solid var(--border)" }}>
-                                {typeInfo[type]?.icon} {typeInfo[type]?.label} ({items.length})
-                              </div>
-                              {items.slice(0, 3).map((item: any, i: number) => (
-                                <button key={i} onClick={() => goToResult(item)} className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-tertiary/50 transition-colors">
-                                  {item.image && <img src={item.image} alt="" className="h-10 w-10 rounded object-cover shrink-0" />}
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-sm text-text-primary truncate">{item.name || item.title}</p>
-                                    <p className="text-xs text-text-tertiary">
-                                      {type === "product" && item.price && `$${Number(item.price).toLocaleString()}`}
-                                      {type === "product" && item.brand && ` · ${item.brand}`}
-                                      {type === "service" && item.duration && `${item.duration}`}
-                                    </p>
-                                  </div>
-                                </button>
-                              ))}
-                              {items.length > 3 && (
-                                <Link to={`/${type === "product" ? "tienda" : type === "service" ? "servicios" : "blog"}?search=${encodeURIComponent(searchQuery)}`}
-                                  onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
-                                  className="block px-4 py-1.5 text-center text-[11px] font-medium text-interactive-accent hover:bg-surface-tertiary/30 transition-colors">
-                                  Ver todos los {typeInfo[type]?.label.toLowerCase()} ({items.length})
-                                </Link>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button onClick={() => { setMobileOpen(false); setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border bg-surface-tertiary/40 text-text-secondary transition-all hover:border-interactive-accent/40 hover:text-interactive-accent hover:bg-interactive-accent/10"
+            style={{ borderColor: "var(--border-subtle)" }}
+            aria-label="Buscar">
+            <Search size={18} />
+          </button>
 
           {/* Consultar estado */}
           <Link to="/estado-servicio" className={`hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-medium transition-all mr-0.5 ${
@@ -513,6 +526,17 @@ export function Navbar() {
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
+      </div>
+      )}
+
+      {/* Search results (full width) */}
+      {searchOpen && (
+        <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }}
+          className="absolute left-0 right-0 top-full max-h-[70vh] overflow-y-auto border-b bg-surface-secondary shadow-elevation-3 z-dropdown"
+          style={{ borderColor: "var(--border)" }}>
+          {renderSearchResults()}
+        </motion.div>
+      )}
       </div>
 
       {/* Mobile Menu */}

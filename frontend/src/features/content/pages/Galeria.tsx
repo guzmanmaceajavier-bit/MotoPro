@@ -7,7 +7,7 @@ import { usePageSEO } from "@/hooks/usePageSEO";
 import Pagination from "@/components/Pagination";
 import { api } from "@/api/client";
 import { Image, Play, Scissors, Calendar, Building2, ChevronLeft, ChevronRight } from "lucide-react";
-import { Spinner } from "@/components/ui";
+import { Spinner, EmptyState } from "@/components/ui";
 
 interface GalleryImg {
   id: string; label: string; image: string; size: string;
@@ -103,7 +103,7 @@ export default function Galeria() {
         </section>
 
         <section className="py-12 bg-surface-primary min-h-[50vh]">
-          <div className="mx-auto max-w-7xl px-4">
+          <div className="mx-auto max-w-7xl px-6">
             {/* Tab Navigation */}
             <div className="flex flex-wrap gap-2 mb-8 border-b border-border pb-4">
               {tabs.map((tab) => {
@@ -296,7 +296,7 @@ export default function Galeria() {
             >
               <div className="relative">
                 <img src={open.image} alt={open.label} loading="lazy" className="w-full h-[50vh] object-cover" />
-                <button onClick={() => setOpen(null)}
+                <button onClick={() => setOpen(null)} aria-label="Cerrar"
                   className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-primary/60 backdrop-blur-sm flex items-center justify-center text-text-primary hover:bg-surface-primary/80 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

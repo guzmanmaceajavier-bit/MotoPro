@@ -15,7 +15,7 @@ function ChevronRightIcon() {
 export default function Pagination({ page, totalPages, onChange }: PaginationProps) {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-center gap-2 mt-10">
+    <nav className="flex items-center justify-center gap-2 mt-10" aria-label="Paginación">
       <button onClick={() => onChange(page - 1)} disabled={page <= 1} aria-label="Página anterior"
         className="rounded-lg border border-border-subtle bg-surface-tertiary/50 p-2.5 text-text-secondary hover:text-text-primary hover:border-interactive-accent/50 transition-all disabled:opacity-30 disabled:pointer-events-none"
       >
@@ -23,6 +23,7 @@ export default function Pagination({ page, totalPages, onChange }: PaginationPro
       </button>
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
         <button key={n} onClick={() => onChange(n)}
+          aria-current={n === page ? "page" : undefined}
           className={`min-w-[40px] rounded-lg border px-3.5 py-2 text-sm font-medium transition-all ${
             n === page
               ? "border-interactive-accent bg-interactive-accent text-text-primary"
@@ -37,6 +38,6 @@ export default function Pagination({ page, totalPages, onChange }: PaginationPro
       >
         <ChevronRightIcon />
       </button>
-    </div>
+    </nav>
   );
 }

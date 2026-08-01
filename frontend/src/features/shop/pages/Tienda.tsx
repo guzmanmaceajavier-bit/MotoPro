@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, Grid3X3, List, X, SlidersHorizontal, ChevronDown, MessageCircle, Bike } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Grid3X3, LayoutGrid, List, X, SlidersHorizontal, ChevronDown, Flame, TicketPercent } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { useCart } from "@/providers/CartProvider";
 import { useConfig } from "@/providers/CMSProvider";
 import { api } from "@/api/client";
 import IconRenderer from "@/components/icons/IconRenderer";
 import { EmptyState } from "@/components/ui";
+import { PromoCard } from "@/components/promos/PromoCard";
 import { ProductCard } from "../components/ProductCard";
 import { ProductCardSkeleton } from "@/components/ui";
 import { QuickViewModal } from "../components/QuickViewModal";
@@ -20,6 +21,8 @@ export default function Tienda() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [storeCategories, setStoreCategories] = useState<Category[]>([]);
   const [trustItems, setTrustItems] = useState<any[]>([]);
+  const [promoOffers, setPromoOffers] = useState<any[]>([]);
+  const [promoCoupons, setPromoCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const config = useConfig();
@@ -29,9 +32,8 @@ export default function Tienda() {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState("featured");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "compact" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [brandsExpanded, setBrandsExpanded] = useState(false);
@@ -67,6 +69,15 @@ export default function Tienda() {
         setTrustItems(data);
       }
     }).catch((err) => console.warn("[fetch]", err)).finally(() => setLoading(false));
+
+    api.get("/offers").then(data => {
+      const items = Array.isArray(data) ? data : [];
+      setPromoOffers(items.filter((o: any) => o.is_active !== 0 && (o.promo_type === "product" || o.promo_type === "general")).slice(0, 3));
+    }).catch(() => {});
+
+    api.get("/coupons/public").then(data => {
+      setPromoCoupons(Array.isArray(data) ? data.slice(0, 3) : []);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -99,22 +110,20 @@ export default function Tienda() {
     if (selectedMotoModel) result = result.filter(p => !p.vehicle_model || p.vehicle_model.toLowerCase().includes(selectedMotoModel.toLowerCase()) || p.compatible_with === "universal");
     result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
     if (inStockOnly) result = result.filter(p => (p.stock ?? 0) > 0);
-    if (minRating > 0) result = result.filter(p => (p.rating ?? 0) >= minRating);
     switch (sortBy) {
       case "newest": result.sort((a, b) => b.id.localeCompare(a.id)); break;
       case "price-low": result.sort((a, b) => a.price - b.price); break;
       case "price-high": result.sort((a, b) => b.price - a.price); break;
       case "name-az": result.sort((a, b) => a.name.localeCompare(b.name)); break;
       case "name-za": result.sort((a, b) => b.name.localeCompare(a.name)); break;
-      case "rating": result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)); break;
     }
     return result;
-  }, [allProducts, selectedCategory, searchQuery, searchCategory, selectedBrands, selectedMotoBrand, selectedMotoModel, priceRange, inStockOnly, minRating, sortBy]);
+  }, [allProducts, selectedCategory, searchQuery, searchCategory, selectedBrands, selectedMotoBrand, selectedMotoModel, priceRange, inStockOnly, sortBy]);
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  useEffect(() => { setCurrentPage(1); }, [selectedCategory, searchQuery, searchCategory, selectedBrands, selectedMotoBrand, selectedMotoModel, priceRange, inStockOnly, minRating, sortBy]);
+  useEffect(() => { setCurrentPage(1); }, [selectedCategory, searchQuery, searchCategory, selectedBrands, selectedMotoBrand, selectedMotoModel, priceRange, inStockOnly, sortBy]);
 
   const availableBrands = useMemo(() => {
     const brandCounts: Record<string, number> = {};
@@ -135,20 +144,21 @@ export default function Tienda() {
   };
 
   const toggleBrand = (brand: string) => {
+    if (brand === "__clear__") { setSelectedBrands([]); return; }
     setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
   };
 
   const clearFilters = () => {
     setSelectedCategory(""); setSearchQuery(""); setSelectedBrands([]); setSearchCategory("");
-    setPriceRange([0, maxPrice]); setInStockOnly(false); setMinRating(0); setSortBy("featured");
+    setPriceRange([0, maxPrice]); setInStockOnly(false); setSortBy("featured");
     setSelectedMotoBrand(""); setSelectedMotoModel("");
   };
 
-  const hasActiveFilters = !!(selectedCategory || searchQuery || searchCategory || selectedBrands.length > 0 || inStockOnly || minRating > 0 || selectedMotoBrand || selectedMotoModel);
+  const hasActiveFilters = !!(selectedCategory || searchQuery || searchCategory || selectedBrands.length > 0 || inStockOnly || selectedMotoBrand || selectedMotoModel);
 
   const filterSidebarProps = {
     selectedCategory, searchQuery, searchCategory, selectedBrands,
-    selectedMotoBrand, selectedMotoModel, priceRange, inStockOnly, minRating,
+    selectedMotoBrand, selectedMotoModel, priceRange, inStockOnly,
     motoFilterExpanded, brandsExpanded, availableBrands, maxPrice, selectedMotoModels,
     hasActiveFilters, MOTO_BRANDS, storeCategories,
     onClearFilters: clearFilters,
@@ -160,7 +170,6 @@ export default function Tienda() {
     onSetSelectedMotoModel: setSelectedMotoModel,
     onSetPriceRange: setPriceRange,
     onSetInStockOnly: setInStockOnly,
-    onSetMinRating: setMinRating,
     onSetSortBy: setSortBy,
     onSetMotoFilterExpanded: setMotoFilterExpanded,
     onSetBrandsExpanded: setBrandsExpanded,
@@ -196,27 +205,31 @@ export default function Tienda() {
             {/* Search bar */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               className="mt-8 max-w-2xl">
-              <div className="flex gap-2">
-                <div className="relative">
+              <div className="flex items-center gap-0 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-1.5 hover:bg-white/15 transition-all duration-300">
+                <div className="relative shrink-0">
                   <select value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)}
-                    className="h-12 pl-4 pr-9 rounded-xl border-0 bg-white text-sm text-text-primary appearance-none cursor-pointer focus:outline-none">
-                    <option value="">Todas las categorías</option>
-                    {storeCategories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                    className="h-11 pl-4 pr-9 rounded-xl bg-transparent border-0 text-sm text-white font-medium appearance-none cursor-pointer focus:outline-none focus:ring-0">
+                    <option value="" className="bg-gray-900 text-white">Todas</option>
+                    {storeCategories.map(c => <option key={c.id} value={c.name} className="bg-gray-900 text-white">{c.name}</option>)}
                   </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
+                  <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
                 </div>
+
+                <div className="w-px h-6 bg-white/15 shrink-0" />
+
                 <div className="flex-1 relative">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                  <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                   <input type="text" placeholder="Buscar por nombre, marca o SKU..."
                     value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-12 pl-11 pr-10 rounded-xl border-0 bg-white text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none" />
+                    className="w-full h-11 pl-10 pr-10 rounded-xl bg-transparent text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-0" />
                   {searchQuery && (
-                    <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary">
+                    <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors">
                       <X size={15} />
                     </button>
                   )}
                 </div>
-                <button className="h-12 px-6 rounded-xl bg-interactive-accent text-white text-sm font-semibold hover:bg-interactive-accent-hover transition-all shrink-0">
+
+                <button className="h-11 px-6 rounded-xl bg-interactive-accent text-white text-sm font-semibold hover:bg-interactive-accent-hover transition-all shrink-0 shadow-lg shadow-interactive-accent/20">
                   Buscar
                 </button>
               </div>
@@ -244,6 +257,50 @@ export default function Tienda() {
           </div>
         </section>
 
+        {/* ── Promociones de tienda ── */}
+        {(config.promotions_enabled === "1") && (promoOffers.length > 0 || promoCoupons.length > 0) && (
+        <section className="bg-surface-primary pb-8">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <span className="inline-flex items-center gap-2 text-[10px] font-bold text-rose-500 uppercase tracking-[0.2em]">
+                  <Flame size={13} /> Promociones en tienda
+                </span>
+                <h2 className="mt-2 text-2xl font-heading font-bold text-text-primary">Ofertas y cupones</h2>
+                <p className="text-sm text-text-secondary mt-1">Productos en oferta, combos promocionales y descuentos por categoría o marca.</p>
+              </div>
+            </div>
+
+            {promoOffers.length > 0 && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+                {promoOffers.map((o, i) => <PromoCard key={o.id} offer={o} index={i} />)}
+              </div>
+            )}
+
+            {promoCoupons.length > 0 && (
+              <div className="grid md:grid-cols-3 gap-4">
+                {promoCoupons.map((c) => (
+                  <div key={c.id} className="relative overflow-hidden rounded-2xl border border-dashed border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 to-teal-400/5 p-5">
+                    <div className="absolute -right-3 -top-3 w-20 h-20 rounded-full bg-emerald-500/10" />
+                    <div className="flex items-center gap-2">
+                      <TicketPercent size={18} className="text-emerald-500" />
+                      <p className="text-2xl font-extrabold text-text-primary">
+                        {c.discount_type === "percentage" ? `${c.discount_value}% OFF` : `$${Math.round(c.discount_value || 0).toLocaleString()} OFF`}
+                      </p>
+                    </div>
+                    <p className="text-xs text-text-tertiary mt-1">{c.description || "Descuento exclusivo"}</p>
+                    {c.min_purchase > 0 && (
+                      <p className="text-[11px] text-text-tertiary mt-1">Compras mayores a ${Math.round(c.min_purchase).toLocaleString()}</p>
+                    )}
+                    <span className="mt-3 inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white">{c.code}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+        )}
+
         {/* ── Products Section ── */}
         <section className="py-8">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -252,54 +309,11 @@ export default function Tienda() {
               <aside className="hidden lg:block w-64 shrink-0">
                 <div className="sticky top-24">
                 <FilterSidebar {...filterSidebarProps} />
-
-                {/* Categories in mobile drawer */}
-                <div className="mt-6 pt-6 border-t border-border-subtle">
-                  <h3 className="text-xs font-bold text-text-primary mb-3">Categorías</h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    <button onClick={() => { setSelectedCategory(""); }}
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
-                        !selectedCategory
-                          ? "bg-interactive-accent text-white"
-                          : "bg-surface-tertiary text-text-secondary hover:text-text-primary border border-border-subtle"
-                      }`}>
-                      Todas
-                    </button>
-                    {storeCategories.map(cat => (
-                      <button key={cat.id} onClick={() => setSelectedCategory(selectedCategory === cat.name ? "" : cat.name)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
-                          selectedCategory === cat.name
-                            ? "bg-interactive-accent text-white"
-                            : "bg-surface-tertiary text-text-secondary hover:text-text-primary border border-border-subtle"
-                        }`}>
-                        {cat.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
                 </div>
               </aside>
 
               {/* Main Content */}
               <div className="flex-1 min-w-0">
-                {/* Moto selection banner */}
-                {!selectedMotoBrand && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 flex items-center gap-4 rounded-2xl border border-interactive-accent/20 bg-interactive-accent/5 p-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-interactive-accent/10 text-interactive-accent shrink-0">
-                      <Bike size={24} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-text-primary">Selecciona tu moto</p>
-                      <p className="text-xs text-text-secondary">Elige la marca y modelo de tu moto para ver repuestos compatibles.</p>
-                    </div>
-                    <button onClick={() => { document.querySelector("aside")?.scrollIntoView({ behavior: "smooth" }); }}
-                      className="px-4 py-2 rounded-xl bg-interactive-accent text-white text-xs font-semibold hover:bg-interactive-accent-hover transition-all shrink-0">
-                      Seleccionar moto
-                    </button>
-                  </motion.div>
-                )}
-
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                   <div>
@@ -325,10 +339,13 @@ export default function Tienda() {
                       <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
                     </div>
                     <div className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-lg border border-border-subtle">
-                      <button onClick={() => setViewMode("grid")} className={`p-1.5 rounded ${viewMode === "grid" ? "bg-interactive-accent text-white" : "text-text-tertiary hover:text-text-primary"}`}>
+                      <button onClick={() => setViewMode("grid")} className={`p-1.5 rounded ${viewMode === "grid" ? "bg-interactive-accent text-white" : "text-text-tertiary hover:text-text-primary"}`} title="Vista cuadrícula">
                         <Grid3X3 size={15} />
                       </button>
-                      <button onClick={() => setViewMode("list")} className={`p-1.5 rounded ${viewMode === "list" ? "bg-interactive-accent text-white" : "text-text-tertiary hover:text-text-primary"}`}>
+                      <button onClick={() => setViewMode("compact")} className={`p-1.5 rounded ${viewMode === "compact" ? "bg-interactive-accent text-white" : "text-text-tertiary hover:text-text-primary"}`} title="Vista compacta">
+                        <LayoutGrid size={15} />
+                      </button>
+                      <button onClick={() => setViewMode("list")} className={`p-1.5 rounded ${viewMode === "list" ? "bg-interactive-accent text-white" : "text-text-tertiary hover:text-text-primary"}`} title="Vista lista">
                         <List size={15} />
                       </button>
                     </div>
@@ -368,12 +385,6 @@ export default function Tienda() {
                         <button onClick={() => setInStockOnly(false)} aria-label="Quitar filtro"><X size={12} /></button>
                       </span>
                     )}
-                    {minRating > 0 && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-interactive-accent/10 text-interactive-accent text-xs font-medium">
-                        {minRating}+ estrellas
-                        <button onClick={() => setMinRating(0)} aria-label="Quitar filtro"><X size={12} /></button>
-                      </span>
-                    )}
                     <button onClick={clearFilters} className="text-xs text-text-tertiary hover:text-interactive-accent transition-colors ml-1">
                       Limpiar todo
                     </button>
@@ -382,7 +393,7 @@ export default function Tienda() {
 
                 {/* Products */}
                 {loading ? (
-                  <div className={`grid gap-5 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
+                  <div className={`grid gap-4 ${viewMode === "compact" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5" : viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
                     {Array.from({ length: 8 }).map((_, i) => (
                       <ProductCardSkeleton key={i} />
                     ))}
@@ -394,10 +405,10 @@ export default function Tienda() {
                     action={<button onClick={clearFilters} className="px-5 py-2.5 rounded-lg bg-interactive-accent text-white text-sm font-semibold hover:bg-interactive-accent-hover transition-all">Limpiar filtros</button>}
                   />
                 ) : (
-                  <div className={`grid gap-5 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
+                  <div className={`grid gap-4 ${viewMode === "compact" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5" : viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
                     {paginatedProducts.map((product, i) => (
                       <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }}>
-                        <ProductCard product={product} onAddToCart={handleAddToCart} onQuickView={setQuickViewProduct} />
+                        <ProductCard product={product} onAddToCart={handleAddToCart} onQuickView={setQuickViewProduct} compact={viewMode === "compact"} />
                       </motion.div>
                     ))}
                   </div>
@@ -457,33 +468,6 @@ export default function Tienda() {
           </div>
         </section>
         )}
-
-        {/* ── CTA: No encuentras ── */}
-        <section className="bg-surface-primary py-16">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-surface-secondary to-surface-tertiary border border-border-subtle">
-              <div className="absolute inset-0 opacity-10">
-                <img src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1200&q=80" alt="" className="w-full h-full object-cover" />
-              </div>
-              <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1">
-                  <h2 className="text-2xl md:text-3xl font-heading font-bold text-text-primary mb-3">¿No encuentras lo que buscas?</h2>
-                  <p className="text-sm text-text-secondary mb-6">Te ayudamos a encontrar la pieza ideal para tu moto.</p>
-                  <a href={`https://wa.me/${config.social_whatsapp || "573001234567"}`} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-5 py-3 text-sm font-semibold text-white hover:bg-green-600 transition-all shadow-lg shadow-green-500/25">
-                    <MessageCircle size={18} />
-                    Contactar por WhatsApp
-                  </a>
-                </div>
-                <div className="shrink-0 hidden md:block">
-                  <div className="w-48 h-48 rounded-full bg-interactive-accent/10 flex items-center justify-center">
-                    <IconRenderer name="headphones" size={64} className="text-interactive-accent" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Mobile Filter Drawer */}
         {showMobileFilters && (
